@@ -16,7 +16,7 @@ cd "$(dirname "$0")/.." || exit 1
 
 if [ ! -f ".env" ]; then
   echo "❌ .env не найден — но я попробую напрямую через ssh с дефолтным алиасом"
-  ssh clawd-vps 'systemctl --user stop openclaw' && {
+  ssh clawd-vps 'systemctl --user stop openclaw-gateway' && {
     echo "✅ DAEMON ОСТАНОВЛЕН"
     exit 0
   }
@@ -35,7 +35,7 @@ VPS="${VPS_USER}@${VPS_IP}"
 echo "🚨 EMERGENCY STOP"
 echo "Останавливаю OpenClaw daemon на ${VPS}..."
 
-ssh -i "$SSH_KEY" -o ConnectTimeout=10 "$VPS" 'systemctl --user stop openclaw' && {
+ssh -i "$SSH_KEY" -o ConnectTimeout=10 "$VPS" 'systemctl --user stop openclaw-gateway' && {
   echo "✅ DAEMON ОСТАНОВЛЕН"
   echo ""
   echo "⏭  Следующие шаги:"
@@ -43,7 +43,7 @@ ssh -i "$SSH_KEY" -o ConnectTimeout=10 "$VPS" 'systemctl --user stop openclaw' &
   echo "   2. Пройди шаги 2-7 (отзыв ключей, анализ, фикс, рестарт)"
   echo ""
   echo "Если уверен что причина известна и исправлена:"
-  echo "   ssh ${VPS} 'systemctl --user start openclaw'"
+  echo "   ssh ${VPS} 'systemctl --user start openclaw-gateway'"
   exit 0
 } || {
   echo "❌ SSH не работает! Если деньги ещё утекают — отзови ключи у провайдеров вручную:"

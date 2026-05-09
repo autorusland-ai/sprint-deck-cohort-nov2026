@@ -1,6 +1,6 @@
 # 🧠 База знаний по OpenClaw
 
-> **2 МБ выверенного материала**: 20 блоков исследований + 5 PRO-материалов + known-issues от реальной 2-дневной отладки.
+> **2 МБ выверенного материала**: 20 блоков исследований + 5 PRO-материалов + known-issues от реальной отладки.
 
 ---
 
@@ -28,7 +28,10 @@ knowledge-base/
 │   ├── 04-slug-case-sensitive.md         (MiniMax-M2.7 vs minimax-m2.7)
 │   ├── 05-bot-silent-in-telegram.md      (бот думает но молчит)
 │   ├── 06-runaway-4200-incident.md       ($4200 за 63 часа)
-│   └── 07-env-not-in-systemd.md          (ключи не пробрасываются)
+│   ├── 07-env-not-in-systemd.md          (ключи не пробрасываются)
+│   ├── 08-slow-first-response.md         (fetch-timeout / CPU на первом ответе)
+│   ├── 09-geographic-latency.md          (RTT до MiniMax/DeepSeek)
+│   └── 10-hatch-skip-scope-issue.md      (Hatch пропущен → нет approvals)
 │
 ├── blocks/                         ← 20 блоков глубокого ресерча
 │   ├── блок-01-vps-фундамент.md
@@ -81,6 +84,9 @@ knowledge-base/
 | **05-bot-silent-in-telegram.md** | Универсальный гид по «бот молчит» — все 4 причины |
 | **06-runaway-4200-incident.md** | Подозрительно большой счёт от провайдера |
 | **07-env-not-in-systemd.md** | `MINIMAX_API_KEY: not set` хотя файл есть |
+| **08-slow-first-response.md** | Первый ответ 45+ сек, `fetch-timeout`, CPU 95%+ |
+| **09-geographic-latency.md** | MiniMax далеко от VPS, нужен geo-aware primary |
+| **10-hatch-skip-scope-issue.md** | В onboard выбран `Do this later`, нет approvals scope |
 
 ---
 

@@ -16,11 +16,11 @@
 Или если скрипт недоступен:
 
 ```bash
-ssh clawd-vps 'systemctl --user stop openclaw'
+ssh clawd-vps 'systemctl --user stop openclaw-gateway'
 ```
 
 Или через AI-плагин в Antigravity:
-> Останови OpenClaw немедленно: `ssh clawd-vps 'systemctl --user stop openclaw'`
+> Останови OpenClaw немедленно: `ssh clawd-vps 'systemctl --user stop openclaw-gateway'`
 
 **Daemon остановлен — больше никаких LLM-запросов.**
 
@@ -105,7 +105,7 @@ ssh clawd-vps 'cat ~/.openclaw/openclaw.json | jq .premiumGuard'
 
 **Проверка логов:**
 ```bash
-ssh clawd-vps 'journalctl --user -u openclaw --since "1 hour ago" -g sessions_spawn | wc -l'
+ssh clawd-vps 'journalctl --user -u openclaw-gateway --since "1 hour ago" -g sessions_spawn | wc -l'
 ```
 
 > 100 за час — это **точно loop**.
@@ -116,7 +116,7 @@ ssh clawd-vps 'journalctl --user -u openclaw --since "1 hour ago" -g sessions_sp
 
 **Проверка:**
 ```bash
-ssh clawd-vps 'journalctl --user -u openclaw --since "1 hour ago" -g browser | tail -50'
+ssh clawd-vps 'journalctl --user -u openclaw-gateway --since "1 hour ago" -g browser | tail -50'
 ```
 
 ---
@@ -148,7 +148,7 @@ ssh clawd-vps 'cp ~/.openclaw/openclaw.json ~/.openclaw/openclaw.json.broken-$(d
 Daemon ещё остановлен. Запусти **с мониторингом**:
 
 ```bash
-ssh clawd-vps 'systemctl --user start openclaw'
+ssh clawd-vps 'systemctl --user start openclaw-gateway'
 sleep 5
 ./scripts/status.sh
 ```
@@ -182,7 +182,7 @@ watch -n 60 './scripts/status.sh'
 1. Свяжись с поддержкой провайдера. **Они иногда возвращают** деньги при инциденте, особенно OpenRouter и Anthropic.
 2. Сохрани логи:
    ```bash
-   ssh clawd-vps 'journalctl --user -u openclaw --since "1 day ago" --no-pager' > incident-logs.txt
+   ssh clawd-vps 'journalctl --user -u openclaw-gateway --since "1 day ago" --no-pager' > incident-logs.txt
    ```
 3. Это поможет провайдеру оценить «known bug or user error».
 

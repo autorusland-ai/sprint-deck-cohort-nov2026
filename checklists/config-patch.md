@@ -77,7 +77,7 @@ Daemon должен оставаться `Active`. Активные сессии
 Иногда какая-то секция не реагирует на hybrid reload — нужен полный рестарт:
 
 ```bash
-ssh clawd-vps 'systemctl --user restart openclaw'
+ssh clawd-vps 'systemctl --user restart openclaw-gateway'
 sleep 10
 ./scripts/status.sh
 ```

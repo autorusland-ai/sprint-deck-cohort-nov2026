@@ -50,16 +50,18 @@
 |---|---|---|
 | C.1 | 5 auth profiles: `openclaw auth list` показывает minimax, deepseek, openrouter, groq, openai | ❗ |
 | C.2 | `missingProvidersInUse` пусто в `openclaw models status` | ❗ |
-| C.3 | Primary: `minimax/MiniMax-M2.7` (⚠️ slug case-sensitive! С заглавными!) | ❗ |
+| C.3 | Primary выбран по RTT с VPS: если MiniMax ≤80ms → `minimax/MiniMax-M2.7`; если >80ms → ближайший дешёвый provider, обычно `deepseek/deepseek-v4-flash` для EU/RU | ❗ |
 | C.4 | Fallback на primary: `deepseek/deepseek-v4-flash` (ТОЛЬКО дешевле primary!) | ❗ |
 | C.5 | Heartbeat: `openrouter/google/gemini-2.5-flash-lite`, every 60m, lightContext, isolatedSession | ⚠️ |
 | C.6 | Subagents: `openrouter/moonshotai/kimi-k2.6` | ⚠️ |
 | C.7 | Alias `premium`: `deepseek/deepseek-v4-pro` | ❗ |
 | C.8 | Alias `think`: `deepseek/deepseek-v4-pro:thinking` | ⚠️ |
 | C.9 | Probe primary зелёный (если поддерживается): `openclaw models status --probe` показывает minimax работает | ⚠️ |
-| C.10 | В реальном ответе боту в Telegram модель = `minimax/MiniMax-M2.7` (НЕ deepseek!) — проверка через `openclaw logs --tail` | ❗ |
+| C.10 | В реальном ответе боту в Telegram модель = выбранный primary (НЕ случайный fallback) — проверка через `openclaw logs --tail` | ❗ |
 
 ⚠️ **ВАЖНО про регистр slug-ов:** OpenClaw case-sensitive. Если probe возвращает 404 — первое что проверять это точный регистр: `MiniMax-M2.7`, не `minimax-m2.7`. Список доступных моделей: `openclaw models list --provider minimax` или `curl https://api.minimax.io/v1/models -H "Authorization: Bearer $KEY"`.
+
+🌍 **Primary выбирается физикой VPS, а не догмой.** Для Asia VPS MiniMax обычно лучший primary. Для EU/RU VPS DeepSeek часто быстрее из-за RTT до Cloudfront edge. Цель C.3/C.10 — бот отвечает выбранной primary-моделью стабильно и без дорогого авто-fallback.
 
 ---
 
@@ -72,7 +74,7 @@
 | D.3 | allowFrom содержит ЧИСЛОВОЙ user_id (НЕ username — username меняется в один клик) | ❗ |
 | D.4 | Token в файле `~/.openclaw/secrets/telegram.token` с правами `chmod 600` (НЕ в openclaw.json напрямую!) | ❗ |
 | D.5 | Bot валиден: `curl https://api.telegram.org/bot$TOKEN/getMe` → `ok:true` | ❗ |
-| D.6 | На «привет» в Telegram бот отвечает за ≤5 секунд | ❗ |
+| D.6 | На «привет» в Telegram бот отвечает за ≤30 секунд; если стабильно дольше — апгрейд VPS до 4 vCPU / 8 GB обязателен | ❗ |
 | D.7 | В ответе есть имя сотрудника из SOUL.md (например «я твой Кит») | ⚠️ |
 
 ---
@@ -133,7 +135,7 @@
 ⚠️ — желательно закрыть к Воркшопу 2, не блокирует.
 💡 — фичи будущего, post-sprint материал.
 
-**Зачёт В1:** все ❗ закрыты И бот в Telegram отвечает на «привет» используя MiniMax (не fallback).
+**Зачёт В1:** все ❗ закрыты И бот в Telegram отвечает на «привет» используя выбранный primary (не случайный fallback).
 
 ---
 

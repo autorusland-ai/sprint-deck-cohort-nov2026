@@ -3,7 +3,7 @@
 > Пульт управления удалённым OpenClaw-агентом на VPS.
 > Это рабочее окружение, которое ты открываешь в Antigravity. AI-плагин (Claude Code или Codex) управляет ботом по SSH через скрипты из этой папки.
 
-**Версия deck:** 1.6.0 — knowledge-base (2 МБ ресерча) + AI-консультант + 5-я закладка в гайде
+**Версия deck:** 1.8.0 — geo-aware primary, OpenClaw gateway unit, tuning after onboard
 **Подготовлено:** Дмитрий Попов (@ai_comandos)
 
 ---
@@ -62,7 +62,7 @@ workshop-1/
 После В1 у тебя должно быть:
 - ✅ VPS с защитой работает 24/7
 - ✅ OpenClaw daemon active
-- ✅ Каскад из 4 моделей с MiniMax M2.7 как primary
+- ✅ Geo-aware каскад моделей: MiniMax для близких Asia VPS, DeepSeek для EU/RU
 - ✅ Бот отвечает в Telegram на «привет»
 - ✅ Картинки `/image` работают
 - ✅ Watchdog защищает от runaway

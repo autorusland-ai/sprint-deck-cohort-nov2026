@@ -197,10 +197,15 @@ VPS_IP и ROOT_PASSWORD читай из .env через
 
 5. npm i -g openclaw  (БЕЗ sudo)
 
+6. Временный фикс OpenClaw 2026.4.29: bundled telegram-extension требует
+   `grammy`, но пакет не всегда подтягивается зависимостью:
+   bash -lc "npm i -g grammy"
+
 Проверки через bash -lc:
 - node --version → v22.x.x
 - bash -lc "openclaw --version" → 2026.4.x
 - bash -lc "which openclaw" → /home/clawd/.npm-global/bin/openclaw
+- bash -lc "npm ls -g grammy --depth=0" → grammy установлен
 
 ⛔ ЗАПРЕЩЕНО: НЕ ЗАПУСКАЙ openclaw onboard! Это интерактивный TTY-мастер
 для ЧЕЛОВЕКА. Через AI-batch вызовы он не работает корректно (мы это
@@ -220,7 +225,7 @@ openclaw onboard. Это TTY-мастер, ты не справишься чер
 
 Не делай больше ничего. Жди моё сообщение «бот живой в Telegram».
 
-Когда я вернусь — дам Промпт 7 (alias premium и тонкие настройки).
+Когда я вернусь — дам Промпт 6.5 (tuning после onboard).
 ```
 
 ---
@@ -257,6 +262,29 @@ set -a && source .env && set +a && ssh -i ~/.ssh/clawd_ed25519 clawd@$VPS_IP
 
 ⚠️ Если получишь ошибку `Could not resolve hostname vps_ip` — значит ты в неправильной папке (нет `.env`) или `VPS_IP` пустой. Проверь: `pwd` (где ты) и `cat .env | grep VPS_IP` (есть ли значение).
 
+## 💡 Keepalive и tmux перед длинным onboard
+
+Один раз на своём компьютере добавь SSH keepalive, чтобы сессия не отваливалась:
+
+```bash
+mkdir -p ~/.ssh && cat >> ~/.ssh/config <<'EOF'
+
+Host *
+  ServerAliveInterval 30
+  ServerAliveCountMax 6
+EOF
+chmod 600 ~/.ssh/config
+```
+
+На VPS запусти onboard внутри `tmux`:
+
+```bash
+sudo apt install -y tmux
+tmux new -s onboard
+```
+
+Если SSH оборвётся: подключись снова и выполни `tmux attach -t onboard`.
+
 ## 🧙 Запусти мастер
 
 ```bash
@@ -268,31 +296,34 @@ openclaw onboard
 | # | Вопрос мастера | Ответ |
 |---|---|---|
 | 1 | Welcome / continue? | **Enter** |
+| 1a | Personal-by-default / shared use warning? | **Yes** |
 | 2 | Mode? | **local** |
+| 2a | Existing config detected / Config handling? | **Use existing values** |
 | 3 | Flow? | **quickstart** |
 | 4 | **Authentication mode?** | **token** ⚠️ (НЕ skip!) |
 | 5 | Gateway bind? | **loopback** |
 | 6 | Gateway port? | **18789** или Enter |
 | 7 | **Enable device-pair plugin?** | **yes** ⚠️ (если спросит — обязательно!) |
 | 8 | Configure providers now? | **yes** |
-| 9 | Add MiniMax? | **yes** → вставь `MINIMAX_API_KEY` |
+| 9 | Add MiniMax? / MiniMax auth method? | **yes** → **MiniMax API key (Global)** → вставь `MINIMAX_API_KEY` |
 | 10 | Add DeepSeek? | **yes** → вставь `DEEPSEEK_API_KEY` |
 | 11 | Add OpenRouter? | **yes** → вставь `OPENROUTER_API_KEY` |
 | 12 | Add Groq? | **yes** → вставь `GROQ_API_KEY` |
 | 13 | Add OpenAI? | **yes** → вставь `OPENAI_API_KEY` |
-| 14 | Default primary model? | **minimax/MiniMax-M2.7** ⚠️ (заглавные M!) |
+| 14 | Default primary model? | **Keep current (minimax/MiniMax-M2.7)** ⚠️ (не Browse/Enter manually) |
 | 15 | Configure channels? | **yes** |
 | 16 | Channel type? | **telegram** |
-| 17 | Telegram bot token? | вставь `TELEGRAM_BOT_TOKEN` |
-| 18 | Channel name? | **main** или Enter |
-| 19 | dmPolicy? | **allowlist** |
-| 20 | Allow from user IDs? | твой `TELEGRAM_USER_ID` (числовой) |
-| 21 | Install skills now? | **skip** (поставим в Воркшоп 3) |
+| 17 | Telegram bot token? / Web search provider? | token → `TELEGRAM_BOT_TOKEN`; web search → **Skip for now** |
+| 17a | Skills status / Configure skills now? | **No / skip** |
+| 17b | Hooks / Enable hooks? | **Skip for now** |
+| 18 | Channel name? / Health check timeout? | **main** или Enter; timeout panel → продолжай дальше |
+| 19 | dmPolicy / allowFrom? | В QuickStart может **не появиться** — фикс в Промпте 6.5 |
+| 20 | Allow from user IDs? | Обычно **не появляется** — фикс в Промпте 6.5 |
+| 21 | Install skills now? / Telegram already configured? | **skip** или **Skip (leave as-is)** |
 | 22 | Install systemd-user service? | **yes** |
 | 23 | Enable linger? | **yes** |
-| 24 | Start daemon now? | **yes** |
-| 25 | Run doctor? | **yes** |
-| 26 | Save config? | **yes** |
+| 24 | **How do you want to hatch your bot?** | **Hatch in Terminal (recommended)** ⚠️ НЕ `Do this later` |
+| 25-28 | Workspace backup / Security / Shell completion / What now | info-панели — просто Enter |
 
 **Если мастер задал вопрос которого нет в таблице** → нажми Ctrl+C, открой
 консультанта (см. `knowledge-base/CONSULTANT-PROMPT.md`) и спроси что выбрать,
@@ -303,53 +334,134 @@ openclaw onboard
 В той же SSH-сессии:
 
 ```bash
-openclaw devices list           # должна быть запись с operator.admin
+openclaw devices list           # должна быть запись с operator.admin / approvals
 openclaw models status          # 5 провайдеров с ✓
 openclaw channels list          # telegram main active
 openclaw doctor --deep | tail   # 0 critical
-systemctl --user status openclaw --no-pager | head -10
+systemctl --user status openclaw-gateway --no-pager | head -10
 ```
 
 ## 🤖 Напиши боту в Telegram
 
 Открой Telegram → найди своего бота → напиши **«Привет!»**
 
-Должно ответить за 3-5 сек. В SSH параллельно:
+Должно ответить. На 4 vCPU обычно 5-15 сек, на 2 vCPU может быть 30-50 сек. В SSH параллельно:
 ```bash
 openclaw logs --since 30s
 ```
 
-Найди строку `model=minimax/MiniMax-M2.7 ok` — победа.
+Найди строку с выбранной primary-моделью: `minimax/MiniMax-M2.7` для Asia VPS или `deepseek/deepseek-v4-flash` для EU/RU.
 
-⚠️ Если модель `deepseek` вместо `minimax` — fallback сработал, primary упал.
-Скажи AI: «MiniMax не работает, в логах модель = deepseek. Диагностируй».
+⚠️ Если ответ стабильно дольше 30 сек — это сигнал апгрейдить VPS до 4 vCPU / 8 GB.
 
 ---
 
 # 💚 Возвращайся в Antigravity
 
-Скажи AI: **«бот живой, отвечает через MiniMax. Дай Промпт 7.»**
+Скажи AI: **«бот живой в Telegram. Дай Промпт 6.5.»**
 
 ---
 
-## 🎨 ПРОМПТ 7 — Alias premium и think
+## 🧩 ПРОМПТ 6.5 — Tuning после onboard
 
 ```
-Промпт 7: Бот живой. Теперь добавь aliases для премиум-режима по разделу C
-стандарта.
+Промпт 6.5: Tuning после onboard. Закрываем дыры QuickStart режима.
 
 На VPS под clawd через bash -lc:
 
-1. openclaw aliases set premium deepseek/deepseek-v4-pro
-2. openclaw aliases set think deepseek/deepseek-v4-pro:thinking
-3. openclaw aliases list  → должно показать оба
+1. Закрой бота от чужих:
+   openclaw config set channels.telegram.dmPolicy "allowlist"
+   openclaw config set channels.telegram.allowFrom '["TELEGRAM_USER_ID"]'
+   Замени TELEGRAM_USER_ID на числовой user_id из ~/.env.
+
+2. Назначь command owner для админ-команд:
+   openclaw config set commands.ownerAllowFrom '["telegram:TELEGRAM_USER_ID"]'
+
+3. Включи plugins.allow whitelist для скорости:
+   python3 <<'EOF'
+   import json, shutil
+   p = "/home/clawd/.openclaw/openclaw.json"
+   shutil.copy(p, p + ".bak.before-tuning")
+   c = json.load(open(p))
+   c.setdefault("plugins", {}).setdefault("allow", [])
+   c["plugins"].setdefault("entries", {})
+   for prov in ["telegram","minimax","deepseek","openrouter","groq","openai","device-pair","memory-core"]:
+       if prov not in c["plugins"]["allow"]:
+           c["plugins"]["allow"].append(prov)
+       c["plugins"]["entries"][prov] = {"enabled": True}
+   json.dump(c, open(p, "w"), indent=2)
+   print("plugins.allow:", c["plugins"]["allow"])
+   EOF
+
+4. Подними таймауты для slow networks:
+   python3 <<'EOF'
+   import json
+   p = "/home/clawd/.openclaw/openclaw.json"
+   c = json.load(open(p))
+   c.setdefault("agents", {}).setdefault("defaults", {})["timeoutSeconds"] = 180
+   c.setdefault("models", {}).setdefault("providers", {}).setdefault("minimax", {})["timeoutSeconds"] = 120
+   json.dump(c, open(p, "w"), indent=2)
+   print("timeouts: agents=180s, minimax=120s")
+   EOF
+
+5. Добавь systemd override для Node:
+   mkdir -p ~/.config/systemd/user/openclaw-gateway.service.d
+   cat > ~/.config/systemd/user/openclaw-gateway.service.d/override.conf <<'EOF'
+   [Service]
+   Environment="OPENCLAW_NO_RESPAWN=1"
+   Environment="NODE_COMPILE_CACHE=/var/tmp/openclaw-compile-cache"
+   EOF
+   mkdir -p /var/tmp/openclaw-compile-cache
+   systemctl --user daemon-reload
+
+6. Restart daemon + проверка:
+   systemctl --user restart openclaw-gateway && sleep 12
+   journalctl --user -u openclaw-gateway --since "30 seconds ago" --no-pager | grep -E "ready|telegram.*provider" | tail -5
+
+Закрой D.2, D.3 и сними блокер fetch-timeout на первом сообщении.
+```
+
+---
+
+## 🎨 ПРОМПТ 7 — Geo-aware primary + aliases premium/think
+
+```
+Промпт 7: Бот живой. Настрой каскад моделей с учётом физики моего VPS.
+
+На VPS под clawd через bash -lc:
+
+1. Проверь auth profiles:
+   openclaw auth list
+
+2. Измерь RTT до провайдеров:
+   ping -c 3 -W 2 api.minimaxi.com
+   ping -c 3 -W 2 api.deepseek.com
+   ping -c 3 -W 2 api.openai.com
+
+3. Выбери primary:
+   - если RTT MiniMax ≤80ms → primary = minimax/MiniMax-M2.7
+   - если RTT MiniMax >80ms → primary = ближайший дешёвый провайдер, обычно deepseek/deepseek-v4-flash для EU/RU
+
+4. Примени primary через CLI:
+   openclaw config set agents.defaults.model.primary "<PRIMARY>"
+
+5. Настрой fallback только дешевле или сопоставимо с primary:
+   если primary = minimax/MiniMax-M2.7:
+     openclaw fallbacks add minimax/MiniMax-M2.7 deepseek/deepseek-v4-flash
+   если primary = deepseek/deepseek-v4-flash:
+     не добавляй дорогой fallback автоматически; оставь premium только ручной командой
+
+6. Aliases:
+   openclaw aliases set premium deepseek/deepseek-v4-pro
+   openclaw aliases set think deepseek/deepseek-v4-pro:thinking
+   openclaw aliases list
 
 Также проверь:
-- openclaw models status — primary minimax/MiniMax-M2.7
-- Если fallback на primary не deepseek-v4-flash — добавь:
-  openclaw fallbacks add minimax/MiniMax-M2.7 deepseek/deepseek-v4-flash
+- openclaw models status — primary = выбранная модель
+- openclaw models test "<PRIMARY>" — зелёный, если команда доступна
+- Telegram «привет» отвечает за ≤30 сек
 
-Закрой C.7, C.8.
+Закрой C.3, C.4, C.7, C.8, C.10.
 ```
 
 ---

@@ -3,15 +3,15 @@
 #
 # Установка:
 #   1. mkdir -p ~/.config/systemd/user/
-#   2. cp openclaw.service ~/.config/systemd/user/
+#   2. cp openclaw-gateway.service ~/.config/systemd/user/
 #   3. systemctl --user daemon-reload
-#   4. systemctl --user enable --now openclaw
+#   4. systemctl --user enable --now openclaw-gateway
 #   5. loginctl enable-linger clawd      # юнит работает даже когда юзер не залогинен
 #
 # Управление:
-#   systemctl --user status openclaw
-#   systemctl --user restart openclaw
-#   journalctl --user -u openclaw -f
+#   systemctl --user status openclaw-gateway
+#   systemctl --user restart openclaw-gateway
+#   journalctl --user -u openclaw-gateway -f
 
 [Unit]
 Description=OpenClaw daemon — личный AI-агент

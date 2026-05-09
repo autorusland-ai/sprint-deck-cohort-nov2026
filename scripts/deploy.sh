@@ -86,20 +86,20 @@ echo "📤 Заливаем openclaw.json..."
 scp -i "$SSH_KEY" "$TMP_CONFIG" "$VPS:~/.openclaw/openclaw.json"
 
 # 8. Залить systemd unit (только если в config/systemd/)
-if [ -f "config/systemd/openclaw.service" ]; then
+if [ -f "config/systemd/openclaw-gateway.service" ]; then
   echo ""
   echo "📤 Заливаем systemd unit..."
   $SSH "$VPS" "mkdir -p ~/.config/systemd/user/"
-  scp -i "$SSH_KEY" config/systemd/openclaw.service "$VPS:~/.config/systemd/user/"
+  scp -i "$SSH_KEY" config/systemd/openclaw-gateway.service "$VPS:~/.config/systemd/user/"
   $SSH "$VPS" "systemctl --user daemon-reload"
 fi
 
 # 9. Перезапуск daemon
 echo ""
 echo "♻️  Перезапускаю daemon..."
-$SSH "$VPS" 'systemctl --user restart openclaw' || {
+$SSH "$VPS" 'systemctl --user restart openclaw-gateway' || {
   echo "⚠️  Restart не удался — пробую start..."
-  $SSH "$VPS" 'systemctl --user start openclaw'
+  $SSH "$VPS" 'systemctl --user start openclaw-gateway'
 }
 sleep 5
 

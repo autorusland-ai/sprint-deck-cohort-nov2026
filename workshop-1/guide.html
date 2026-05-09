@@ -398,7 +398,7 @@
   <!-- ============================================================ -->
   <div class="panel panel-blue active" id="panel-0">
 
-    <div class="notice info"><div class="ni">ℹ️</div>Эту страницу проходим <strong>до</strong> старта Воркшопа 1. Цель — собрать VPS, API-ключи, Telegram-бот и Antigravity, чтобы на воркшопе не отвлекаться. Время: <strong>30–60 минут</strong>. Деньги: <strong>~700–1500 ₽</strong> разовых трат на месяц вперёд (VPS + MiniMax-подписка).</div>
+    <div class="notice info"><div class="ni">ℹ️</div>Эту страницу проходим <strong>до</strong> старта Воркшопа 1. Цель — собрать VPS, API-ключи, Telegram-бот и Antigravity, чтобы на воркшопе не отвлекаться. Время: <strong>30–60 минут</strong>. Деньги: <strong>~1 900–2 500 ₽</strong> разовых трат на месяц вперёд (рекомендованный VPS + MiniMax-подписка).</div>
 
     <!-- A. VPS -->
     <h2 class="pf-section-title"><span class="num">A</span>VPS — где будет жить твой сотрудник</h2>
@@ -408,9 +408,9 @@
     <div class="vps-checklist">
       <div class="vps-checklist-title">Минимальные требования</div>
       <ul>
-        <li><strong>2 vCPU</strong></li>
-        <li><strong>4 GB RAM</strong> (не меньше 2)</li>
-        <li><strong>20–40 GB SSD</strong></li>
+        <li><strong>4 vCPU</strong> рекомендуется (2 vCPU — только бюджетный минимум)</li>
+        <li><strong>8 GB RAM</strong> рекомендуется (4 GB — минимум)</li>
+        <li><strong>60–160 GB SSD</strong></li>
         <li><strong>Ubuntu 24.04 LTS</strong></li>
         <li><strong>KVM</strong> (НЕ OpenVZ — ломает swap)</li>
         <li><strong>Публичный IPv4</strong></li>
@@ -425,35 +425,36 @@
       <div class="host gold">
         <div class="host-rank">🥇</div>
         <div class="host-tag">Лучший выбор · Германия</div>
-        <div class="host-name">Hetzner CX22</div>
-        <div class="host-spec">2 vCPU · 4 GB · 40 GB SSD · 20 TB/мес</div>
-        <div class="host-pros"><span class="ok">Лучшее соотношение цена/качество, отличная сеть</span><br><span class="bad">Только зарубежная карта (Wise / Revolut)</span></div>
-        <div class="host-price">€4.51 <span style="font-size:14px;color:var(--muted);font-style:normal;">/мес ≈ 470 ₽</span></div>
+        <div class="host-name">Hetzner CPX31</div>
+        <div class="host-spec">4 vCPU · 8 GB · 160 GB SSD · 20 TB/мес</div>
+        <div class="host-pros"><span class="ok">Комфортный CPU для OpenClaw, отличная сеть</span><br><span class="bad">Только зарубежная карта (Wise / Revolut)</span></div>
+        <div class="host-price">€13.51 <span style="font-size:14px;color:var(--muted);font-style:normal;">/мес ≈ 1 400 ₽</span></div>
         <a href="https://www.hetzner.com/cloud" class="host-link" target="_blank" rel="noopener">hetzner.com/cloud →</a>
       </div>
 
       <div class="host">
         <div class="host-rank">🥈</div>
         <div class="host-tag">Россия · карта РФ</div>
-        <div class="host-name">Timeweb Cloud-2</div>
-        <div class="host-spec">2 vCPU · 4 GB · 60 GB SSD</div>
+        <div class="host-name">Timeweb Cloud-4</div>
+        <div class="host-spec">4 vCPU · 8 GB · 80 GB SSD</div>
         <div class="host-pros"><span class="ok">Оплата картой РФ, KVM, почасовая тарификация</span><br><span class="ok">Можно остановить/удалить за 1 клик</span></div>
-        <div class="host-price">449 ₽ <span style="font-size:14px;color:var(--muted);font-style:normal;">/мес</span></div>
+        <div class="host-price">989 ₽ <span style="font-size:14px;color:var(--muted);font-style:normal;">/мес</span></div>
         <a href="https://timeweb.cloud/" class="host-link" target="_blank" rel="noopener">timeweb.cloud →</a>
       </div>
 
       <div class="host">
         <div class="host-rank">🥉</div>
         <div class="host-tag">Россия · альтернатива</div>
-        <div class="host-name">Beget VPS-3</div>
-        <div class="host-spec">2 vCPU · 4 GB · 32 GB SSD</div>
+        <div class="host-name">Beget VPS-5</div>
+        <div class="host-spec">4 vCPU · 8 GB · 64 GB SSD</div>
         <div class="host-pros"><span class="ok">Понятный интерфейс, оплата картой РФ</span><br><span class="bad">Чуть дороже Timeweb</span></div>
-        <div class="host-price">695 ₽ <span style="font-size:14px;color:var(--muted);font-style:normal;">/мес</span></div>
+        <div class="host-price">1 295 ₽ <span style="font-size:14px;color:var(--muted);font-style:normal;">/мес</span></div>
         <a href="https://beget.com/ru/vps" class="host-link" target="_blank" rel="noopener">beget.com →</a>
       </div>
     </div>
 
     <div class="notice tip"><div class="ni">💡</div><strong>При создании сервера</strong> выбирай Ubuntu 24.04, datacenter ближе к Европе. <strong>Не добавляй SSH-ключ</strong> на этом этапе (его создаст AI на Промпте 2). Бэкапы можно отключить — у нас всё в Git.</div>
+    <div class="notice wrn"><div class="ni">⚠️</div><strong>2 vCPU / 4 GB — рабочий, но фрустрирующий минимум:</strong> бот может отвечать 30–50 секунд. Если пользуешься часто, бери 4 vCPU / 8 GB: реальная цель — 5–15 секунд.</div>
 
     <div class="dont">
       <div class="dont-title">Что НЕ брать</div>
@@ -477,7 +478,7 @@
           <div class="key-name">MiniMax</div>
           <div class="key-status req">Обязателен</div>
         </div>
-        <div class="key-role">Primary-модель — основной диалог в Telegram. <strong>MiniMax-M2.7</strong> уровня Sonnet за фикс. подписку.</div>
+        <div class="key-role">Primary для близких Asia VPS; для EU/RU может остаться запасным provider. <strong>MiniMax-M2.7</strong> уровня Sonnet за фикс. подписку.</div>
         <div class="key-cost">Coding Plan · <span class="price">$10/мес</span></div>
         <div class="key-env">MINIMAX_API_KEY=...</div>
         <a href="https://platform.minimax.io/" class="key-link" target="_blank" rel="noopener">platform.minimax.io →</a>
@@ -488,7 +489,7 @@
           <div class="key-name">DeepSeek</div>
           <div class="key-status req">Обязателен</div>
         </div>
-        <div class="key-role">Fallback (если MiniMax упал) + premium-модель по команде <code>/premium</code>.</div>
+        <div class="key-role">Primary для EU/RU VPS + premium-модель по команде <code>/premium</code>.</div>
         <div class="key-cost">Pay-as-you-go · <span class="price">~$1–2/мес</span></div>
         <div class="key-env">DEEPSEEK_API_KEY=...</div>
         <a href="https://platform.deepseek.com/" class="key-link" target="_blank" rel="noopener">platform.deepseek.com →</a>
@@ -903,7 +904,7 @@ VPS_IP и ROOT_PASSWORD читай из .env через `set -a; source .env; se
           <div class="pcard-title">Node 22 + установить OpenClaw</div>
         </div>
       </div>
-      <p class="pcard-desc">nvm + Node 22 + npm prefix без sudo + PATH в три файла + <code>npm i -g openclaw</code>. <strong>БЕЗ запуска <code>openclaw onboard</code>!</strong></p>
+      <p class="pcard-desc">nvm + Node 22 + npm prefix без sudo + PATH в три файла + <code>npm i -g openclaw</code> + <code>npm i -g grammy</code>. <strong>БЕЗ запуска <code>openclaw onboard</code>!</strong></p>
       <div class="notice wrn"><div class="ni">⛔</div><strong>Финальный шаг этого промпта:</strong> AI говорит «openclaw установлен, готов к ручному onboarding». Дальше эстафета переходит к тебе.</div>
       <div class="pb">
         <div class="pbar"><span class="plang">antigravity · chat</span><button class="cbtn" onclick="cp(this,'p5')">📋 Копировать</button></div>
@@ -924,8 +925,9 @@ VPS_IP и ROOT_PASSWORD читай из .env через `set -a; source .env; se
    npm config set prefix '~/.npm-global'
 
 6. npm i -g openclaw (БЕЗ sudo)
+7. npm i -g grammy (фикс bundled telegram-extension в OpenClaw 2026.4.29)
 
-7. ⚠️ ПРОВЕРЬ что which openclaw указывает на ~/.npm-global/bin (НЕ на nvm shim):
+8. ⚠️ ПРОВЕРЬ что which openclaw указывает на ~/.npm-global/bin (НЕ на nvm shim):
    bash -lc "which openclaw"
    Должно: /home/clawd/.npm-global/bin/openclaw
    Если /home/clawd/.nvm/... — порядок PATH в .bashrc не тот, поправь.
@@ -933,6 +935,7 @@ VPS_IP и ROOT_PASSWORD читай из .env через `set -a; source .env; se
 Проверки через bash -lc:
 - bash -lc "openclaw --version" → 2026.4.x
 - bash -lc "which openclaw" → /home/clawd/.npm-global/bin/openclaw
+- bash -lc "npm ls -g grammy --depth=0" → grammy установлен
 
 ⛔ ЗАПРЕЩЕНО: НЕ ЗАПУСКАЙ openclaw onboard! Это интерактивный TTY-мастер для ЧЕЛОВЕКА.
 
@@ -1052,30 +1055,32 @@ VPS_IP и ROOT_PASSWORD читай из .env через `set -a; source .env; se
           <tr><td>1</td><td>Welcome / continue?</td><td>Enter</td></tr>
           <tr class="warn"><td>1a</td><td>I understand this is personal-by-default and shared/multi-user use requires lock-down. Continue?</td><td>Yes (стрелка влево → Enter)</td></tr>
           <tr><td>2</td><td>Mode?</td><td>local</td></tr>
+          <tr><td>2a</td><td>Existing config detected / Config handling?</td><td>Use existing values</td></tr>
           <tr><td>3</td><td>Flow?</td><td>quickstart</td></tr>
           <tr class="warn"><td>4</td><td>Authentication mode?</td><td>token</td></tr>
           <tr><td>5</td><td>Gateway bind?</td><td>loopback</td></tr>
           <tr><td>6</td><td>Gateway port?</td><td>18789</td></tr>
           <tr class="warn"><td>7</td><td>Enable device-pair plugin? <em style="color:var(--subtle);">(может не появиться в quickstart — это норма, плагин включится автоматически)</em></td><td>yes</td></tr>
           <tr><td>8</td><td>Configure providers?</td><td>yes</td></tr>
-          <tr><td>9</td><td>Add MiniMax?</td><td>yes → MINIMAX_API_KEY</td></tr>
+          <tr><td>9</td><td>Add MiniMax? / MiniMax auth method?</td><td>yes → MiniMax API key (Global) → MINIMAX_API_KEY</td></tr>
           <tr><td>10</td><td>Add DeepSeek?</td><td>yes → DEEPSEEK_API_KEY</td></tr>
           <tr><td>11</td><td>Add OpenRouter?</td><td>yes → OPENROUTER_API_KEY</td></tr>
           <tr><td>12</td><td>Add Groq?</td><td>yes → GROQ_API_KEY</td></tr>
           <tr><td>13</td><td>Add OpenAI?</td><td>yes → OPENAI_API_KEY</td></tr>
-          <tr class="warn"><td>14</td><td>Default primary model?</td><td>minimax/MiniMax-M2.7</td></tr>
+          <tr class="warn"><td>14</td><td>Default primary model?</td><td>Keep current (minimax/MiniMax-M2.7)</td></tr>
           <tr><td>15</td><td>Configure channels?</td><td>yes</td></tr>
           <tr><td>16</td><td>Channel type?</td><td>telegram</td></tr>
-          <tr><td>17</td><td>Telegram bot token?</td><td>TELEGRAM_BOT_TOKEN</td></tr>
-          <tr><td>18</td><td>Channel name?</td><td>main</td></tr>
-          <tr><td>19</td><td>dmPolicy?</td><td>allowlist</td></tr>
-          <tr><td>20</td><td>Allow from user IDs?</td><td>TELEGRAM_USER_ID</td></tr>
-          <tr><td>21</td><td>Install skills now?</td><td>skip</td></tr>
+          <tr><td>17</td><td>Telegram bot token? / Web search provider?</td><td>token → TELEGRAM_BOT_TOKEN; web search → Skip for now</td></tr>
+          <tr><td>17a</td><td>Skills status / Configure skills now?</td><td>No / skip</td></tr>
+          <tr><td>17b</td><td>Hooks / Enable hooks?</td><td>Skip for now</td></tr>
+          <tr><td>18</td><td>Channel name? / Health check timeout?</td><td>main; timeout panel → продолжай дальше</td></tr>
+          <tr><td>19</td><td>dmPolicy / allowFrom?</td><td>В QuickStart может не появиться — фикс в Промпте 6.5</td></tr>
+          <tr><td>20</td><td>Allow from user IDs?</td><td>Обычно не появляется — фикс в Промпте 6.5</td></tr>
+          <tr><td>21</td><td>Install skills now? / Telegram already configured?</td><td>skip или Skip (leave as-is)</td></tr>
           <tr><td>22</td><td>Install systemd-user service?</td><td>yes</td></tr>
           <tr><td>23</td><td>Enable linger?</td><td>yes</td></tr>
-          <tr><td>24</td><td>Start daemon now?</td><td>yes</td></tr>
-          <tr><td>25</td><td>Run doctor?</td><td>yes</td></tr>
-          <tr><td>26</td><td>Save config?</td><td>yes</td></tr>
+          <tr class="warn"><td>24</td><td>How do you want to hatch your bot?</td><td>Hatch in Terminal (recommended) — НЕ Do this later</td></tr>
+          <tr><td>25-28</td><td>Workspace backup / Security / Shell completion / What now</td><td>info-панели — просто Enter</td></tr>
         </tbody>
       </table>
     </div>
@@ -1094,10 +1099,11 @@ VPS_IP и ROOT_PASSWORD читай из .env через `set -a; source .env; se
       <p class="pcard-desc">После завершения мастера — 4 проверки в SSH-сессии:</p>
       <div class="pb">
         <div class="pbar"><span class="plang">mac terminal · ssh</span><button class="cbtn" onclick="cp(this,'check1')">📋 Копировать</button></div>
-        <div class="pcode" id="check1">openclaw devices list           # запись с operator.admin
+        <div class="pcode" id="check1">openclaw devices list           # запись с operator.admin / approvals
 openclaw models status          # 5 провайдеров с ✓
 openclaw channels list          # telegram main active
-openclaw doctor --deep | tail   # 0 critical</div>
+openclaw doctor --deep | tail   # 0 critical
+systemctl --user status openclaw-gateway --no-pager | head -10</div>
       </div>
       <div class="rbox" style="margin-top:14px;">
         <div class="rtitle">Что должно быть</div>
@@ -1117,13 +1123,13 @@ openclaw doctor --deep | tail   # 0 critical</div>
           <div class="pcard-title">Напиши боту «Привет!»</div>
         </div>
       </div>
-      <p class="pcard-desc">Открой Telegram → найди своего бота → напиши <strong>«Привет!»</strong>. Должно ответить за 3-5 секунд. Параллельно в SSH-сессии:</p>
+      <p class="pcard-desc">Открой Telegram → найди своего бота → напиши <strong>«Привет!»</strong>. На 4 vCPU обычно 5–15 секунд, на 2 vCPU может быть 30–50 секунд. Параллельно в SSH-сессии:</p>
       <div class="pb">
         <div class="pbar"><span class="plang">mac terminal · ssh</span><button class="cbtn" onclick="cp(this,'check2')">📋 Копировать</button></div>
         <div class="pcode" id="check2">openclaw logs --since 30s</div>
       </div>
-      <p class="pcard-desc" style="margin-top:10px;">Найди строку <code>model=minimax/MiniMax-M2.7 ok</code> — <strong>победа!</strong></p>
-      <div class="notice wrn" style="margin-top:10px;"><div class="ni">⚠️</div>Если в логах модель <code>deepseek</code> вместо <code>minimax</code> — fallback сработал, primary упал. Возвращайся в Antigravity и скажи AI: «MiniMax не работает, в логах модель = deepseek. Диагностируй».</div>
+      <p class="pcard-desc" style="margin-top:10px;">Найди выбранную primary-модель: <code>minimax/MiniMax-M2.7</code> для Asia VPS или <code>deepseek/deepseek-v4-flash</code> для EU/RU.</p>
+      <div class="notice wrn" style="margin-top:10px;"><div class="ni">⚠️</div>Если ответ стабильно дольше 30 секунд — это сигнал апгрейдить VPS до 4 vCPU / 8 GB.</div>
     </div>
 
     <!-- ═══ ЧАСТЬ Б: AI ДОДЕЛЫВАЕТ ═══ -->
@@ -1133,50 +1139,102 @@ openclaw doctor --deep | tail   # 0 critical</div>
       <div class="part-divider-line"></div>
     </div>
 
-    <div class="notice tip"><div class="ni">💚</div>Возвращайся в <strong>Antigravity</strong>. Скажи AI: «бот живой, отвечает через MiniMax. Дай Промпт 7». Дальше 5 коротких промптов до полной готовности.</div>
+    <div class="notice tip"><div class="ni">💚</div>Возвращайся в <strong>Antigravity</strong>. Скажи AI: «бот живой в Telegram. Дай Промпт 6.5». Дальше AI закроет tuning после QuickStart и geo-aware каскад моделей.</div>
+
+    <!-- Промпт 6.5: tuning после onboard -->
+    <div class="pcard">
+      <div class="pcard-head">
+        <div class="pcard-badge">6.5</div>
+        <div class="pcard-info">
+          <div class="pcard-tool">Промпт 6.5 · Tuning</div>
+          <div class="pcard-title">Закрыть дыры QuickStart</div>
+        </div>
+      </div>
+      <p class="pcard-desc">dmPolicy allowlist, command owner, plugins.allow whitelist, таймауты и systemd override. Закрывает <strong>D.2, D.3</strong> и снижает риск fetch-timeout.</p>
+      <div class="pb">
+        <div class="pbar"><span class="plang">antigravity · chat</span><button class="cbtn" onclick="cp(this,'p65')">📋 Копировать</button></div>
+        <div class="pcode" id="p65">Промпт 6.5: Tuning после onboard. Закрываем дыры QuickStart режима.
+
+На VPS под clawd через bash -lc:
+
+1. Закрой бота от чужих:
+   openclaw config set channels.telegram.dmPolicy "allowlist"
+   openclaw config set channels.telegram.allowFrom '["TELEGRAM_USER_ID"]'
+   Замени TELEGRAM_USER_ID на числовой user_id из ~/.env.
+
+2. Назначь command owner:
+   openclaw config set commands.ownerAllowFrom '["telegram:TELEGRAM_USER_ID"]'
+
+3. Включи plugins.allow whitelist для скорости: telegram, minimax, deepseek, openrouter, groq, openai, device-pair, memory-core.
+
+4. Подними таймауты:
+   agents.defaults.timeoutSeconds = 180
+   models.providers.minimax.timeoutSeconds = 120
+
+5. Добавь systemd override:
+   ~/.config/systemd/user/openclaw-gateway.service.d/override.conf
+   OPENCLAW_NO_RESPAWN=1
+   NODE_COMPILE_CACHE=/var/tmp/openclaw-compile-cache
+
+6. Restart daemon:
+   systemctl --user daemon-reload
+   systemctl --user restart openclaw-gateway
+
+Покажи diff openclaw.json, journalctl --user -u openclaw-gateway --since "30 seconds ago" и что закрыл D.2/D.3.</div>
+      </div>
+    </div>
 
     <!-- Промпт 7: alias premium -->
     <div class="pcard">
       <div class="pcard-head">
         <div class="pcard-badge">07</div>
         <div class="pcard-info">
-          <div class="pcard-tool">Промпт 7 · Alias</div>
-          <div class="pcard-title">Premium и think режимы</div>
+          <div class="pcard-tool">Промпт 7 · Geo-aware</div>
+          <div class="pcard-title">Primary по RTT + Premium/think</div>
         </div>
       </div>
-      <p class="pcard-desc"><code>/premium</code> переключает на DeepSeek V4-Pro (только важные задачи). <code>/think</code> — reasoning-режим. Закрывает <strong>C.7, C.8</strong>.</p>
+      <p class="pcard-desc">AI измеряет RTT до провайдеров, выбирает primary по физике VPS и настраивает aliases. Закрывает <strong>C.3, C.4, C.7, C.8, C.10</strong>.</p>
       <div class="pb">
         <div class="pbar"><span class="plang">antigravity · chat</span><button class="cbtn" onclick="cp(this,'p7')">📋 Копировать</button></div>
-        <div class="pcode" id="p7">Промпт 7: Бот живой. Теперь добавь aliases для премиум-режима по разделу C стандарта.
+        <div class="pcode" id="p7">Промпт 7: Бот живой. Настрой каскад моделей с учётом физики моего VPS.
 
 На VPS под clawd через bash -lc:
 
-1. openclaw aliases set premium deepseek/deepseek-v4-pro
-2. openclaw aliases set think deepseek/deepseek-v4-pro:thinking
-3. openclaw aliases list  → должно показать оба
+1. Проверь auth profiles:
+   openclaw auth list
 
-⚠️ FALLBACK если "openclaw aliases set" не работает (schema mismatch):
-- Проверь синтаксис: openclaw aliases --help
-- Если команды нет — настрой через config:
-    openclaw config set modelAliases.premium deepseek/deepseek-v4-pro
-    openclaw config set modelAliases.think deepseek/deepseek-v4-pro:thinking
-- Проверь что записалось:
-    cat ~/.openclaw/openclaw.json | python3 -c "import json,sys; print(json.load(sys.stdin).get('modelAliases'))"
+2. Измерь RTT:
+   ping -c 3 -W 2 api.minimaxi.com
+   ping -c 3 -W 2 api.deepseek.com
+   ping -c 3 -W 2 api.openai.com
 
-Также проверь:
-- openclaw models status — primary minimax/MiniMax-M2.7
-- Если fallback на primary не deepseek-v4-flash — добавь:
-  openclaw fallbacks add minimax/MiniMax-M2.7 deepseek/deepseek-v4-flash
+3. Выбери primary:
+   если RTT MiniMax ≤80ms → minimax/MiniMax-M2.7
+   если RTT MiniMax >80ms → ближайший дешёвый provider, обычно deepseek/deepseek-v4-flash для EU/RU
 
-Закрой C.7, C.8.</div>
+4. Примени:
+   openclaw config set agents.defaults.model.primary "&lt;PRIMARY&gt;"
+
+5. Fallback:
+   если primary = minimax/MiniMax-M2.7:
+     openclaw fallbacks add minimax/MiniMax-M2.7 deepseek/deepseek-v4-flash
+   если primary = deepseek/deepseek-v4-flash:
+     не добавляй дорогой auto-fallback
+
+6. Aliases:
+   openclaw aliases set premium deepseek/deepseek-v4-pro
+   openclaw aliases set think deepseek/deepseek-v4-pro:thinking
+   openclaw aliases list
+
+Проверь openclaw models status, Telegram «привет» за ≤30 сек и закрой C.3/C.4/C.7/C.8/C.10.</div>
       </div>
       <div class="expect">
         <div class="expect-title">✓ Что должен сказать AI в ответ</div>
         <div class="expect-body">
           <strong>openclaw aliases list:</strong> <code>premium → deepseek/deepseek-v4-pro</code> и <code>think → deepseek/deepseek-v4-pro:thinking</code><br>
-          <strong>openclaw models status:</strong> primary = <code>minimax/MiniMax-M2.7</code>, fallback = <code>deepseek/deepseek-v4-flash</code><br>
-          <strong>Закрытые критерии:</strong> C.7, C.8<br>
-          ⚠️ <strong>Если schema mismatch</strong> и команда <code>aliases set</code> не работает — AI должен использовать <code>config set modelAliases.premium ...</code> (это OK, документировано в Промпте).
+          <strong>openclaw models status:</strong> primary = выбранная по RTT модель<br>
+          <strong>Закрытые критерии:</strong> C.3, C.4, C.7, C.8, C.10<br>
+          ⚠️ <strong>Если EU/RU VPS</strong> — DeepSeek primary может быть правильным выбором, это не fallback.
         </div>
       </div>
     </div>
@@ -1336,7 +1394,7 @@ openclaw doctor --deep | tail   # 0 critical</div>
 
     <div class="final">
       <div class="final-title">Установка <span class="acc">завершена</span></div>
-      <div class="final-desc">Бот в Telegram отвечает через MiniMax M2.7, картинки рисуются, watchdog защищает, личность задана. <br>Дальше — независимая проверка через сам Telegram-бот → переходи на <strong>Закладку 02</strong>.</div>
+      <div class="final-desc">Бот в Telegram отвечает через выбранный primary, картинки рисуются, watchdog защищает, личность задана. <br>Дальше — независимая проверка через сам Telegram-бот → переходи на <strong>Закладку 02</strong>.</div>
     </div>
 
   </div>
@@ -1396,7 +1454,7 @@ openclaw doctor --deep | tail   # 0 critical</div>
           <div class="pcard-title">models status</div>
         </div>
       </div>
-      <p class="pcard-desc">Какая модель сейчас primary, какие fallbacks, какие aliases. Главное — должно быть <code>minimax/MiniMax-M2.7</code>.</p>
+      <p class="pcard-desc">Какая модель сейчас primary, какие fallbacks, какие aliases. Главное — primary должен совпадать с выбором по RTT.</p>
       <div class="pb">
         <div class="pbar"><span class="plang">telegram · твой бот</span><button class="cbtn" onclick="cp(this,'q2')">📋 Копировать</button></div>
         <div class="pcode" id="q2">Запусти openclaw models status и пришли мне ПОЛНЫЙ вывод без сокращений. Покажи также primary, fallbacks, aliases.</div>
@@ -1404,7 +1462,7 @@ openclaw doctor --deep | tail   # 0 critical</div>
       <div class="expect" style="background:rgba(34,197,94,0.06);">
         <div class="expect-title" style="color:var(--green);">✓ Что искать в ответе</div>
         <div class="expect-body">
-          <strong>primary:</strong> <code style="color:var(--green);">minimax/MiniMax-M2.7</code> (с заглавными M!)<br>
+          <strong>primary:</strong> <code style="color:var(--green);">minimax/MiniMax-M2.7</code> для Asia или <code style="color:var(--green);">deepseek/deepseek-v4-flash</code> для EU/RU<br>
           <strong>fallback:</strong> <code style="color:var(--green);">deepseek/deepseek-v4-flash</code> (дешевле primary!)<br>
           <strong>aliases:</strong> <code style="color:var(--green);">premium → deepseek-v4-pro</code>, <code style="color:var(--green);">think → ...:thinking</code><br>
           <strong>5 провайдеров</strong> с зелёной галкой: minimax, deepseek, openrouter, groq, openai<br><br>
@@ -1662,14 +1720,14 @@ B.6 ⚠️ Auto-restart on failure включён
 C. Каскад моделей
 C.1 ❗ 5 auth profiles (minimax, deepseek, openrouter, groq, openai)
 C.2 ❗ missingProvidersInUse пусто
-C.3 ❗ Primary: <span class="v">minimax/MiniMax-M2.7</span> (с заглавными!)
+C.3 ❗ Primary выбран по RTT: MiniMax ≤80ms → <span class="v">minimax/MiniMax-M2.7</span>, иначе ближайший дешёвый provider
 C.4 ❗ Fallback на primary: deepseek/deepseek-v4-flash (только дешевле!)
 C.5 ⚠️ Heartbeat: openrouter/google/gemini-2.5-flash-lite, every 60m
 C.6 ⚠️ Subagents: openrouter/moonshotai/kimi-k2.6
 C.7 ❗ Alias premium: deepseek/deepseek-v4-pro
 C.8 ⚠️ Alias think: deepseek/deepseek-v4-pro:thinking
 C.9 ⚠️ Probe primary зелёный
-C.10 ❗ В реальном ответе боту модель = minimax/MiniMax-M2.7 (НЕ deepseek!)
+C.10 ❗ В реальном ответе боту модель = выбранный primary (НЕ случайный fallback)
 
 D. Telegram-бот
 D.1 ❗ Telegram channel active
@@ -1677,7 +1735,7 @@ D.2 ❗ dmPolicy: allowlist
 D.3 ❗ allowFrom содержит ЧИСЛОВОЙ user_id
 D.4 ❗ Token в файле с chmod 600
 D.5 ❗ Bot валиден (getMe → ok:true)
-D.6 ❗ На «привет» бот отвечает за ≤5 секунд
+D.6 ❗ На «привет» бот отвечает за ≤30 секунд; если дольше — нужен 4 vCPU / 8 GB
 D.7 ⚠️ В ответе есть имя сотрудника из SOUL.md
 
 E. Картинки

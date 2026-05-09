@@ -3,7 +3,7 @@
 > Полный путь Воркшопа 1: от пустого VPS до работающего AI-сотрудника в Telegram.
 >
 > **Время**: ~1.5 часа.
-> **Версия**: v1.5 (гибридный путь — AI делает рутину, человек делает onboard).
+> **Версия**: v1.8 (geo-aware primary, tuning после onboard, openclaw-gateway).
 
 ---
 
@@ -26,7 +26,7 @@
 После В1 у тебя должно быть:
 - ✅ VPS работает 24/7 с защитой
 - ✅ OpenClaw daemon active
-- ✅ Каскад из 5 моделей с MiniMax M2.7 как primary
+- ✅ Geo-aware каскад из 5 моделей: MiniMax для близких Asia VPS, DeepSeek для EU/RU
 - ✅ Бот отвечает в Telegram на «привет» за <5 сек
 - ✅ Картинки `/image` работают
 - ✅ Watchdog защищает от runaway

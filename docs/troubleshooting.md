@@ -72,7 +72,7 @@ ssh clawd-vps 'curl -s -o /dev/null -w "%{http_code}" https://api.openrouter.ai/
 Quick:
 ```bash
 ssh clawd-vps 'journalctl --user -u openclaw --since "5 min ago" | tail -50'
-ssh clawd-vps 'systemctl --user restart openclaw'
+ssh clawd-vps 'systemctl --user restart openclaw-gateway'
 ```
 
 Самые частые причины:
@@ -137,7 +137,7 @@ ssh clawd-vps 'find ~/.cache/ms-playwright -name chrome -type f'
 
 Решение:
 ```bash
-ssh clawd-vps 'openclaw doctor --fix && systemctl --user restart openclaw'
+ssh clawd-vps 'openclaw doctor --fix && systemctl --user restart openclaw-gateway'
 ```
 
 ### Причина #3.5: Browser control service не запущен
@@ -335,7 +335,7 @@ ssh clawd-vps 'cat ~/.openclaw/openclaw.json | jq'
 ```bash
 ssh clawd-vps 'ls -la ~/.openclaw/openclaw.json.backup-*'
 ssh clawd-vps 'cp ~/.openclaw/openclaw.json.backup-<latest> ~/.openclaw/openclaw.json'
-ssh clawd-vps 'systemctl --user restart openclaw'
+ssh clawd-vps 'systemctl --user restart openclaw-gateway'
 ```
 
 `deploy.sh` делает backup перед каждым деплоем.

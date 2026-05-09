@@ -12,7 +12,7 @@ Bash-скрипты для типовых операций с VPS. Все исп
 | `deploy.sh` | git snapshot → rsync `workspace/` + `config/openclaw.json` → VPS → restart daemon | после изменений в `workspace/` или `config/` |
 | `status.sh` | Healthcheck: daemon, gateway, spending, models, RAM, диск | проверить что бот живой |
 | `pull.sh` | rsync обратно с VPS (бот мог редактировать SOUL.md, накопить daily logs) | раз в день для git-снапшота |
-| `emergency-stop.sh` | `systemctl --user stop openclaw` за 5 секунд | когда что-то горит |
+| `emergency-stop.sh` | `systemctl --user stop openclaw-gateway` за 5 секунд | когда что-то горит |
 
 ---
 
@@ -50,7 +50,7 @@ ssh-copy-id -i ~/.ssh/clawd_ed25519.pub clawd@<VPS_IP>
 ```bash
 ./scripts/status.sh                                        # видишь Daemon: Down
 ./scripts/connect.sh                                       # ssh
-sudo systemctl --user restart openclaw                    # или ./scripts/connect.sh + restart
+systemctl --user restart openclaw-gateway                 # или ./scripts/connect.sh + restart
 ```
 
 ### Деньги утекают → СТОП

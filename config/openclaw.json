@@ -36,11 +36,12 @@
       "userTimezone": "Europe/Moscow",
       "timeFormat": "24",
       "contextInjection": "continuation-skip",
+      "timeoutSeconds": 180,
       "model": {
-        "// PRIMARY: 90% диалогов через MiniMax Coding $10/мес фикс": "блок-03",
-        "primary": "minimax/minimax-m2.7",
-        "// FALLBACK: только дешевле primary! (V4-Flash cache hit ~ $0.0028)": "АУДИТ",
-        "fallbacks": ["deepseek/deepseek-v4-flash"]
+        "// PRIMARY: geo-aware. Для RU/EU VPS DeepSeek ближе; для Asia можно переключить на minimax/MiniMax-M2.7": "PENDING-FIXES-v1.8",
+        "primary": "deepseek/deepseek-v4-flash",
+        "// FALLBACK: не добавляем дорогой auto-fallback для DeepSeek primary": "АУДИТ",
+        "fallbacks": []
       },
       "heartbeat": {
         "// Дешёвая модель для 24/7 фоновых проверок": "блок-12",
@@ -85,6 +86,14 @@
     "think": "deepseek/deepseek-v4-pro:thinking",
     "// /utility — V4-Flash для router/eval/compaction": "PRO-01",
     "utility": "deepseek/deepseek-v4-flash"
+  },
+
+  "models": {
+    "providers": {
+      "minimax": {
+        "timeoutSeconds": 120
+      }
+    }
   },
 
   "premiumGuard": {
@@ -225,6 +234,29 @@
 
   "skills": {
     "entries": {}
+  },
+
+  "plugins": {
+    "allow": [
+      "telegram",
+      "minimax",
+      "deepseek",
+      "openrouter",
+      "groq",
+      "openai",
+      "device-pair",
+      "memory-core"
+    ],
+    "entries": {
+      "telegram": { "enabled": true },
+      "minimax": { "enabled": true },
+      "deepseek": { "enabled": true },
+      "openrouter": { "enabled": true },
+      "groq": { "enabled": true },
+      "openai": { "enabled": true },
+      "device-pair": { "enabled": true },
+      "memory-core": { "enabled": true }
+    }
   },
 
   "sandbox": {

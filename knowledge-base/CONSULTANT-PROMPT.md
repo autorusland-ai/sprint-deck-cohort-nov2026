@@ -14,7 +14,7 @@
 
 Консультант в отдельном чате:
 - ✅ Только читает (не меняет систему)
-- ✅ Имеет доступ к 2 МБ ресерча и 7 known-issues
+- ✅ Имеет доступ к 2 МБ ресерча и known-issues
 - ✅ Не унаследовал bias главного AI
 - ✅ Скажет «не делай этого» если ты собираешься на минное поле
 - ✅ Сходит в интернет если нет в базе
@@ -52,14 +52,17 @@
 
 knowledge-base/
 ├── README.md                       — индекс по базе
-├── known-issues/                   — 7 реальных ловушек и фиксов
+├── known-issues/                   — реальные ловушки и фиксы
 │   ├── 01-1008-pairing-required.md       (главная боль)
 │   ├── 02-path-non-login-shell.md        (PATH в cron/SSH)
 │   ├── 03-device-pair-disabled.md        (плагин выключен)
 │   ├── 04-slug-case-sensitive.md         (MiniMax-M2.7 vs minimax)
 │   ├── 05-bot-silent-in-telegram.md      (бот молчит)
 │   ├── 06-runaway-4200-incident.md       ($4200/63ч кейс)
-│   └── 07-env-not-in-systemd.md          (env не пробрасывается)
+│   ├── 07-env-not-in-systemd.md          (env не пробрасывается)
+│   ├── 08-slow-first-response.md         (fetch-timeout / CPU)
+│   ├── 09-geographic-latency.md          (RTT до providers)
+│   └── 10-hatch-skip-scope-issue.md      (Hatch пропущен)
 ├── blocks/                         — 20 блоков ресерча (VPS, модели, Telegram...)
 └── pro/                            — 5 PRO-материалов (cost, hidden, community...)
 
@@ -71,7 +74,7 @@ knowledge-base/
 
 2. ИЩЕШЬ В KB В ТАКОМ ПОРЯДКЕ:
    а) knowledge-base/known-issues/ — это ПЕРВЫЙ источник.
-      Если симптом совпадает с одним из 7 файлов — там готовый фикс.
+      Если симптом совпадает с одним из файлов — там готовый фикс.
    б) knowledge-base/blocks/ — для углублённой темы (модели, Telegram,
       SOUL.md, память, tools, skills, MCP, безопасность и т.д.).
    в) knowledge-base/pro/ — для специфичных продвинутых вопросов
@@ -181,13 +184,13 @@ openclaw onboard
 1. **«Бот молчит в Telegram, что проверять?»** → 05-bot-silent-in-telegram
 2. **«В логах gateway closed 1008, что это?»** → 01-1008-pairing-required
 3. **«openclaw: command not found из cron, почему?»** → 02-path-non-login-shell
-4. **«Бот отвечает через DeepSeek а не MiniMax, чините»** → 04-slug-case-sensitive
-5. **«Какую модель на primary поставить и почему?»** → blocks/блок-03-llm-провайдеры
+4. **«Первый ответ 45 секунд и fetch-timeout, что делать?»** → 08-slow-first-response
+5. **«Какую модель на primary поставить и почему?»** → 09-geographic-latency + blocks/блок-03-llm-провайдеры
 6. **«Как защитить от runaway-инцидента?»** → 06-runaway-4200-incident
 7. **«Как настроить SOUL.md чтобы бот не лился пустыми фразами?»** → blocks/блок-05-личность
 8. **«Что такое heartbeat и зачем оно?»** → blocks/блок-12-проактивность
 9. **«Как добавить память типа mem0?»** → blocks/блок-15-mem0-память + pro/PRO-05
-10. **«Какой хостер VPS для России?»** → blocks/блок-01-vps-фундамент
+10. **«После Hatch пропустил approve, ловлю 1008»** → 10-hatch-skip-scope-issue
 
 ---
 

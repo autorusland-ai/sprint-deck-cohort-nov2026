@@ -258,6 +258,7 @@ echo $PATH | tr ':' '\n' | head -3
 
 ```bash
 npm i -g openclaw
+npm i -g grammy
 
 openclaw --version    # 2026.4.29 или новее
 which openclaw        # /home/clawd/.npm-global/bin/openclaw
@@ -278,31 +279,34 @@ openclaw onboard
 | # | Вопрос мастера | Ответ |
 |---|---|---|
 | 1 | Welcome / continue? | **Enter** |
+| 1a | Personal-by-default / shared use warning? | **Yes** |
 | 2 | Mode? | **local** |
+| 2a | Existing config detected / Config handling? | **Use existing values** |
 | 3 | Flow? | **quickstart** |
 | 4 | **Authentication mode?** | **token** ⚠️ (НЕ skip!) |
 | 5 | Gateway bind? | **loopback** |
 | 6 | Gateway port? | **18789** |
 | 7 | **Enable device-pair plugin?** | **yes** ⚠️ |
 | 8 | Configure providers? | **yes** |
-| 9 | Add MiniMax? | yes → `MINIMAX_API_KEY` |
+| 9 | Add MiniMax? / MiniMax auth method? | yes → **MiniMax API key (Global)** → `MINIMAX_API_KEY` |
 | 10 | Add DeepSeek? | yes → `DEEPSEEK_API_KEY` |
 | 11 | Add OpenRouter? | yes → `OPENROUTER_API_KEY` |
 | 12 | Add Groq? | yes → `GROQ_API_KEY` |
 | 13 | Add OpenAI? | yes → `OPENAI_API_KEY` |
-| 14 | Default primary model? | **minimax/MiniMax-M2.7** ⚠️ заглавные! |
+| 14 | Default primary model? | **Keep current (minimax/MiniMax-M2.7)** ⚠️ не Browse/Enter manually |
 | 15 | Configure channels? | **yes** |
 | 16 | Channel type? | **telegram** |
-| 17 | Telegram bot token? | `TELEGRAM_BOT_TOKEN` |
-| 18 | Channel name? | **main** |
-| 19 | dmPolicy? | **allowlist** |
-| 20 | Allow from user IDs? | `TELEGRAM_USER_ID` |
-| 21 | Install skills now? | **skip** |
+| 17 | Telegram bot token? / Web search provider? | token → `TELEGRAM_BOT_TOKEN`; web search → **Skip for now** |
+| 17a | Skills status / Configure skills now? | **No / skip** |
+| 17b | Hooks / Enable hooks? | **Skip for now** |
+| 18 | Channel name? / Health check timeout? | **main**; timeout panel → продолжай дальше |
+| 19 | dmPolicy / allowFrom? | В QuickStart может **не появиться** — фикс ниже |
+| 20 | Allow from user IDs? | Обычно **не появляется** — фикс ниже |
+| 21 | Install skills now? / Telegram already configured? | **skip** или **Skip (leave as-is)** |
 | 22 | Install systemd-user service? | **yes** |
 | 23 | Enable linger? | **yes** |
-| 24 | Start daemon now? | **yes** |
-| 25 | Run doctor? | **yes** |
-| 26 | Save config? | **yes** |
+| 24 | **How do you want to hatch your bot?** | **Hatch in Terminal (recommended)** ⚠️ НЕ `Do this later` |
+| 25-28 | Workspace backup / Security / Shell completion / What now | info-панели — просто Enter |
 
 **Если мастер задал вопрос не из таблицы** → Ctrl+C, открой
 `knowledge-base/CONSULTANT-PROMPT.md`, спроси у консультанта, потом запусти
@@ -317,7 +321,17 @@ openclaw devices list           # запись с operator.admin
 openclaw models status          # 5 ✓
 openclaw channels list          # telegram main active
 openclaw doctor --deep | tail   # 0 critical
-systemctl --user status openclaw --no-pager | head -10
+systemctl --user status openclaw-gateway --no-pager | head -10
+```
+
+Если QuickStart не спросил `dmPolicy` и `allowFrom`, сразу закрой доступ:
+
+```bash
+set -a; source ~/.env; set +a
+openclaw config set channels.telegram.dmPolicy "allowlist"
+openclaw config set channels.telegram.allowFrom "[\"$TELEGRAM_USER_ID\"]"
+openclaw config set commands.ownerAllowFrom "[\"telegram:$TELEGRAM_USER_ID\"]"
+systemctl --user restart openclaw-gateway
 ```
 
 ---
@@ -331,7 +345,7 @@ systemctl --user status openclaw --no-pager | head -10
 openclaw logs --since 30s
 ```
 
-Найди `model=minimax/MiniMax-M2.7 ok` — победа.
+Найди выбранную primary-модель: `minimax/MiniMax-M2.7` для Asia VPS или `deepseek/deepseek-v4-flash` для EU/RU.
 
 ---
 
@@ -360,7 +374,7 @@ openclaw logs --since 30s
 Топ-5 ловушек:
 - `1008 pairing required` → device-pair плагин выключен или onboard auth=skip
 - `openclaw: command not found` из cron → PATH не в ~/.profile
-- Бот через DeepSeek а не MiniMax → slug в нижнем регистре, должен `MiniMax-M2.7`
+- Бот через неожиданный fallback → проверь RTT, primary и slug `MiniMax-M2.7`
 - Daemon после reboot не стартует → `loginctl enable-linger` не сделан
 - $4200/63ч runaway → fallback модель ДОРОЖЕ primary, поменяй
 

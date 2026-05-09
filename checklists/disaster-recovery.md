@@ -108,7 +108,7 @@ mkdir -p ~/.config/systemd/user
 EOF
 
 # Залей unit с локалки
-scp config/systemd/openclaw.service clawd-vps:~/.config/systemd/user/
+scp config/systemd/openclaw-gateway.service clawd-vps:~/.config/systemd/user/
 
 ssh clawd-vps << 'EOF'
 systemctl --user daemon-reload

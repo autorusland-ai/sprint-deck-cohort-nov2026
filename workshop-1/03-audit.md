@@ -89,9 +89,9 @@
   (вывода команды) — пометь ❓.
 - Будь строг. Лучше ⚠️ сейчас, чем сюрприз на В2.
 - Если slug модели в отчёте `minimax/minimax-m2.7` (нижний регистр) — это ❌ 
-  для C.3 (правильно `minimax/MiniMax-M2.7`).
-- Если в логах последний ответ не от minimax/MiniMax-M2.7 — это ❌ для C.10 
-  (probe MiniMax падает, fallback на DeepSeek).
+  для C.3 (MiniMax для Asia VPS, DeepSeek для EU/RU VPS).
+- Если в логах последний ответ не от выбранного primary — это ❌ для C.10
+  (сработал неожиданный fallback).
 
 ВЫВОД:
 Сохрани полный отчёт аудита в audit/reports/workshop-1-<дата>-AUDIT.md.

@@ -35,11 +35,11 @@ echo "===================================="
 echo ""
 
 echo "📦 Daemon:"
-if $SSH "$VPS" 'systemctl --user is-active openclaw' 2>/dev/null | grep -q active; then
+if $SSH "$VPS" 'systemctl --user is-active openclaw-gateway' 2>/dev/null | grep -q active; then
   echo "  ✅ Active"
 else
   echo "  ❌ Down"
-  $SSH "$VPS" 'systemctl --user status openclaw --no-pager 2>&1 | head -5'
+  $SSH "$VPS" 'systemctl --user status openclaw-gateway --no-pager 2>&1 | head -5'
 fi
 
 echo ""

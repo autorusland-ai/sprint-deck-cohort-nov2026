@@ -28,7 +28,7 @@
 ### 2. Проверь статус
 
 ```bash
-systemctl --user status openclaw
+systemctl --user status openclaw-gateway
 ```
 
 Возможные сценарии:
@@ -56,7 +56,7 @@ systemctl --user start openclaw
 Daemon живой, но gateway завис. Полный рестарт:
 
 ```bash
-systemctl --user restart openclaw
+systemctl --user restart openclaw-gateway
 sleep 10
 openclaw gateway status      # должен ответить healthy
 ```
@@ -77,7 +77,7 @@ journalctl --user -u openclaw --since "10 min ago" --no-pager | tail -100
 
 ```bash
 systemctl --user daemon-reload
-systemctl --user restart openclaw
+systemctl --user restart openclaw-gateway
 sleep 10
 openclaw doctor --deep
 ```

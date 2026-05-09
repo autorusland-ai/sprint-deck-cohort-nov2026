@@ -59,7 +59,7 @@ comandos-claw-deck/
 ├── config/
 │   ├── openclaw.json                # Главный конфиг (4 модели, спендинг, voice, image)
 │   ├── docker-compose.qdrant.yml    # Qdrant для vector memory
-│   └── systemd/openclaw.service     # User-unit для daemon
+│   └── systemd/openclaw-gateway.service # User-unit для daemon
 │
 ├── checklists/                # Оперативные runbooks
 │   ├── deploy-agent.md        # Стандартный deploy
@@ -153,7 +153,7 @@ comandos-claw-deck/
 | `./scripts/deploy.sh` | git snapshot → rsync `workspace/` + `config/` → VPS → restart daemon |
 | `./scripts/status.sh` | Healthcheck: daemon, gateway, spending, models, RAM, диск |
 | `./scripts/pull.sh` | rsync с VPS обратно (бот мог редактировать SOUL.md / memory/) |
-| `./scripts/emergency-stop.sh` | `systemctl --user stop openclaw` — стоп за 5 секунд |
+| `./scripts/emergency-stop.sh` | `systemctl --user stop openclaw-gateway` — стоп за 5 секунд |
 
 ---
 
@@ -189,7 +189,7 @@ comandos-claw-deck/
 ## Версия
 
 ```
-Deck version: 1.0.0
+Deck version: 1.8.0
 OpenClaw target: 0.9.x (на момент 2026-04)
 Owner: Дмитрий Попов (@ai_comandos)
 ```

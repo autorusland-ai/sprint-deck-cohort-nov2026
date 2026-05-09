@@ -134,4 +134,4 @@
 1. Проверь через `/status` что бот живой.
 2. `/help` — может команда переименована.
 3. Логи: `ssh clawd-vps 'journalctl --user -u openclaw -g <command-name>'`.
-4. Если новая фича — обнови OpenClaw: `ssh clawd-vps 'npm install -g openclaw@latest && systemctl --user restart openclaw'`.
+4. Если новая фича — обнови OpenClaw: `ssh clawd-vps 'npm install -g openclaw@latest && systemctl --user restart openclaw-gateway'`.

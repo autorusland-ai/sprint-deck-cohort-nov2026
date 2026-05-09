@@ -54,7 +54,7 @@ gitleaks detect --no-banner --redact
 Скрипт:
 - Делает локальный `git commit` (snapshot).
 - `rsync` `workspace/` и `config/openclaw.json` → `VPS:~/.openclaw/`.
-- Перезапускает daemon: `systemctl --user restart openclaw`.
+- Перезапускает daemon: `systemctl --user restart openclaw-gateway`.
 - Запускает `openclaw doctor --deep` на VPS.
 
 ### 5. Верификация
@@ -88,7 +88,7 @@ git revert HEAD --no-edit            # откат последнего deploy sn
 ```bash
 # На VPS
 ssh clawd-vps 'cp ~/.openclaw/openclaw.json.backup-* ~/.openclaw/openclaw.json'
-ssh clawd-vps 'systemctl --user restart openclaw'
+ssh clawd-vps 'systemctl --user restart openclaw-gateway'
 ```
 
 `deploy.sh` автоматически делает backup конфига перед каждым деплоем.

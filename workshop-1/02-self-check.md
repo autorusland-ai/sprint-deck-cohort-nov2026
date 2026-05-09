@@ -88,7 +88,7 @@
 ```
 Запусти openclaw logs --tail 30 — пришли вывод. 
 Какая модель использовалась в последних 3 ответах? 
-Это minimax/MiniMax-M2.7 или fallback на deepseek?
+Это выбранный primary по RTT или случайный fallback?
 
 Также пришли:
 - systemctl --user status openclaw --no-pager
