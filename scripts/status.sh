@@ -24,11 +24,17 @@ set -a
 source .env
 set +a
 
-: "${VPS_IP:?VPS_IP не задан}"
 : "${VPS_USER:=clawd}"
 SSH_KEY="${HOME}/.ssh/clawd_ed25519"
-VPS="${VPS_USER}@${VPS_IP}"
 SSH="ssh -i $SSH_KEY"
+if [ -n "${VPS_IP:-}" ]; then
+  VPS="${VPS_USER}@${VPS_IP}"
+elif [ -n "${SSH_ALIAS:-}" ]; then
+  VPS="${SSH_ALIAS}"
+else
+  echo "❌ VPS_IP не задан и SSH_ALIAS пустой"
+  exit 1
+fi
 
 echo "🔍 OpenClaw Healthcheck — $(date)"
 echo "===================================="
