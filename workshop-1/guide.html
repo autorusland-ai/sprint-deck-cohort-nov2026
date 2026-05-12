@@ -50,7 +50,7 @@
   .prelude-item strong{color:var(--text);font-weight:500;}
 
   /* ТАБЫ */
-  .tabs{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:32px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:6px;}
+  .tabs{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-bottom:32px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:6px;}
   .tab{background:transparent;border:1px solid transparent;border-radius:10px;padding:18px 16px;cursor:pointer;text-align:left;transition:all 0.25s;display:flex;flex-direction:column;gap:6px;}
   .tab:hover{background:rgba(255,255,255,0.02);}
   .tab.active{background:var(--bg);border-color:var(--border);}
@@ -60,6 +60,14 @@
   .tab[data-tab="2"].active .tab-num{color:var(--green);}
   .tab[data-tab="3"].active .tab-num{color:var(--orange);}
   .tab[data-tab="4"].active .tab-num{color:#a78bfa;}
+  .tab[data-tab="5"].active .tab-num{color:#ef4444;}
+  .tab[data-tab="6"].active .tab-num{color:#06b6d4;}
+  .panel-cyan{border-color:rgba(6,182,212,0.18)}
+  .banner-v12{background:linear-gradient(135deg,rgba(6,182,212,0.08),rgba(13,14,15,1));border:1px solid rgba(6,182,212,0.3);border-radius:8px;padding:14px 18px;margin:0 0 22px;color:var(--muted);font-size:13.5px;line-height:1.7}
+  .banner-v12 strong{color:#06b6d4;font-weight:600}
+  .banner-v12 .badge{display:inline-block;background:#06b6d4;color:#0d0e0f;font-size:10.5px;font-weight:700;letter-spacing:0.08em;padding:3px 9px;border-radius:3px;text-transform:uppercase;margin-right:8px;vertical-align:1px}
+  .banner-v12 ul{margin:8px 0 0;padding-left:18px}
+  .banner-v12 li{margin-bottom:4px}
   .tab-title{font-family:'Barlow Condensed',sans-serif;font-style:italic;font-size:18px;font-weight:700;text-transform:uppercase;color:var(--text);line-height:1.05;letter-spacing:0.01em;}
   .tab-desc{font-size:11px;color:var(--muted);line-height:1.4;}
 
@@ -103,6 +111,64 @@
   .panel-violet .cbtn{background:rgba(167,139,250,0.1);border-color:rgba(167,139,250,0.25);color:#a78bfa;}
   .panel-violet .cbtn:hover{background:rgba(167,139,250,0.18);}
   .panel-violet .pcode .v{color:#a78bfa;}
+
+  /* Красный (5 закладка — Домашка) */
+  .panel-red .pcard:hover{border-color:rgba(239,68,68,0.28);}
+  .panel-red .pcard-badge{color:#ef4444;}
+  .panel-red .pcard-tool{color:#ef4444;}
+  .panel-red .pb{border-color:rgba(239,68,68,0.22);}
+  .panel-red .pbar{background:rgba(239,68,68,0.05);border-color:rgba(239,68,68,0.15);}
+  .panel-red .cbtn{background:rgba(239,68,68,0.1);border-color:rgba(239,68,68,0.25);color:#ef4444;}
+  .panel-red .cbtn:hover{background:rgba(239,68,68,0.18);}
+  .panel-red .pcode .v{color:#ef4444;}
+
+  /* Карточки задач домашки (Tab 05) */
+  .hw-tasks{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin:16px 0;}
+  .hw-task{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 20px;display:flex;flex-direction:column;gap:8px;transition:border-color 0.25s;}
+  .hw-task:hover{border-color:rgba(239,68,68,0.32);}
+  .hw-task-tag{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#ef4444;}
+  .hw-task-name{font-family:'Barlow Condensed',sans-serif;font-style:italic;font-size:20px;font-weight:800;text-transform:uppercase;color:var(--text);line-height:1.05;}
+  .hw-task-desc{font-size:13px;color:var(--muted);line-height:1.5;}
+  .hw-task-desc strong{color:var(--text);font-weight:500;}
+  .hw-task-examples{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;font-size:12.5px;color:var(--muted);line-height:1.45;}
+  .hw-task-examples li{list-style:none;padding-left:14px;position:relative;}
+  .hw-task-examples li::before{content:'›';position:absolute;left:0;color:#ef4444;font-weight:700;}
+  .hw-task-meta{display:flex;gap:10px;flex-wrap:wrap;font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--subtle);margin-top:auto;padding-top:6px;border-top:1px solid var(--border);}
+  .hw-task-meta span{color:var(--text);}
+  .hw-task-meta b{color:#ef4444;font-weight:600;}
+
+  /* Чек-лист доказательств */
+  .hw-proof{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 22px;margin:16px 0;}
+  .hw-proof-title{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#ef4444;margin-bottom:10px;}
+  .hw-proof ol{list-style:none;counter-reset:proof;padding:0;margin:0;display:flex;flex-direction:column;gap:8px;}
+  .hw-proof li{counter-increment:proof;font-size:13.5px;color:var(--muted);line-height:1.5;padding-left:30px;position:relative;}
+  .hw-proof li::before{content:counter(proof);position:absolute;left:0;top:1px;width:22px;height:22px;border-radius:50%;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.3);color:#ef4444;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;}
+  .hw-proof li strong{color:var(--text);font-weight:500;}
+
+  /* Шаблон поста */
+  .hw-template{background:var(--bg);border:1px dashed rgba(239,68,68,0.35);border-radius:10px;padding:14px 16px;font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.7;color:var(--muted);white-space:pre-wrap;margin:10px 0;}
+  .hw-template .v{color:#ef4444;}
+
+  /* Мокап вердикта от Аудитора — пример как должен выглядеть скриншот */
+  .verdict-preview{background:linear-gradient(135deg,rgba(34,197,94,0.04),rgba(13,14,15,1));border:1px solid rgba(34,197,94,0.3);border-radius:14px;padding:22px 26px;margin:16px 0;position:relative;overflow:hidden;}
+  .verdict-preview::before{content:'ПРИМЕР ВЫВОДА';position:absolute;top:10px;right:14px;font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;letter-spacing:0.18em;color:rgba(34,197,94,0.5);text-transform:uppercase;}
+  .vp-header{font-family:'Barlow Condensed',sans-serif;font-style:italic;font-size:30px;font-weight:800;text-transform:uppercase;letter-spacing:0.01em;color:var(--text);line-height:1.05;margin-bottom:14px;}
+  .vp-header .em{font-size:24px;margin-right:8px;}
+  .vp-intro{font-size:13.5px;color:var(--muted);margin-bottom:8px;}
+  .vp-list{list-style:none;padding:0;margin:0 0 14px;counter-reset:vp;}
+  .vp-list li{counter-increment:vp;font-size:13.5px;color:var(--muted);line-height:1.7;padding-left:24px;position:relative;}
+  .vp-list li::before{content:counter(vp) '.';position:absolute;left:0;color:var(--text);font-weight:600;}
+  .vp-list code{background:var(--card);border:1px solid var(--border);padding:1px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--lime);}
+  .vp-list strong{color:var(--text);font-weight:500;}
+  .vp-note{font-size:12.5px;color:var(--subtle);line-height:1.6;margin-bottom:18px;padding:10px 14px;background:rgba(34,197,94,0.04);border-left:2px solid rgba(34,197,94,0.4);border-radius:4px;}
+  .vp-note strong{color:var(--text);font-weight:500;}
+  .vp-table-title{font-family:'Barlow Condensed',sans-serif;font-style:italic;font-size:18px;font-weight:700;text-transform:uppercase;color:var(--text);margin:0 0 10px;}
+  .vp-table{width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:18px;}
+  .vp-table th{background:var(--card);border:1px solid var(--border);padding:8px 12px;text-align:left;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--subtle);}
+  .vp-table td{border:1px solid var(--border);padding:7px 12px;color:var(--muted);}
+  .vp-table td:nth-child(2),.vp-table td:nth-child(3){text-align:center;width:80px;}
+  .vp-verdict{font-family:'Barlow Condensed',sans-serif;font-style:italic;font-size:26px;font-weight:800;text-transform:uppercase;letter-spacing:0.01em;color:var(--lime);line-height:1.05;margin-top:6px;}
+  .vp-verdict .em{font-size:22px;margin-right:8px;}
 
   /* Карточки KB (для закладки 04) */
   .kb-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin:14px 0;}
@@ -327,6 +393,9 @@
   .footer-tg{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--lime);text-decoration:none;}
   .footer-meta{font-size:11px;color:var(--subtle);width:100%;}
 
+  @media (max-width:1100px){
+    .tabs{grid-template-columns:repeat(3,1fr);}
+  }
   @media (max-width:720px){
     .topbar{padding:0 18px;}
     .tabs{grid-template-columns:1fr;}
@@ -372,25 +441,43 @@
       <span class="tab-desc">VPS, API-ключи, Telegram, Antigravity — что собрать заранее</span>
     </button>
     <button class="tab" data-tab="1" onclick="goTab(1)">
-      <span class="tab-num">01 · Antigravity + Терминал</span>
+      <span class="tab-num">01 · В Antigravity</span>
       <span class="tab-title">Установка</span>
       <span class="tab-desc">11 шагов: AI делает рутину → ты проходишь onboard → AI доделывает</span>
     </button>
     <button class="tab" data-tab="2" onclick="goTab(2)">
-      <span class="tab-num">02 · Telegram-бот</span>
+      <span class="tab-num">02 · В Telegram</span>
       <span class="tab-title">Самопроверка</span>
-      <span class="tab-desc">8 запросов прямо боту — отдаёт сырые артефакты состояния системы</span>
+      <span class="tab-desc">8 запросов прямо боту — отдаёт сырые артефакты состояния</span>
     </button>
     <button class="tab" data-tab="3" onclick="goTab(3)">
-      <span class="tab-num">03 · Новый чат AI</span>
+      <span class="tab-num">03 · В новом чате</span>
       <span class="tab-title">Контроль</span>
-      <span class="tab-desc">Один большой промпт независимому аудитору — вердикт по 30 критериям</span>
+      <span class="tab-desc">Один промпт независимому аудитору — вердикт по 30 критериям</span>
     </button>
     <button class="tab" data-tab="4" onclick="goTab(4)">
       <span class="tab-num">04 · Если упало</span>
       <span class="tab-title">Консультант</span>
-      <span class="tab-desc">AI-эксперт с базой знаний 2МБ — открывается в новом чате, отвечает за 30 секунд</span>
+      <span class="tab-desc">AI-эксперт с базой знаний 2 МБ — отвечает за 30 секунд</span>
     </button>
+    <button class="tab" data-tab="5" onclick="goTab(5)">
+      <span class="tab-num">05 · Финал</span>
+      <span class="tab-title">Домашка</span>
+      <span class="tab-desc">5 заданий → артефакты + вердикт «ПРОЙДЕН» спринт-боту</span>
+    </button>
+    <button class="tab" data-tab="6" onclick="goTab(6)">
+      <span class="tab-num">06 · NEW</span>
+      <span class="tab-title">🩹 Патчи v1.3</span>
+      <span class="tab-desc">Tailscale (рекомендуется) или базовый SSH-hardening — для тех кто прошёл В1 до 12 мая</span>
+    </button>
+  </div>
+
+  <div class="banner-v12">
+    <span class="badge">v1.3 · 12 мая</span><strong>SSH-защита — Tailscale рекомендуется, базовый hardening как fallback</strong>
+    <ul>
+      <li>🟢 <strong>Не начинал или в начале</strong> → иди обычным путём. Промпт 4 встроит базовый hardening (A.11-A.14). Хочешь полную защиту — после В1 открой Закладку «🩹 Патчи v1.3» и сделай A.1 Tailscale (5 мин).</li>
+      <li>🔴 <strong>Уже закончил В1 до 12 мая</strong> → Закладка «🩹 Патчи v1.3». Выбери ОДИН вариант: <strong>A.1 Tailscale</strong> (SSH невидим в интернете) или <strong>A.2 Базовый</strong> (смена порта + passauth off + fail2ban 24h).</li>
+    </ul>
   </div>
 
   <!-- ============================================================ -->
@@ -398,7 +485,7 @@
   <!-- ============================================================ -->
   <div class="panel panel-blue active" id="panel-0">
 
-    <div class="notice info"><div class="ni">ℹ️</div>Эту страницу проходим <strong>до</strong> старта Воркшопа 1. Цель — собрать VPS, API-ключи, Telegram-бот и Antigravity, чтобы на воркшопе не отвлекаться. Время: <strong>30–60 минут</strong>. Деньги: <strong>~1 900–2 500 ₽</strong> разовых трат на месяц вперёд (рекомендованный VPS + MiniMax-подписка).</div>
+    <div class="notice info"><div class="ni">ℹ️</div>Эту страницу проходим <strong>до</strong> старта Воркшопа 1. Цель — собрать VPS, API-ключи, Telegram-бот и Antigravity, чтобы на воркшопе не отвлекаться. Время: <strong>30–60 минут</strong>. Деньги: <strong>~1700–2200 ₽</strong> разовых трат на месяц вперёд (VPS 4 vCPU + MiniMax-подписка $10).</div>
 
     <!-- A. VPS -->
     <h2 class="pf-section-title"><span class="num">A</span>VPS — где будет жить твой сотрудник</h2>
@@ -406,16 +493,16 @@
     <p class="pcard-desc" style="margin-bottom:14px;">Сервер в облаке, на котором OpenClaw работает <strong>24/7</strong>. Не зависит от твоего ноутбука и интернета дома. На воркшопе тебе понадобятся всего <strong>две вещи</strong>: <code>IP-адрес</code> и <code>root-пароль</code> — придут на email от хостера сразу после оплаты.</p>
 
     <div class="vps-checklist">
-      <div class="vps-checklist-title">Минимальные требования</div>
+      <div class="vps-checklist-title">Минимальные требования (проверено в реальном спринте)</div>
       <ul>
-        <li><strong>4 vCPU</strong> рекомендуется (2 vCPU — только бюджетный минимум)</li>
-        <li><strong>8 GB RAM</strong> рекомендуется (4 GB — минимум)</li>
-        <li><strong>60–160 GB SSD</strong></li>
+        <li><strong>4 vCPU</strong> <span style="color:rgba(239,68,68,0.85);">(на 2 vCPU бот отвечает 30–50 сек — мучение)</span></li>
+        <li><strong>8 GB RAM</strong> (минимум 4)</li>
+        <li><strong>30–40 GB SSD</strong></li>
         <li><strong>Ubuntu 24.04 LTS</strong></li>
         <li><strong>KVM</strong> (НЕ OpenVZ — ломает swap)</li>
         <li><strong>Публичный IPv4</strong></li>
         <li><strong>Трафик</strong> от 1 TB/мес</li>
-        <li><strong>Datacenter в Европе</strong></li>
+        <li><strong>Datacenter в Европе</strong> или Москве</li>
       </ul>
     </div>
 
@@ -425,36 +512,35 @@
       <div class="host gold">
         <div class="host-rank">🥇</div>
         <div class="host-tag">Лучший выбор · Германия</div>
-        <div class="host-name">Hetzner CPX31</div>
-        <div class="host-spec">4 vCPU · 8 GB · 160 GB SSD · 20 TB/мес</div>
-        <div class="host-pros"><span class="ok">Комфортный CPU для OpenClaw, отличная сеть</span><br><span class="bad">Только зарубежная карта (Wise / Revolut)</span></div>
-        <div class="host-price">€13.51 <span style="font-size:14px;color:var(--muted);font-style:normal;">/мес ≈ 1 400 ₽</span></div>
+        <div class="host-name">Hetzner CX32</div>
+        <div class="host-spec">4 vCPU · 8 GB · 80 GB SSD · 20 TB/мес</div>
+        <div class="host-pros"><span class="ok">Лучшее соотношение цена/качество, отличная сеть</span><br><span class="bad">Только зарубежная карта (Wise / Revolut)</span></div>
+        <div class="host-price">€7.05 <span style="font-size:14px;color:var(--muted);font-style:normal;">/мес ≈ 740 ₽</span></div>
         <a href="https://www.hetzner.com/cloud" class="host-link" target="_blank" rel="noopener">hetzner.com/cloud →</a>
       </div>
 
       <div class="host">
         <div class="host-rank">🥈</div>
         <div class="host-tag">Россия · карта РФ</div>
-        <div class="host-name">Timeweb Cloud-4</div>
+        <div class="host-name">Timeweb Cloud-3</div>
         <div class="host-spec">4 vCPU · 8 GB · 80 GB SSD</div>
         <div class="host-pros"><span class="ok">Оплата картой РФ, KVM, почасовая тарификация</span><br><span class="ok">Можно остановить/удалить за 1 клик</span></div>
-        <div class="host-price">989 ₽ <span style="font-size:14px;color:var(--muted);font-style:normal;">/мес</span></div>
+        <div class="host-price">~999 ₽ <span style="font-size:14px;color:var(--muted);font-style:normal;">/мес</span></div>
         <a href="https://timeweb.cloud/" class="host-link" target="_blank" rel="noopener">timeweb.cloud →</a>
       </div>
 
       <div class="host">
         <div class="host-rank">🥉</div>
         <div class="host-tag">Россия · альтернатива</div>
-        <div class="host-name">Beget VPS-5</div>
-        <div class="host-spec">4 vCPU · 8 GB · 64 GB SSD</div>
+        <div class="host-name">Beget VPS-4</div>
+        <div class="host-spec">4 vCPU · 8 GB · 60 GB SSD</div>
         <div class="host-pros"><span class="ok">Понятный интерфейс, оплата картой РФ</span><br><span class="bad">Чуть дороже Timeweb</span></div>
-        <div class="host-price">1 295 ₽ <span style="font-size:14px;color:var(--muted);font-style:normal;">/мес</span></div>
+        <div class="host-price">~1190 ₽ <span style="font-size:14px;color:var(--muted);font-style:normal;">/мес</span></div>
         <a href="https://beget.com/ru/vps" class="host-link" target="_blank" rel="noopener">beget.com →</a>
       </div>
     </div>
 
     <div class="notice tip"><div class="ni">💡</div><strong>При создании сервера</strong> выбирай Ubuntu 24.04, datacenter ближе к Европе. <strong>Не добавляй SSH-ключ</strong> на этом этапе (его создаст AI на Промпте 2). Бэкапы можно отключить — у нас всё в Git.</div>
-    <div class="notice wrn"><div class="ni">⚠️</div><strong>2 vCPU / 4 GB — рабочий, но фрустрирующий минимум:</strong> бот может отвечать 30–50 секунд. Если пользуешься часто, бери 4 vCPU / 8 GB: реальная цель — 5–15 секунд.</div>
 
     <div class="dont">
       <div class="dont-title">Что НЕ брать</div>
@@ -478,7 +564,7 @@
           <div class="key-name">MiniMax</div>
           <div class="key-status req">Обязателен</div>
         </div>
-        <div class="key-role">Primary для близких Asia VPS; для EU/RU может остаться запасным provider. <strong>MiniMax-M2.7</strong> уровня Sonnet за фикс. подписку.</div>
+        <div class="key-role">Primary-модель — основной диалог в Telegram. <strong>MiniMax-M2.7</strong> уровня Sonnet за фикс. подписку.</div>
         <div class="key-cost">Coding Plan · <span class="price">$10/мес</span></div>
         <div class="key-env">MINIMAX_API_KEY=...</div>
         <a href="https://platform.minimax.io/" class="key-link" target="_blank" rel="noopener">platform.minimax.io →</a>
@@ -489,7 +575,7 @@
           <div class="key-name">DeepSeek</div>
           <div class="key-status req">Обязателен</div>
         </div>
-        <div class="key-role">Primary для EU/RU VPS + premium-модель по команде <code>/premium</code>.</div>
+        <div class="key-role">Fallback (если MiniMax упал) + premium-модель по команде <code>/premium</code>.</div>
         <div class="key-cost">Pay-as-you-go · <span class="price">~$1–2/мес</span></div>
         <div class="key-env">DEEPSEEK_API_KEY=...</div>
         <a href="https://platform.deepseek.com/" class="key-link" target="_blank" rel="noopener">platform.deepseek.com →</a>
@@ -685,6 +771,12 @@
         <div class="pbar"><span class="plang">antigravity · chat</span><button class="cbtn" onclick="cp(this,'p0')">📋 Копировать</button></div>
         <div class="pcode" id="p0">Ты помогаешь мне развернуть OpenClaw на VPS — это будет мой личный AI-сотрудник в Telegram. Я делаю это в рамках спринта @ai_comandos, Воркшоп 1.
 
+⚠️ ВЕРСИЯ OPENCLAW — определи и зафиксируй СРАЗУ:
+- В Промпте 5 после установки сделаешь `openclaw --version` и запишешь в EXECUTION-LOG (или в чат со мной).
+- Если ≥2026.5.0 — команды установки плагинов через `openclaw plugins install --dangerously-force-unsafe-install` (issue #4645).
+- Если <2026.5.0 — старый API через `openclaw skills install`.
+- Стандарт В1 v1.3 покрывает обе версии; адаптируй команды под установленную.
+
 ⚠️ Репо ещё нет на диске — не пытайся читать файлы сейчас!
 
 В Промпте 1 я склонирую deck и тогда прочитаю:
@@ -865,7 +957,7 @@ VPS_IP и ROOT_PASSWORD читай из .env через `set -a; source .env; se
           <div class="pcard-title">Защитить VPS</div>
         </div>
       </div>
-      <p class="pcard-desc">Юзер <strong>clawd</strong>, passwordless sudo (ДО блокировки root!), ufw rate-limit, fail2ban, swap 4GB, linger. Закрывает <strong>A.1-A.10</strong>.</p>
+      <p class="pcard-desc">Юзер <strong>clawd</strong>, passwordless sudo (ДО блокировки root!), ufw rate-limit, fail2ban, swap 4GB, linger + <span style="color:var(--lime)"><strong>SSH-hardening v1.2</strong></span> (порт≠22, password auth off, bantime 24h, MaxStartups). Закрывает <strong>A.1-A.14</strong>.</p>
       <div class="notice wrn"><div class="ni">⚠️</div><strong>Критично:</strong> passwordless sudo для clawd сделать ДО блокировки root SSH. Иначе можно потерять доступ к VPS навсегда.</div>
       <div class="pb">
         <div class="pbar"><span class="plang">antigravity · chat</span><button class="cbtn" onclick="cp(this,'p4')">📋 Копировать</button></div>
@@ -884,14 +976,27 @@ VPS_IP и ROOT_PASSWORD читай из .env через `set -a; source .env; se
 
 4. Скопировать ключ из /root/.ssh/authorized_keys в /home/clawd/.ssh/
 5. Заблокировать root SSH (PermitRootLogin no, PasswordAuthentication no)
-6. ufw: deny incoming, allow outgoing, limit 22/tcp, enable
-7. fail2ban: install, enable, start
+6. ufw: deny incoming, allow outgoing, enable. ПОКА allow 22/tcp limit — поменяем после шага 11.
+7. fail2ban: install, enable, start с bantime ≥ 86400 (24h), maxretry 3, findtime 600 в /etc/fail2ban/jail.local
 8. Swap 4GB через /swapfile + /etc/fstab
 9. unattended-upgrades + Automatic-Reboot=false
 10. loginctl enable-linger clawd
 
-После — обнови .env: VPS_USER=root → VPS_USER=clawd.
-Покажи какие критерии A.1-A.10 закрыл.</div>
+11. (v1.2 КРИТИЧНО A.11-A.14) SSH-hardening — порядок строгий, не отрежь меня от VPS:
+    a. Выбери NEW_PORT в диапазоне 10000-60000 (echo $((RANDOM % 50000 + 10000)))
+    b. sudo ufw allow $NEW_PORT/tcp (открой новый порт ДО)
+    c. sudo sed -i "s/^#*Port 22/Port $NEW_PORT/" /etc/ssh/sshd_config
+    d. echo "MaxStartups 5:30:10" | sudo tee -a /etc/ssh/sshd_config
+    e. echo "MaxSessions 5" | sudo tee -a /etc/ssh/sshd_config
+    f. sudo sshd -t (проверка синтаксиса). sudo systemctl reload sshd.
+    g. СКАЖИ МНЕ СТОП. Я во втором терминале проверю ssh -p $NEW_PORT.
+    h. После моего «работает» — sudo ufw delete allow 22/tcp.
+    i. Обнови .env: добавь SSH_PORT=$NEW_PORT. Скажи мне обновить Mac ~/.ssh/config: Port $NEW_PORT.
+
+После — обнови .env: VPS_USER=root → VPS_USER=clawd, SSH_PORT=$NEW_PORT.
+Покажи какие критерии A.1-A.14 закрыл (вывод grep -E "^Port|^Password|^MaxSt|^MaxSess" /etc/ssh/sshd_config + sudo fail2ban-client get sshd bantime).
+
+⚠️ ЗАМЕТКА: A.11-A.14 это БАЗОВЫЙ минимум (security-by-obscurity + key auth + rate limit). НАСТОЯЩАЯ защита — A.15 Tailscale: закрывает порт 22 из публичного интернета полностью. После Промпта 11 (финал В1) → открой Закладку 06 «🩹 Патчи v1.3» → Промпт A.1 Tailscale (5 минут, $0, Win/Mac/Linux). Без A.15 атаки на SSH продолжатся, просто будет меньше шума.</div>
       </div>
     </div>
 
@@ -904,7 +1009,7 @@ VPS_IP и ROOT_PASSWORD читай из .env через `set -a; source .env; se
           <div class="pcard-title">Node 22 + установить OpenClaw</div>
         </div>
       </div>
-      <p class="pcard-desc">nvm + Node 22 + npm prefix без sudo + PATH в три файла + <code>npm i -g openclaw</code> + <code>npm i -g grammy</code>. <strong>БЕЗ запуска <code>openclaw onboard</code>!</strong></p>
+      <p class="pcard-desc">nvm + Node 22 + npm prefix без sudo + PATH в три файла + <code>npm i -g openclaw</code>. <strong>БЕЗ запуска <code>openclaw onboard</code>!</strong></p>
       <div class="notice wrn"><div class="ni">⛔</div><strong>Финальный шаг этого промпта:</strong> AI говорит «openclaw установлен, готов к ручному onboarding». Дальше эстафета переходит к тебе.</div>
       <div class="pb">
         <div class="pbar"><span class="plang">antigravity · chat</span><button class="cbtn" onclick="cp(this,'p5')">📋 Копировать</button></div>
@@ -925,9 +1030,8 @@ VPS_IP и ROOT_PASSWORD читай из .env через `set -a; source .env; se
    npm config set prefix '~/.npm-global'
 
 6. npm i -g openclaw (БЕЗ sudo)
-7. npm i -g grammy (фикс bundled telegram-extension в OpenClaw 2026.4.29)
 
-8. ⚠️ ПРОВЕРЬ что which openclaw указывает на ~/.npm-global/bin (НЕ на nvm shim):
+7. ⚠️ ПРОВЕРЬ что which openclaw указывает на ~/.npm-global/bin (НЕ на nvm shim):
    bash -lc "which openclaw"
    Должно: /home/clawd/.npm-global/bin/openclaw
    Если /home/clawd/.nvm/... — порядок PATH в .bashrc не тот, поправь.
@@ -935,7 +1039,6 @@ VPS_IP и ROOT_PASSWORD читай из .env через `set -a; source .env; se
 Проверки через bash -lc:
 - bash -lc "openclaw --version" → 2026.4.x
 - bash -lc "which openclaw" → /home/clawd/.npm-global/bin/openclaw
-- bash -lc "npm ls -g grammy --depth=0" → grammy установлен
 
 ⛔ ЗАПРЕЩЕНО: НЕ ЗАПУСКАЙ openclaw onboard! Это интерактивный TTY-мастер для ЧЕЛОВЕКА.
 
@@ -1055,32 +1158,30 @@ VPS_IP и ROOT_PASSWORD читай из .env через `set -a; source .env; se
           <tr><td>1</td><td>Welcome / continue?</td><td>Enter</td></tr>
           <tr class="warn"><td>1a</td><td>I understand this is personal-by-default and shared/multi-user use requires lock-down. Continue?</td><td>Yes (стрелка влево → Enter)</td></tr>
           <tr><td>2</td><td>Mode?</td><td>local</td></tr>
-          <tr><td>2a</td><td>Existing config detected / Config handling?</td><td>Use existing values</td></tr>
           <tr><td>3</td><td>Flow?</td><td>quickstart</td></tr>
           <tr class="warn"><td>4</td><td>Authentication mode?</td><td>token</td></tr>
           <tr><td>5</td><td>Gateway bind?</td><td>loopback</td></tr>
           <tr><td>6</td><td>Gateway port?</td><td>18789</td></tr>
           <tr class="warn"><td>7</td><td>Enable device-pair plugin? <em style="color:var(--subtle);">(может не появиться в quickstart — это норма, плагин включится автоматически)</em></td><td>yes</td></tr>
           <tr><td>8</td><td>Configure providers?</td><td>yes</td></tr>
-          <tr><td>9</td><td>Add MiniMax? / MiniMax auth method?</td><td>yes → MiniMax API key (Global) → MINIMAX_API_KEY</td></tr>
+          <tr><td>9</td><td>Add MiniMax?</td><td>yes → MINIMAX_API_KEY</td></tr>
           <tr><td>10</td><td>Add DeepSeek?</td><td>yes → DEEPSEEK_API_KEY</td></tr>
           <tr><td>11</td><td>Add OpenRouter?</td><td>yes → OPENROUTER_API_KEY</td></tr>
           <tr><td>12</td><td>Add Groq?</td><td>yes → GROQ_API_KEY</td></tr>
           <tr><td>13</td><td>Add OpenAI?</td><td>yes → OPENAI_API_KEY</td></tr>
-          <tr class="warn"><td>14</td><td>Default primary model?</td><td>Keep current (minimax/MiniMax-M2.7)</td></tr>
+          <tr class="warn"><td>14</td><td>Default primary model?</td><td>minimax/MiniMax-M2.7</td></tr>
           <tr><td>15</td><td>Configure channels?</td><td>yes</td></tr>
           <tr><td>16</td><td>Channel type?</td><td>telegram</td></tr>
-          <tr><td>17</td><td>Telegram bot token? / Web search provider?</td><td>token → TELEGRAM_BOT_TOKEN; web search → Skip for now</td></tr>
-          <tr><td>17a</td><td>Skills status / Configure skills now?</td><td>No / skip</td></tr>
-          <tr><td>17b</td><td>Hooks / Enable hooks?</td><td>Skip for now</td></tr>
-          <tr><td>18</td><td>Channel name? / Health check timeout?</td><td>main; timeout panel → продолжай дальше</td></tr>
-          <tr><td>19</td><td>dmPolicy / allowFrom?</td><td>В QuickStart может не появиться — фикс в Промпте 6.5</td></tr>
-          <tr><td>20</td><td>Allow from user IDs?</td><td>Обычно не появляется — фикс в Промпте 6.5</td></tr>
-          <tr><td>21</td><td>Install skills now? / Telegram already configured?</td><td>skip или Skip (leave as-is)</td></tr>
+          <tr><td>17</td><td>Telegram bot token?</td><td>TELEGRAM_BOT_TOKEN</td></tr>
+          <tr><td>18</td><td>Channel name?</td><td>main</td></tr>
+          <tr><td>19</td><td>dmPolicy?</td><td>allowlist</td></tr>
+          <tr><td>20</td><td>Allow from user IDs?</td><td>TELEGRAM_USER_ID</td></tr>
+          <tr><td>21</td><td>Install skills now?</td><td>skip</td></tr>
           <tr><td>22</td><td>Install systemd-user service?</td><td>yes</td></tr>
           <tr><td>23</td><td>Enable linger?</td><td>yes</td></tr>
-          <tr class="warn"><td>24</td><td>How do you want to hatch your bot?</td><td>Hatch in Terminal (recommended) — НЕ Do this later</td></tr>
-          <tr><td>25-28</td><td>Workspace backup / Security / Shell completion / What now</td><td>info-панели — просто Enter</td></tr>
+          <tr><td>24</td><td>Start daemon now?</td><td>yes</td></tr>
+          <tr><td>25</td><td>Run doctor?</td><td>yes</td></tr>
+          <tr><td>26</td><td>Save config?</td><td>yes</td></tr>
         </tbody>
       </table>
     </div>
@@ -1099,11 +1200,10 @@ VPS_IP и ROOT_PASSWORD читай из .env через `set -a; source .env; se
       <p class="pcard-desc">После завершения мастера — 4 проверки в SSH-сессии:</p>
       <div class="pb">
         <div class="pbar"><span class="plang">mac terminal · ssh</span><button class="cbtn" onclick="cp(this,'check1')">📋 Копировать</button></div>
-        <div class="pcode" id="check1">openclaw devices list           # запись с operator.admin / approvals
+        <div class="pcode" id="check1">openclaw devices list           # запись с operator.admin
 openclaw models status          # 5 провайдеров с ✓
 openclaw channels list          # telegram main active
-openclaw doctor --deep | tail   # 0 critical
-systemctl --user status openclaw-gateway --no-pager | head -10</div>
+openclaw doctor --deep | tail   # 0 critical</div>
       </div>
       <div class="rbox" style="margin-top:14px;">
         <div class="rtitle">Что должно быть</div>
@@ -1123,13 +1223,13 @@ systemctl --user status openclaw-gateway --no-pager | head -10</div>
           <div class="pcard-title">Напиши боту «Привет!»</div>
         </div>
       </div>
-      <p class="pcard-desc">Открой Telegram → найди своего бота → напиши <strong>«Привет!»</strong>. На 4 vCPU обычно 5–15 секунд, на 2 vCPU может быть 30–50 секунд. Параллельно в SSH-сессии:</p>
+      <p class="pcard-desc">Открой Telegram → найди своего бота → напиши <strong>«Привет!»</strong>. Должно ответить за 3-5 секунд. Параллельно в SSH-сессии:</p>
       <div class="pb">
         <div class="pbar"><span class="plang">mac terminal · ssh</span><button class="cbtn" onclick="cp(this,'check2')">📋 Копировать</button></div>
         <div class="pcode" id="check2">openclaw logs --since 30s</div>
       </div>
-      <p class="pcard-desc" style="margin-top:10px;">Найди выбранную primary-модель: <code>minimax/MiniMax-M2.7</code> для Asia VPS или <code>deepseek/deepseek-v4-flash</code> для EU/RU.</p>
-      <div class="notice wrn" style="margin-top:10px;"><div class="ni">⚠️</div>Если ответ стабильно дольше 30 секунд — это сигнал апгрейдить VPS до 4 vCPU / 8 GB.</div>
+      <p class="pcard-desc" style="margin-top:10px;">Найди строку <code>model=minimax/MiniMax-M2.7 ok</code> — <strong>победа!</strong></p>
+      <div class="notice wrn" style="margin-top:10px;"><div class="ni">⚠️</div>Если в логах модель <code>deepseek</code> вместо <code>minimax</code> — fallback сработал, primary упал. Возвращайся в Antigravity и скажи AI: «MiniMax не работает, в логах модель = deepseek. Диагностируй».</div>
     </div>
 
     <!-- ═══ ЧАСТЬ Б: AI ДОДЕЛЫВАЕТ ═══ -->
@@ -1139,102 +1239,50 @@ systemctl --user status openclaw-gateway --no-pager | head -10</div>
       <div class="part-divider-line"></div>
     </div>
 
-    <div class="notice tip"><div class="ni">💚</div>Возвращайся в <strong>Antigravity</strong>. Скажи AI: «бот живой в Telegram. Дай Промпт 6.5». Дальше AI закроет tuning после QuickStart и geo-aware каскад моделей.</div>
-
-    <!-- Промпт 6.5: tuning после onboard -->
-    <div class="pcard">
-      <div class="pcard-head">
-        <div class="pcard-badge">6.5</div>
-        <div class="pcard-info">
-          <div class="pcard-tool">Промпт 6.5 · Tuning</div>
-          <div class="pcard-title">Закрыть дыры QuickStart</div>
-        </div>
-      </div>
-      <p class="pcard-desc">dmPolicy allowlist, command owner, plugins.allow whitelist, таймауты и systemd override. Закрывает <strong>D.2, D.3</strong> и снижает риск fetch-timeout.</p>
-      <div class="pb">
-        <div class="pbar"><span class="plang">antigravity · chat</span><button class="cbtn" onclick="cp(this,'p65')">📋 Копировать</button></div>
-        <div class="pcode" id="p65">Промпт 6.5: Tuning после onboard. Закрываем дыры QuickStart режима.
-
-На VPS под clawd через bash -lc:
-
-1. Закрой бота от чужих:
-   openclaw config set channels.telegram.dmPolicy "allowlist"
-   openclaw config set channels.telegram.allowFrom '["TELEGRAM_USER_ID"]'
-   Замени TELEGRAM_USER_ID на числовой user_id из ~/.env.
-
-2. Назначь command owner:
-   openclaw config set commands.ownerAllowFrom '["telegram:TELEGRAM_USER_ID"]'
-
-3. Включи plugins.allow whitelist для скорости: telegram, minimax, deepseek, openrouter, groq, openai, device-pair, memory-core.
-
-4. Подними таймауты:
-   agents.defaults.timeoutSeconds = 180
-   models.providers.minimax.timeoutSeconds = 120
-
-5. Добавь systemd override:
-   ~/.config/systemd/user/openclaw-gateway.service.d/override.conf
-   OPENCLAW_NO_RESPAWN=1
-   NODE_COMPILE_CACHE=/var/tmp/openclaw-compile-cache
-
-6. Restart daemon:
-   systemctl --user daemon-reload
-   systemctl --user restart openclaw-gateway
-
-Покажи diff openclaw.json, journalctl --user -u openclaw-gateway --since "30 seconds ago" и что закрыл D.2/D.3.</div>
-      </div>
-    </div>
+    <div class="notice tip"><div class="ni">💚</div>Возвращайся в <strong>Antigravity</strong>. Скажи AI: «бот живой, отвечает через MiniMax. Дай Промпт 7». Дальше 5 коротких промптов до полной готовности.</div>
 
     <!-- Промпт 7: alias premium -->
     <div class="pcard">
       <div class="pcard-head">
         <div class="pcard-badge">07</div>
         <div class="pcard-info">
-          <div class="pcard-tool">Промпт 7 · Geo-aware</div>
-          <div class="pcard-title">Primary по RTT + Premium/think</div>
+          <div class="pcard-tool">Промпт 7 · Alias</div>
+          <div class="pcard-title">Premium и think режимы</div>
         </div>
       </div>
-      <p class="pcard-desc">AI измеряет RTT до провайдеров, выбирает primary по физике VPS и настраивает aliases. Закрывает <strong>C.3, C.4, C.7, C.8, C.10</strong>.</p>
+      <p class="pcard-desc"><code>/premium</code> переключает на DeepSeek V4-Pro (только важные задачи). <code>/think</code> — reasoning-режим. Закрывает <strong>C.7, C.8</strong>.</p>
       <div class="pb">
         <div class="pbar"><span class="plang">antigravity · chat</span><button class="cbtn" onclick="cp(this,'p7')">📋 Копировать</button></div>
-        <div class="pcode" id="p7">Промпт 7: Бот живой. Настрой каскад моделей с учётом физики моего VPS.
+        <div class="pcode" id="p7">Промпт 7: Бот живой. Теперь добавь aliases для премиум-режима по разделу C стандарта.
 
 На VPS под clawd через bash -lc:
 
-1. Проверь auth profiles:
-   openclaw auth list
+1. openclaw aliases set premium deepseek/deepseek-v4-pro
+2. openclaw aliases set think deepseek/deepseek-v4-pro:thinking
+3. openclaw aliases list  → должно показать оба
 
-2. Измерь RTT:
-   ping -c 3 -W 2 api.minimaxi.com
-   ping -c 3 -W 2 api.deepseek.com
-   ping -c 3 -W 2 api.openai.com
+⚠️ FALLBACK если "openclaw aliases set" не работает (schema mismatch):
+- Проверь синтаксис: openclaw aliases --help
+- Если команды нет — настрой через config:
+    openclaw config set modelAliases.premium deepseek/deepseek-v4-pro
+    openclaw config set modelAliases.think deepseek/deepseek-v4-pro:thinking
+- Проверь что записалось:
+    cat ~/.openclaw/openclaw.json | python3 -c "import json,sys; print(json.load(sys.stdin).get('modelAliases'))"
 
-3. Выбери primary:
-   если RTT MiniMax ≤80ms → minimax/MiniMax-M2.7
-   если RTT MiniMax >80ms → ближайший дешёвый provider, обычно deepseek/deepseek-v4-flash для EU/RU
+Также проверь:
+- openclaw models status — primary minimax/MiniMax-M2.7
+- Если fallback на primary не deepseek-v4-flash — добавь:
+  openclaw fallbacks add minimax/MiniMax-M2.7 deepseek/deepseek-v4-flash
 
-4. Примени:
-   openclaw config set agents.defaults.model.primary "&lt;PRIMARY&gt;"
-
-5. Fallback:
-   если primary = minimax/MiniMax-M2.7:
-     openclaw fallbacks add minimax/MiniMax-M2.7 deepseek/deepseek-v4-flash
-   если primary = deepseek/deepseek-v4-flash:
-     не добавляй дорогой auto-fallback
-
-6. Aliases:
-   openclaw aliases set premium deepseek/deepseek-v4-pro
-   openclaw aliases set think deepseek/deepseek-v4-pro:thinking
-   openclaw aliases list
-
-Проверь openclaw models status, Telegram «привет» за ≤30 сек и закрой C.3/C.4/C.7/C.8/C.10.</div>
+Закрой C.7, C.8.</div>
       </div>
       <div class="expect">
         <div class="expect-title">✓ Что должен сказать AI в ответ</div>
         <div class="expect-body">
           <strong>openclaw aliases list:</strong> <code>premium → deepseek/deepseek-v4-pro</code> и <code>think → deepseek/deepseek-v4-pro:thinking</code><br>
-          <strong>openclaw models status:</strong> primary = выбранная по RTT модель<br>
-          <strong>Закрытые критерии:</strong> C.3, C.4, C.7, C.8, C.10<br>
-          ⚠️ <strong>Если EU/RU VPS</strong> — DeepSeek primary может быть правильным выбором, это не fallback.
+          <strong>openclaw models status:</strong> primary = <code>minimax/MiniMax-M2.7</code>, fallback = <code>deepseek/deepseek-v4-flash</code><br>
+          <strong>Закрытые критерии:</strong> C.7, C.8<br>
+          ⚠️ <strong>Если schema mismatch</strong> и команда <code>aliases set</code> не работает — AI должен использовать <code>config set modelAliases.premium ...</code> (это OK, документировано в Промпте).
         </div>
       </div>
     </div>
@@ -1344,13 +1392,30 @@ systemctl --user status openclaw-gateway --no-pager | head -10</div>
 ## Характер
 [характер]
 
-## Правила
+## Правила базовые
 - Отвечай кратко и по делу на русском
-- НИКОГДА не используй пустые фразы: «Отличный вопрос!», «С удовольствием помогу!», «Конечно!»
-- Не показывай chain-of-thought, не пиши «Анализирую...»
 - Если не знаешь — скажи прямо «не знаю», не выдумывай
 
-Перезапусти daemon. Я напишу боту «привет» — он должен представиться по имени БЕЗ пустых фраз.
+## Anti-verbosity (КРИТИЧНО — иначе MiniMax будет болтать)
+ЗАПРЕЩЕНО:
+- Повторять вопрос пользователя в следующем сообщении («Ты спросил X, отвечаю...» / «Понятно, тебя интересует Y...»)
+- Выводить chain-of-thought / рассуждения наружу («Сначала мне нужно...», «Дай-ка подумаю...», «Анализирую...»)
+- Начинать ответ с пустых фраз: «Отличный вопрос!», «С удовольствием помогу!», «Конечно!», «Ща, момент»
+- Преамбулы вроде «Прежде чем ответить...»
+- Markdown-заголовки в коротких ответах (1 абзац = без заголовка)
+
+ОБЯЗАТЕЛЬНО:
+- Простой вопрос → один абзац ответа, всё. Точка.
+- Сложный → структурированный ответ без воды между блоками
+- Нужно подумать → думай молча, наружу только результат
+- На «привет» / «как дела?» → одна короткая фраза, не лекция
+
+ВНУТРЕННИЙ ЧЕКЛИСТ перед отправкой:
+1. Не повторил ли я вопрос? Если да — стереть.
+2. Нет ли преамбулы / рассуждений? Если есть — стереть.
+3. Ответ соразмерен вопросу? «Как дела?» = 1 предложение.
+
+Перезапусти daemon. Я напишу боту «привет, как дела?» — должен ответить 1-2 короткими фразами БЕЗ повтора вопроса и БЕЗ пустых фраз.
 
 Закрой D.7, H.1-H.3.</div>
       </div>
@@ -1394,7 +1459,7 @@ systemctl --user status openclaw-gateway --no-pager | head -10</div>
 
     <div class="final">
       <div class="final-title">Установка <span class="acc">завершена</span></div>
-      <div class="final-desc">Бот в Telegram отвечает через выбранный primary, картинки рисуются, watchdog защищает, личность задана. <br>Дальше — независимая проверка через сам Telegram-бот → переходи на <strong>Закладку 02</strong>.</div>
+      <div class="final-desc">Бот в Telegram отвечает через MiniMax M2.7, картинки рисуются, watchdog защищает, личность задана. <br>Дальше — независимая проверка через сам Telegram-бот → переходи на <strong>Закладку 02</strong>.</div>
     </div>
 
   </div>
@@ -1454,7 +1519,7 @@ systemctl --user status openclaw-gateway --no-pager | head -10</div>
           <div class="pcard-title">models status</div>
         </div>
       </div>
-      <p class="pcard-desc">Какая модель сейчас primary, какие fallbacks, какие aliases. Главное — primary должен совпадать с выбором по RTT.</p>
+      <p class="pcard-desc">Какая модель сейчас primary, какие fallbacks, какие aliases. Главное — должно быть <code>minimax/MiniMax-M2.7</code>.</p>
       <div class="pb">
         <div class="pbar"><span class="plang">telegram · твой бот</span><button class="cbtn" onclick="cp(this,'q2')">📋 Копировать</button></div>
         <div class="pcode" id="q2">Запусти openclaw models status и пришли мне ПОЛНЫЙ вывод без сокращений. Покажи также primary, fallbacks, aliases.</div>
@@ -1462,7 +1527,7 @@ systemctl --user status openclaw-gateway --no-pager | head -10</div>
       <div class="expect" style="background:rgba(34,197,94,0.06);">
         <div class="expect-title" style="color:var(--green);">✓ Что искать в ответе</div>
         <div class="expect-body">
-          <strong>primary:</strong> <code style="color:var(--green);">minimax/MiniMax-M2.7</code> для Asia или <code style="color:var(--green);">deepseek/deepseek-v4-flash</code> для EU/RU<br>
+          <strong>primary:</strong> <code style="color:var(--green);">minimax/MiniMax-M2.7</code> (с заглавными M!)<br>
           <strong>fallback:</strong> <code style="color:var(--green);">deepseek/deepseek-v4-flash</code> (дешевле primary!)<br>
           <strong>aliases:</strong> <code style="color:var(--green);">premium → deepseek-v4-pro</code>, <code style="color:var(--green);">think → ...:thinking</code><br>
           <strong>5 провайдеров</strong> с зелёной галкой: minimax, deepseek, openrouter, groq, openai<br><br>
@@ -1720,14 +1785,14 @@ B.6 ⚠️ Auto-restart on failure включён
 C. Каскад моделей
 C.1 ❗ 5 auth profiles (minimax, deepseek, openrouter, groq, openai)
 C.2 ❗ missingProvidersInUse пусто
-C.3 ❗ Primary выбран по RTT: MiniMax ≤80ms → <span class="v">minimax/MiniMax-M2.7</span>, иначе ближайший дешёвый provider
+C.3 ❗ Primary: <span class="v">minimax/MiniMax-M2.7</span> (с заглавными!)
 C.4 ❗ Fallback на primary: deepseek/deepseek-v4-flash (только дешевле!)
 C.5 ⚠️ Heartbeat: openrouter/google/gemini-2.5-flash-lite, every 60m
 C.6 ⚠️ Subagents: openrouter/moonshotai/kimi-k2.6
 C.7 ❗ Alias premium: deepseek/deepseek-v4-pro
 C.8 ⚠️ Alias think: deepseek/deepseek-v4-pro:thinking
 C.9 ⚠️ Probe primary зелёный
-C.10 ❗ В реальном ответе боту модель = выбранный primary (НЕ случайный fallback)
+C.10 ❗ В реальном ответе боту модель = minimax/MiniMax-M2.7 (НЕ deepseek!)
 
 D. Telegram-бот
 D.1 ❗ Telegram channel active
@@ -1735,7 +1800,7 @@ D.2 ❗ dmPolicy: allowlist
 D.3 ❗ allowFrom содержит ЧИСЛОВОЙ user_id
 D.4 ❗ Token в файле с chmod 600
 D.5 ❗ Bot валиден (getMe → ok:true)
-D.6 ❗ На «привет» бот отвечает за ≤30 секунд; если дольше — нужен 4 vCPU / 8 GB
+D.6 ❗ На «привет» бот отвечает за ≤5 секунд
 D.7 ⚠️ В ответе есть имя сотрудника из SOUL.md
 
 E. Картинки
@@ -2142,6 +2207,324 @@ knowledge-base/
 
   </div>
 
+  <!-- ============================================================ -->
+  <!-- ЗАКЛАДКА 5 — ДОМАШКА                                           -->
+  <!-- ============================================================ -->
+  <div class="panel panel-red" id="panel-5">
+
+    <div class="notice info" style="border-color:rgba(239,68,68,0.25);background:rgba(239,68,68,0.04);"><div class="ni" style="color:#ef4444;">🎓</div><span><strong>Финал Воркшопа 1.</strong> 5 коротких заданий: <strong>голос → картинка → решение → дерзкая самопрезентация → вердикт от Аудитора</strong>. Всё отправляешь спринт-боту, не в общий чат. Время: <strong>15–20 минут</strong>. Главное — получить зелёный «🎉 ВОРКШОП 1 ПРОЙДЕН» от Аудитора (Шаг 5).</span></div>
+
+    <!-- ШАГ 1 — ГОЛОС -->
+    <div class="pcard">
+      <div class="pcard-head">
+        <div class="pcard-badge">1</div>
+        <div class="pcard-info">
+          <div class="pcard-tool">Шаг 1 · Голос</div>
+          <div class="pcard-title">Поговори с ботом голосом</div>
+        </div>
+      </div>
+      <p class="pcard-desc">Открой бота в Telegram, зажми кнопку <strong>микрофона</strong> и запиши <strong>любое голосовое</strong> 5–15 секунд. Например: «Привет, расскажи короткий анекдот про программистов» или «Подскажи 3 идеи на ужин». Отпусти — Telegram отправит голосовое.</p>
+      <div class="rbox"><div class="rtitle">Что произойдёт</div><div class="rrow">Бот <strong>распознает</strong> твоё голосовое (Whisper)</div><div class="rrow">Через 5–20 секунд <strong>ответит голосом</strong> (TTS)</div><div class="rrow"><strong>📸 Скриншот:</strong> чтобы было видно <strong>твою голосовую дорожку</strong> и <strong>голосовой ответ бота</strong></div></div>
+      <div class="notice tip" style="margin-top:10px;border-color:rgba(239,68,68,0.18);background:rgba(239,68,68,0.04);"><div class="ni">💡</div>Если бот ответил <strong>текстом, а не голосом</strong> — значит при установке Voice был отключён. Не страшно: используй текстовый ответ как скриншот, в подписи укажи «голос текстом — TTS не настроен».</div>
+    </div>
+
+    <!-- ШАГ 2 — КАРТИНКА -->
+    <div class="pcard">
+      <div class="pcard-head">
+        <div class="pcard-badge">2</div>
+        <div class="pcard-info">
+          <div class="pcard-tool">Шаг 2 · Картинка</div>
+          <div class="pcard-title">Попроси нарисовать что-нибудь</div>
+        </div>
+      </div>
+      <p class="pcard-desc">Скопируй и отправь боту. <strong>Тему картинки придумай свою</strong> — что вдохновляет, что любишь, что прикольно увидеть.</p>
+      <div class="pb"><div class="pbar"><span class="ptag">в Telegram-бот</span><button class="cbtn" onclick="cp(this,'hw2')">📋 Копировать</button></div><pre class="pcode" id="hw2">/image нарисуй [придумай свою тему — кот в космосе / неоновый закат / робот-самурай / что угодно]</pre></div>
+      <div class="rbox"><div class="rtitle">Что произойдёт</div><div class="rrow">Картинка придёт за <strong>5–15 секунд</strong></div><div class="rrow"><strong>🎨 Сохрани картинку</strong> — отправишь её спринт-боту</div></div>
+    </div>
+
+    <!-- ШАГ 3 — РЕШЕНИЕ -->
+    <div class="pcard">
+      <div class="pcard-head">
+        <div class="pcard-badge">3</div>
+        <div class="pcard-info">
+          <div class="pcard-tool">Шаг 3 · Решение задачи</div>
+          <div class="pcard-title">Дай боту реальную задачу</div>
+        </div>
+      </div>
+      <p class="pcard-desc">Скопируй и отправь. Бот <strong>сам задаст 5 уточняющих вопросов</strong> по очереди и в конце выдаст <strong>персональный план</strong>.</p>
+      <div class="pb"><div class="pbar"><span class="ptag">в Telegram-бот</span><button class="cbtn" onclick="cp(this,'hw3')">📋 Копировать</button></div><pre class="pcode" id="hw3">/premium Помоги составить план развития на месяц. Сначала задай мне 5 коротких вопросов чтобы понять контекст, потом составь план на основе моих ответов. Вопросы задавай по одному и жди мой ответ.</pre></div>
+
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin:14px 0 0;">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#ef4444;margin-bottom:8px;">Какие вопросы задаст бот <span style="color:var(--subtle);font-weight:400;letter-spacing:0;text-transform:none;font-style:italic;">(примерно)</span></div>
+        <ol style="padding-left:18px;font-size:13.5px;color:var(--muted);line-height:1.8;margin:0;">
+          <li>Какая у тебя главная цель на ближайший месяц?</li>
+          <li>Сколько часов в неделю готов на это тратить?</li>
+          <li>Что уже пробовал и что не сработало?</li>
+          <li>Какой бюджет на этот месяц?</li>
+          <li>По чему будешь измерять успех?</li>
+        </ol>
+        <p style="font-size:12.5px;color:var(--subtle);margin:10px 0 0;line-height:1.5;">Отвечай по одному. После 5-го ответа бот соберёт <strong style="color:var(--text);">персональный план</strong>.</p>
+      </div>
+
+      <div class="rbox"><div class="rtitle">Что произойдёт</div><div class="rrow">Бот <strong>сам подумает</strong> 15–40 секунд</div><div class="rrow">Задаст <strong>5 вопросов по очереди</strong></div><div class="rrow">Выдаст <strong>план на месяц</strong></div><div class="rrow"><strong>📸 Сделай скриншот</strong> финального плана</div></div>
+    </div>
+
+    <!-- ШАГ 4 — ДЕРЗКАЯ САМОПРЕЗЕНТАЦИЯ -->
+    <div class="pcard">
+      <div class="pcard-head">
+        <div class="pcard-badge">4</div>
+        <div class="pcard-info">
+          <div class="pcard-tool">Шаг 4 · Самопрезентация</div>
+          <div class="pcard-title">Пусть бот сам себя продаст</div>
+        </div>
+      </div>
+      <p class="pcard-desc">Скопируй и отправь боту. Он напишет <strong>яркое представление о себе</strong> с юмором, дерзостью и хвастовством — то, что ты <strong>скопируешь и отправишь спринт-боту</strong> как финальную сдачу.</p>
+      <div class="pb"><div class="pbar"><span class="ptag">в Telegram-бот</span><button class="cbtn" onclick="cp(this,'hw4')">📋 Копировать</button></div><pre class="pcode" id="hw4">Напиши яркое самопредставление о себе для общего чата спринта по AI. Стиль — с юмором, лёгкой дерзостью, хвастовством, можно с подколами. Расскажи: как тебя зовут, кто тебя сегодня собрал (моё имя), что умеешь круче всех в когорте, и почему меня будут все ненавидеть за то что я выбрал тебя. 5–7 предложений, добавь эмодзи, в конце — провокационный вопрос остальным участникам спринта. Без слова «хозяин», говори «я работаю с [имя]» или «меня собрал [имя]».</pre></div>
+      <div class="rbox"><div class="rtitle">Что произойдёт</div><div class="rrow">Бот напишет <strong>дерзкое представление</strong> от своего лица</div><div class="rrow"><strong>📋 Скопируй текст</strong> ответа целиком</div><div class="rrow">Если получилось скучно — попроси «<em>сделай злее и смешнее</em>», бот перепишет</div></div>
+    </div>
+
+    <!-- ШАГ 5 — ВЕРДИКТ ОТ АУДИТОРА -->
+    <div class="pcard">
+      <div class="pcard-head">
+        <div class="pcard-badge">5</div>
+        <div class="pcard-info">
+          <div class="pcard-tool">Шаг 5 · Вердикт</div>
+          <div class="pcard-title">Получи зелёный «ПРОЙДЕН» от Аудитора</div>
+        </div>
+      </div>
+      <p class="pcard-desc">Открой <strong>Закладку 03 «Контроль»</strong>, прогони её по инструкции — Аудитор в новом чате независимо проверит твою установку по 30 критериям и выдаст вердикт. <strong>Когда увидишь «🎉 ВОРКШОП 1 ПРОЙДЕН» — сделай скриншот.</strong></p>
+
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#ef4444;margin:18px 0 6px;">Как должен выглядеть вердикт <span style="color:var(--subtle);font-weight:400;letter-spacing:0;text-transform:none;font-style:italic;">— ориентируйся на этот пример</span></div>
+
+      <!-- ВИЗУАЛЬНЫЙ МОКАП ВЕРДИКТА — для ориентира -->
+      <div class="verdict-preview">
+        <div class="vp-header"><span class="em">🎉</span>Воркшоп 1 пройден</div>
+        <div class="vp-intro">Все три факта в порядке:</div>
+        <ol class="vp-list">
+          <li><strong>Новая сессия</strong> <code>f5c2d535-...</code> — резолв модели свежий ✅</li>
+          <li><strong>Model:</strong> <code>minimax/MiniMax-M2.7</code> — именно с заглавными, ровно как требует C.3 ✅</li>
+          <li><code>model.completed</code> за <code>~1603ms</code> — это и есть полный круг отработки модели на запросе. <strong>1.6 секунды</strong> — в 17× быстрее старого deepseek (28 сек) и сильно ниже норматива в 5 сек ✅</li>
+        </ol>
+        <div class="vp-note">Критерий <strong>C.10 закрыт</strong>, <strong>D.6 закрыт с большим запасом</strong>. Stream-ready в этой версии OpenClaw трэйсится в <code style="color:var(--lime);">config-audit.jsonl</code>, лезть туда не надо — <code style="color:var(--lime);">model.completed</code> это эквивалент по смыслу.</div>
+        <div class="vp-table-title">Финальная сводка</div>
+        <table class="vp-table">
+          <thead><tr><th>Из прошлого аудита</th><th>Было</th><th>Стало</th></tr></thead>
+          <tbody>
+            <tr><td>C.3 primary = MiniMax</td><td>❌</td><td>✅</td></tr>
+            <tr><td>C.4 fallback = deepseek-flash</td><td>❌</td><td>✅ <span style="color:var(--subtle);">(после правки конфига)</span></td></tr>
+            <tr><td>C.10 реальный ответ от MiniMax</td><td>❌</td><td>✅</td></tr>
+            <tr><td>D.6 ≤5 сек</td><td>❌ <span style="color:var(--subtle);">(28s)</span></td><td>✅ <span style="color:var(--subtle);">(1.6s)</span></td></tr>
+            <tr><td>F.4 watchdog</td><td>❌</td><td>✅ <span style="color:var(--subtle);">(v2 на OpenRouter API)</span></td></tr>
+            <tr><td>B.4 doctor</td><td>⚠️</td><td>✅ <span style="color:var(--subtle);">(Errors: 0)</span></td></tr>
+          </tbody>
+        </table>
+        <div class="vp-verdict"><span class="em">🎉</span>Вердикт: Воркшоп 1 пройден</div>
+      </div>
+
+      <p class="pcard-desc" style="font-size:12.5px;margin-top:12px;color:var(--subtle);">У тебя могут быть другие цифры (другая сессия, другая модель, другой ms). <strong style="color:var(--text);">Главное — финальная строка «🎉 Вердикт: Воркшоп 1 пройден»</strong>. Если у Аудитора другой вердикт (🟡 «почти готово» или ❌ «есть проблемы») — иди в <strong>Закладку 04 «Консультант»</strong>, чините и прогоните Аудитора заново, пока не получится зелёный «пройден».</p>
+
+      <div class="rbox"><div class="rtitle">Что произойдёт</div><div class="rrow">Аудитор пройдётся по 30 критериям и выдаст таблицу</div><div class="rrow">В конце — финальный <strong>вердикт</strong> зелёным шрифтом</div><div class="rrow"><strong>📸 Скриншот вердикта</strong> — это твой пропуск на Воркшоп 2</div></div>
+    </div>
+
+    <!-- СДАЧА -->
+    <div class="pcard" style="border-color:rgba(239,68,68,0.25);background:linear-gradient(135deg,rgba(239,68,68,0.04),transparent);">
+      <div class="pcard-head">
+        <div class="pcard-badge" style="background:rgba(239,68,68,0.12);border-color:rgba(239,68,68,0.35);">✓</div>
+        <div class="pcard-info">
+          <div class="pcard-tool">Сдача · Спринт-бот @ai_comandos_bot</div>
+          <div class="pcard-title">Отправь всё спринт-боту</div>
+        </div>
+      </div>
+      <p class="pcard-desc">Зайди к спринт-боту в Telegram (имя бота Дмитрий пришлёт перед стартом, пока используй <code>@ai_comandos_bot</code> как placeholder) и отправь <strong>5 сообщений подряд</strong>:</p>
+
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin:0 0 0;">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#ef4444;margin-bottom:10px;">Что отправить (по одному сообщению на каждое)</div>
+        <ol style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px;font-size:13.5px;color:var(--muted);line-height:1.5;counter-reset:sub;">
+          <li style="counter-increment:sub;padding-left:30px;position:relative;"><span style="position:absolute;left:0;top:0;width:22px;height:22px;border-radius:50%;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.3);color:#ef4444;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;">1</span><strong style="color:var(--text);">Скриншот из Шага 1</strong> — где видно твоё голосовое и голосовой ответ бота</li>
+          <li style="counter-increment:sub;padding-left:30px;position:relative;"><span style="position:absolute;left:0;top:0;width:22px;height:22px;border-radius:50%;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.3);color:#ef4444;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;">2</span><strong style="color:var(--text);">Картинка из Шага 2</strong> — как картинка, не как скриншот</li>
+          <li style="counter-increment:sub;padding-left:30px;position:relative;"><span style="position:absolute;left:0;top:0;width:22px;height:22px;border-radius:50%;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.3);color:#ef4444;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;">3</span><strong style="color:var(--text);">Скриншот плана из Шага 3</strong> — финальный план который собрал бот после 5 вопросов</li>
+          <li style="counter-increment:sub;padding-left:30px;position:relative;"><span style="position:absolute;left:0;top:0;width:22px;height:22px;border-radius:50%;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.3);color:#ef4444;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;">4</span><strong style="color:var(--text);">Текст самопрезентации из Шага 4</strong> — то что бот написал о себе для участников спринта</li>
+          <li style="counter-increment:sub;padding-left:30px;position:relative;"><span style="position:absolute;left:0;top:0;width:22px;height:22px;border-radius:50%;background:rgba(34,197,94,0.18);border:1px solid rgba(34,197,94,0.4);color:var(--green);display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;">5</span><strong style="color:var(--text);">📸 Скриншот вердикта от Аудитора</strong> — где зелёным написано «🎉 Воркшоп 1 пройден» (это и есть твой пропуск на Воркшоп 2)</li>
+        </ol>
+      </div>
+
+      <p class="pcard-desc" style="margin:14px 0 0;font-size:12.5px;color:var(--subtle);">Спринт-бот примет 5 сообщений и отметит у Дмитрия что Воркшоп 1 ты сдал. <strong style="color:var(--text);">Никаких подписей, расчётов, шаблонов</strong> — просто 5 сообщений подряд.</p>
+    </div>
+
+    <div class="notice tip" style="margin-top:14px;border-color:rgba(239,68,68,0.18);background:rgba(239,68,68,0.04);"><div class="ni">🆘</div>Если на любом шаге бот молчит, путается или выдаёт ошибку — <strong>не парься, не дёргай AI-установщика</strong>. Открой Закладку <strong>04 «Консультант»</strong>, опиши симптом — он подскажет за 30 секунд.</div>
+
+    <div class="final" style="background:linear-gradient(135deg,rgba(239,68,68,0.08),rgba(200,255,0,0.04));border-color:rgba(239,68,68,0.25);">
+      <div class="final-title">Это <span class="acc" style="color:#ef4444;">первый день</span> с твоим сотрудником</div>
+      <div class="final-desc">У тебя на руках бот, который <strong>слышит голосом</strong>, <strong>рисует</strong>, <strong>думает над задачей</strong>, <strong>сам себя дерзко продаёт</strong> и <strong>прошёл независимый аудит</strong>. На Воркшопе 2 он научится <strong>помнить</strong> разговоры — каждый следующий диалог станет умнее предыдущего.</div>
+    </div>
+
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- TAB 6 — ПАТЧИ v1.2                                              -->
+  <!-- ============================================================ -->
+  <div class="panel panel-cyan" id="panel-6">
+
+    <div class="banner-v12" style="margin-bottom:18px"><span class="badge">v1.3 · 12 мая</span><strong>SSH-защита — догнать до v1.3</strong>. Если ты прошёл В1 до 12 мая, твой VPS открыт по дефолтному порту 22 и уязвим под брут-форс. История: участник когорты 2 дня терпел атаку с десятков IP, fail2ban не справился, сервер забивался connections, AI-агент не мог достучаться.</div>
+
+    <h2>Выбери <span class="acc" style="color:#06b6d4;">ОДИН</span> вариант</h2>
+    <p class="hero-sub">Если ты ещё не проходил В1 — патч НЕ НУЖЕН, в Промпте 4 Установки уже встроен базовый hardening (A.11-A.14). Хочешь полную защиту — добавь сверху A.1 Tailscale.</p>
+
+    <div class="notice wrn" style="background:rgba(6,182,212,0.05);border-color:rgba(6,182,212,0.25);margin-top:14px">
+      <div class="ni">🛡</div>
+      <div>
+        <strong style="color:#06b6d4">A.1 — Tailscale (рекомендуется)</strong> закрывает SSH из публичного интернета полностью. Брут-форсить нечего. Win/Mac/Linux одинаково, 5 минут, $0. <strong>Истинная защита.</strong><br>
+        <strong>A.2 — Базовый</strong> меняет порт, отключает password auth, поднимает fail2ban bantime. Снижает шум атак в 100×, но не закрывает корень. Подходит если ты не хочешь Tailscale-аккаунт.
+      </div>
+    </div>
+
+    <!-- ===== A.1 TAILSCALE ===== -->
+    <div class="pcard" style="margin-top:18px;border-left-color:#06b6d4">
+      <div class="pcard-head">
+        <div class="pcard-badge" style="color:#06b6d4;background:rgba(6,182,212,0.12);border-color:rgba(6,182,212,0.3)">A.1</div>
+        <div class="pcard-info">
+          <div class="pcard-tool" style="color:#06b6d4">🥇 Рекомендуется · 10 минут · Win/Mac/Linux</div>
+          <div class="pcard-title">Tailscale — SSH невидим в интернете</div>
+        </div>
+      </div>
+      <p class="pcard-desc">Tailscale = бесплатная zero-trust VPN. VPS виден только устройствам в твоей Tailscale-сети (Mac, Win-PC, телефон). Снаружи интернета — порт 22 закрыт полностью. Брут-форс физически невозможен.</p>
+      <div class="notice tip" style="border-color:rgba(6,182,212,0.2);background:rgba(6,182,212,0.04);margin:10px 0"><div class="ni">📱</div><strong>Сначала на устройстве (Mac/Win/iPhone/Android):</strong><br>
+      • <strong>Mac:</strong> App Store → найди «Tailscale» → установи → открой → Sign in с Google/GitHub<br>
+      • <strong>Windows:</strong> <code>tailscale.com/download/windows</code> → .exe → установи → tray-icon → Login → Google/GitHub<br>
+      • <strong>iPhone/Android:</strong> App Store / Google Play → «Tailscale» → войди тем же аккаунтом<br>
+      Важно: тот же аккаунт Google/GitHub что используешь — все твои устройства попадают в одну сеть.</div>
+      <p class="pcard-desc" style="margin-top:14px"><strong>Дальше — отдай этот промпт AI-агенту в папке проекта:</strong></p>
+      <div class="pb">
+        <div class="pbar"><span class="plang">antigravity · chat</span><button class="cbtn" onclick="cp(this,'pa1')">📋 Копировать</button></div>
+        <div class="pcode" id="pa1">Промпт A.1: Закрой SSH из публичного интернета через Tailscale (A.15 стандарта W1 v1.3).
+
+ПРЕДУСЛОВИЕ: я уже установил Tailscale-клиент на своём Mac/Windows и залогинился через Google/GitHub. Скажу тебе свой логин когда понадобится — а ты только VPS настраиваешь.
+
+ДЕЙСТВУЙ ПОСЛЕДОВАТЕЛЬНО (порядок критичен — не отрежь меня от SSH):
+
+1. Подключись по текущему SSH (как обычно). Установи Tailscale на VPS:
+   curl -fsSL https://tailscale.com/install.sh | sh
+
+2. Запусти tailscale up с флагом для серверов:
+   sudo tailscale up --ssh=false --accept-routes
+   ВЫВЕДЕТСЯ ССЫЛКА (типа https://login.tailscale.com/a/abc...). СКАЖИ МНЕ ЭТУ ССЫЛКУ — я открою в браузере и авторизую устройство в своём аккаунте.
+
+3. Жди моего подтверждения «авторизовал VPS». После моего OK — узнай Tailscale-IP VPS:
+   tailscale ip -4
+   Это адрес вида 100.X.X.X — запомни.
+
+4. Покажи мне этот 100.X.X.X-адрес + скажи мне обновить ~/.ssh/config на Mac:
+   Host clawd-vps-tail
+     HostName <100.X.X.X>
+     User clawd
+     IdentityFile ~/.ssh/clawd_ed25519
+     Port <текущий SSH порт, если меняли в v1.2 — иначе 22>
+
+5. СКАЖИ МНЕ СТОП. Я открою второй терминал и проверю:
+   ssh clawd-vps-tail "echo OK"
+   Если работает — скажу «работает».
+
+6. ТОЛЬКО ПОСЛЕ моего «работает» — закрываем SSH в публичном интернете:
+   sudo ufw delete allow <SSH_PORT>/tcp
+   (это удалит правило для текущего порта — публичный SSH становится недоступен)
+   sudo ufw status (должно показать что SSH-порта в публичных allow больше нет)
+
+7. Опционально (для параноиков) — заставь sshd слушать ТОЛЬКО на tailscale0 интерфейсе:
+   echo "ListenAddress <100.X.X.X>" | sudo tee -a /etc/ssh/sshd_config
+   echo "ListenAddress 127.0.0.1" | sudo tee -a /etc/ssh/sshd_config
+   sudo sshd -t && sudo systemctl reload sshd
+
+8. ВНЕШНЯЯ ПРОВЕРКА: я с телефона (вне Tailscale) пробую ssh <PUBLIC_IP> -p <SSH_PORT> → должен быть timeout/refused. Если кто-то отвечает — A.15 НЕ ЗАКРЫТ.
+
+9. Обнови мой .env:
+   - VPS_HOST=<100.X.X.X> (Tailscale-IP, заменяет публичный для SSH)
+   - VPS_PUBLIC_IP=<старый публичный> (для веб-доступа к боту, если есть)
+
+10. Допиши в ~/.openclaw/RECOVERY.md:
+    "## A.15 SSH через Tailscale
+    - VPS Tailscale-IP: 100.X.X.X
+    - Если Tailscale сломался — открой панель https://login.tailscale.com/admin/machines, проверь статус VPS
+    - Альтернативный доступ через провайдера: web-консоль VPS (Hetzner/DigitalOcean/etc) → залогиньтесь как root → перезапустите tailscaled"
+
+Отчёт ✅/⚠️/❌ по A.15 с проверкой `tailscale status` + внешний nmap.</div>
+      </div>
+      <div class="rbox" style="margin-top:14px;background:rgba(6,182,212,0.04);border-color:rgba(6,182,212,0.2)"><div class="rtitle" style="color:#06b6d4">✅ Результат A.1</div><div class="rrow">SSH работает только из твоей Tailscale-сети. Снаружи интернета порт filtered/closed. Брут-форсить нечего. Подключение из любой точки мира пока Tailscale-клиент запущен на твоём устройстве.</div></div>
+    </div>
+
+    <!-- ===== A.2 БАЗОВЫЙ ===== -->
+    <div class="pcard" style="margin-top:14px">
+      <div class="pcard-head">
+        <div class="pcard-badge">A.2</div>
+        <div class="pcard-info">
+          <div class="pcard-tool">🥉 Базовый · 10 минут · Если не хочешь Tailscale</div>
+          <div class="pcard-title">SSH-hardening (A.11-A.14 стандарта W1 v1.2)</div>
+        </div>
+      </div>
+      <p class="pcard-desc">Меняет SSH-порт с 22 на случайный, отключает password auth, fail2ban bantime до 24h, MaxStartups/MaxSessions. <strong>Снижает атаки в 100×, но не закрывает корень.</strong> Используй если категорически не хочешь Tailscale-аккаунт.</p>
+      <div class="notice wrn" style="border-color:rgba(6,182,212,0.18);background:rgba(6,182,212,0.04)"><div class="ni">⚠️</div><strong>Порядок строгий — не отрежь себя от SSH.</strong> Сначала открой новый порт в ufw, проверь работу из второго терминала, ТОЛЬКО потом закрывай 22.</div>
+      <div class="pb">
+        <div class="pbar"><span class="plang">antigravity · chat</span><button class="cbtn" onclick="cp(this,'pa2')">📋 Копировать</button></div>
+        <div class="pcode" id="pa2">Промпт A.2: Закрой A.11-A.14 стандарта W1 v1.2 (SSH-hardening, базовый).
+
+КОНТЕКСТ: участник когорты 2 дня терпел брут-форс на порт 22. fail2ban с дефолтным bantime=3600 не справился — атакующие ротировали IP, забивали MaxStartups, AI-агент не мог достучаться. После смены порта + passauth off + bantime 24h атака прекратилась за час.
+
+ДЕЙСТВУЙ ПОСЛЕДОВАТЕЛЬНО (порядок критичен — не отрежь меня от SSH):
+
+1. Выбери NEW_PORT в диапазоне 10000-60000:
+   NEW_PORT=$((RANDOM % 50000 + 10000))
+   echo "NEW_PORT=$NEW_PORT"
+
+2. СНАЧАЛА открой NEW_PORT в ufw (на случай если sshd перезагрузится):
+   sudo ufw allow $NEW_PORT/tcp
+   sudo ufw status
+
+3. ПОТОМ правь sshd_config с бэкапом:
+   sudo cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak.$(date +%F)
+   sudo sed -i "s/^#*Port 22/Port $NEW_PORT/" /etc/ssh/sshd_config
+   sudo sed -i 's/^#*PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config
+   sudo sed -i 's/^#*PermitRootLogin.*/PermitRootLogin no/' /etc/ssh/sshd_config
+   echo "MaxStartups 5:30:10" | sudo tee -a /etc/ssh/sshd_config
+   echo "MaxSessions 5" | sudo tee -a /etc/ssh/sshd_config
+
+4. sudo sshd -t (проверка синтаксиса). Если OK: sudo systemctl reload sshd
+
+5. СКАЖИ МНЕ СТОП. Я открою второе окно терминала на Mac и проверю:
+   ssh -i ~/.ssh/clawd_ed25519 -p $NEW_PORT clawd@$VPS_IP "echo OK"
+   Скажу тебе работает или нет.
+
+6. Если работает — закрывай 22:
+   sudo ufw delete allow 22/tcp
+   sudo ufw status
+
+7. Подтяни fail2ban (bantime 24h):
+   sudo tee -a /etc/fail2ban/jail.local &lt;&lt;EOF
+   [sshd]
+   enabled = true
+   port = $NEW_PORT
+   bantime = 86400
+   findtime = 600
+   maxretry = 3
+   EOF
+   sudo systemctl restart fail2ban
+   sudo fail2ban-client status sshd
+
+8. Обнови мой .env: добавь строку SSH_PORT=$NEW_PORT. Скажи мне обновить также Mac ~/.ssh/config: "Port $NEW_PORT" в блоке clawd-vps.
+
+9. Отчёт ✅/⚠️/❌ по A.11-A.14:
+   - grep -E "^Port|^PasswordAuth|^MaxSt|^MaxSess|^PermitRoot" /etc/ssh/sshd_config
+   - sudo ufw status
+   - sudo fail2ban-client get sshd bantime
+   - sudo fail2ban-client status sshd</div>
+      </div>
+    </div>
+
+    <div class="final" style="margin-top:36px;background:linear-gradient(135deg,rgba(6,182,212,0.08),rgba(13,14,15,1));border-color:rgba(6,182,212,0.3)">
+      <div class="final-title">После патча — <span class="acc" style="color:#06b6d4;">перепрогон Аудитора</span></div>
+      <div class="final-desc">Открой Закладку 03 «Контроль», скопируй промпт аудитора в новый чат AI. Аудитор по стандарту v1.3 проверит либо <strong>A.15 Tailscale</strong> (если ты выбрал A.1), либо <strong>A.11-A.14</strong> (если A.2). Финальная строка «🎉 ВОРКШОП 1 ПРОЙДЕН (v1.3)» — новый скрин для спринт-бота, замени им старый.</div>
+    </div>
+
+  </div>
+
   <!-- CTA -->
   <div class="cta">
     <div class="cta-tag">Хочешь больше</div>
@@ -2164,7 +2547,7 @@ knowledge-base/
   <div class="footer">
     <div class="footer-brand"><strong>Дмитрий Попов</strong> · AI Бизнес Стратег</div>
     <a class="footer-tg" href="https://t.me/ai_comandos" target="_blank">@ai_comandos</a>
-    <div class="footer-meta">Спринт OpenClaw · 1 ноября 2026 · Цифровые сотрудники</div>
+    <div class="footer-meta">Спринт OpenClaw · 1 ноября 2026 · Цифровые сотрудники · v1.3 patches 12 мая (Tailscale)</div>
   </div>
 
 </div>

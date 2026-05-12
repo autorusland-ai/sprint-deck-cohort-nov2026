@@ -1,0 +1,1111 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Воркшоп 2 · Память + Бэкап · @ai_comandos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,700;1,700;1,800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0d0e0f; --card:#181a1b; --card2:#1f2122; --border:rgba(255,255,255,0.06);
+    --text:#f0f0f0; --muted:rgba(240,240,240,0.62); --subtle:rgba(240,240,240,0.4);
+    --lime:#c8ff00; --lime-dim:rgba(200,255,0,0.1); --lime-glow:rgba(200,255,0,0.35);
+    --green:#22c55e; --orange:#f97316; --blue:#60a5fa; --red:#ef4444; --violet:#a78bfa;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:1000;background:repeating-linear-gradient(0deg,rgba(255,255,255,0.014) 0,rgba(255,255,255,0.014) 1px,transparent 1px,transparent 3px)}
+
+  .topbar{position:sticky;top:0;z-index:100;background:rgba(13,14,15,0.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 32px;height:54px;display:flex;align-items:center;gap:14px;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--lime);box-shadow:0 0 12px var(--lime-glow);animation:pulse 1.6s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.4;transform:scale(0.85)}}
+  .topbar .brand{color:var(--text)} .topbar .sep{color:var(--subtle)} .topbar .crumb{color:var(--muted)}
+  .topbar .right{margin-left:auto;color:var(--lime)} .topbar .right a{color:var(--lime);text-decoration:none}
+
+  .wrap{max-width:1180px;margin:0 auto;padding:48px 32px 100px}
+
+  h1{font-family:'Barlow Condensed',sans-serif;font-style:italic;font-weight:800;font-size:clamp(48px,7vw,88px);line-height:0.96;letter-spacing:-0.005em;text-transform:uppercase;color:var(--text);margin-bottom:18px}
+  h1 .acc{color:var(--lime)}
+  h2{font-family:'Barlow Condensed',sans-serif;font-style:italic;font-weight:800;font-size:clamp(32px,4vw,46px);line-height:1.05;text-transform:uppercase;color:var(--text);margin:32px 0 16px}
+  h2 .acc{color:var(--lime)}
+  h3{font-family:'Barlow Condensed',sans-serif;font-style:italic;font-weight:700;font-size:22px;letter-spacing:0.02em;text-transform:uppercase;color:var(--lime);margin:18px 0 8px}
+  .lede{font-size:18px;color:var(--muted);max-width:880px;line-height:1.55;font-weight:300;margin-bottom:24px}
+  .lede strong{color:var(--text);font-weight:500}
+
+  .hero{background:linear-gradient(135deg,rgba(200,255,0,0.05),rgba(34,211,238,0.03));border:1px solid rgba(200,255,0,0.18);border-radius:18px;padding:36px 40px;margin-bottom:36px;position:relative;overflow:hidden}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:var(--lime);margin-bottom:14px}
+  .hero-tag::before{content:'';width:24px;height:1px;background:var(--lime)}
+  .hero-meta{display:flex;gap:24px;margin-top:24px;flex-wrap:wrap}
+  .hero-meta .item{display:flex;flex-direction:column;gap:3px}
+  .hero-meta .lbl{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--subtle)}
+  .hero-meta .val{font-family:'JetBrains Mono',monospace;font-size:15px;color:var(--text);font-weight:500}
+  .hero-meta .val.lime{color:var(--lime)}
+
+  /* TABS */
+  .tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:32px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:6px}
+  .tab{background:transparent;border:1px solid transparent;border-radius:10px;padding:16px 14px;cursor:pointer;text-align:left;transition:all 0.25s;display:flex;flex-direction:column;gap:6px;font-family:inherit}
+  .tab:hover{background:rgba(255,255,255,0.02)}
+  .tab.active{background:var(--bg);border-color:var(--border)}
+  .tab-num{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.14em;color:var(--subtle);text-transform:uppercase}
+  .tab[data-tab="1"].active .tab-num{color:var(--lime)}
+  .tab[data-tab="2"].active .tab-num{color:var(--orange)}
+  .tab[data-tab="3"].active .tab-num{color:var(--red)}
+  .tab[data-tab="4"].active .tab-num{color:var(--violet)}
+  .panel-violet{border-color:rgba(167,139,250,0.18)}
+  .banner-v12{background:linear-gradient(135deg,rgba(167,139,250,0.08),rgba(13,14,15,1));border:1px solid rgba(167,139,250,0.3);border-radius:8px;padding:14px 18px;margin:0 0 22px;color:var(--muted);font-size:13.5px;line-height:1.7}
+  .banner-v12 strong{color:var(--violet);font-weight:600}
+  .banner-v12 .badge{display:inline-block;background:var(--violet);color:#0d0e0f;font-size:10.5px;font-weight:700;letter-spacing:0.08em;padding:3px 9px;border-radius:3px;text-transform:uppercase;margin-right:8px;vertical-align:1px}
+  .banner-v12 ul{margin:8px 0 0;padding-left:18px}
+  .banner-v12 li{margin-bottom:4px}
+  .tab-title{font-family:'Barlow Condensed',sans-serif;font-style:italic;font-size:18px;font-weight:700;text-transform:uppercase;color:var(--text);line-height:1.05;letter-spacing:0.01em}
+  .tab-desc{font-size:11px;color:var(--muted);line-height:1.4}
+
+  .panel{display:none}
+  .panel.active{display:block;animation:fadeUp 0.35s ease both}
+  @keyframes fadeUp{0%{opacity:0;transform:translateY(8px)}100%{opacity:1;transform:none}}
+
+  /* Prompt card */
+  .pcard{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px 26px;margin-bottom:16px;transition:border-color 0.25s}
+  .pcard:hover{border-color:rgba(200,255,0,0.18)}
+  .pcard-head{display:flex;align-items:center;gap:14px;margin-bottom:12px}
+  .pcard-badge{width:42px;height:42px;flex-shrink:0;border-radius:10px;display:flex;align-items:center;justify-content:center;background:var(--bg);border:1px solid var(--border);font-family:'Barlow Condensed',sans-serif;font-style:italic;font-size:18px;font-weight:800;color:var(--lime)}
+  .pcard-info{flex:1}
+  .pcard-tool{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:var(--lime);margin-bottom:3px}
+  .pcard-title{font-family:'Barlow Condensed',sans-serif;font-style:italic;font-size:22px;font-weight:700;text-transform:uppercase;letter-spacing:0.01em;color:var(--text);line-height:1.05}
+  .pcard-desc{font-size:14px;line-height:1.65;color:var(--muted);margin-bottom:14px}
+  .pcard-desc strong{color:var(--text);font-weight:500}
+  .pcard-desc code{background:var(--bg);border:1px solid var(--border);padding:2px 7px;border-radius:5px;font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--lime)}
+
+  /* Tab colour variants */
+  .panel-blue .pcard:hover{border-color:rgba(96,165,250,0.28)}
+  .panel-blue .pcard-badge{color:var(--blue)} .panel-blue .pcard-tool{color:var(--blue)}
+  .panel-orange .pcard:hover{border-color:rgba(249,115,22,0.25)}
+  .panel-orange .pcard-badge{color:var(--orange)} .panel-orange .pcard-tool{color:var(--orange)}
+  .panel-red .pcard:hover{border-color:rgba(239,68,68,0.28)}
+  .panel-red .pcard-badge{color:var(--red)} .panel-red .pcard-tool{color:var(--red)}
+
+  /* Copy block */
+  .pb{position:relative;border:1px solid var(--border);border-radius:10px;background:var(--bg);overflow:hidden}
+  .pbar{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;border-bottom:1px solid var(--border);background:rgba(255,255,255,0.012)}
+  .ptag{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--subtle)}
+  .cbtn{background:rgba(200,255,0,0.1);border:1px solid rgba(200,255,0,0.25);color:var(--lime);padding:6px 12px;border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer;transition:all 0.2s}
+  .cbtn:hover{background:rgba(200,255,0,0.18);border-color:rgba(200,255,0,0.4)}
+  .cbtn.copied{background:rgba(34,197,94,0.18);border-color:rgba(34,197,94,0.4);color:var(--green)}
+  .pcode{padding:14px 16px;font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.65;color:var(--text);white-space:pre-wrap;word-break:break-word;overflow-x:auto;max-height:520px;overflow-y:auto}
+  .panel-orange .cbtn{background:rgba(249,115,22,0.1);border-color:rgba(249,115,22,0.25);color:var(--orange)}
+  .panel-red .cbtn{background:rgba(239,68,68,0.1);border-color:rgba(239,68,68,0.25);color:var(--red)}
+
+  /* Result box */
+  .rbox{background:rgba(34,197,94,0.05);border:1px solid rgba(34,197,94,0.18);border-radius:10px;padding:13px 18px;margin-top:12px}
+  .rtitle{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--green);margin-bottom:6px}
+  .rrow{display:flex;gap:8px;align-items:flex-start;font-size:13.5px;color:rgba(34,197,94,0.78);margin-bottom:4px;line-height:1.5}
+  .rrow:last-child{margin-bottom:0}
+  .rrow::before{content:'→';color:var(--green);flex-shrink:0}
+  .rrow strong{color:var(--text);font-weight:500}
+
+  /* Notice */
+  .notice{display:flex;gap:10px;align-items:flex-start;border-radius:10px;padding:14px 18px;margin-bottom:14px;font-size:13.5px;line-height:1.6}
+  .notice .ni{flex-shrink:0;font-size:18px}
+  .info{background:rgba(96,165,250,0.06);border:1px solid rgba(96,165,250,0.18);color:rgba(96,165,250,0.85)} .info strong{color:var(--blue)}
+  .warn{background:rgba(249,115,22,0.07);border:1px solid rgba(249,115,22,0.2);color:rgba(249,115,22,0.85)} .warn strong{color:var(--orange)}
+  .danger{background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.22);color:rgba(239,68,68,0.85)} .danger strong{color:var(--red)}
+  .tip{background:rgba(200,255,0,0.05);border:1px solid rgba(200,255,0,0.15);color:rgba(200,255,0,0.78)} .tip strong{color:var(--lime)}
+
+  /* Submission cards */
+  .submit-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin:18px 0}
+  .submit-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 22px;border-left:3px solid var(--green);display:flex;flex-direction:column;gap:8px}
+  .submit-num{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--green);font-weight:600;letter-spacing:0.1em}
+  .submit-icon{font-size:28px;margin:2px 0}
+  .submit-title{font-family:'Barlow Condensed',sans-serif;font-style:italic;font-size:18px;font-weight:700;text-transform:uppercase;color:var(--text);line-height:1.1}
+  .submit-from{font-size:12px;color:var(--subtle);font-family:'JetBrains Mono',monospace;margin-top:auto;padding-top:8px;border-top:1px dashed var(--border)}
+
+  .final{background:linear-gradient(135deg,rgba(200,255,0,0.05),rgba(34,197,94,0.04));border:1px solid rgba(200,255,0,0.22);border-radius:14px;padding:24px 28px;margin:32px 0 8px;text-align:center}
+  .final-title{font-family:'Barlow Condensed',sans-serif;font-style:italic;font-weight:800;font-size:32px;text-transform:uppercase;color:var(--text);line-height:1.05;margin-bottom:6px}
+  .final-title .acc{color:var(--lime)}
+  .final-desc{font-size:14px;color:var(--muted);max-width:680px;margin:0 auto;line-height:1.55}
+
+  .verdict{background:linear-gradient(135deg,rgba(34,197,94,0.04),rgba(13,14,15,1));border:1px solid rgba(34,197,94,0.3);border-radius:12px;padding:18px 22px;margin:14px 0}
+  .verdict-h{font-family:'Barlow Condensed',sans-serif;font-style:italic;font-weight:800;font-size:24px;text-transform:uppercase;color:var(--text);margin-bottom:10px}
+  .verdict-h .em{font-size:20px;margin-right:6px}
+
+  .audit-copy{background:linear-gradient(135deg,rgba(249,115,22,0.05),rgba(13,14,15,1));border:2px solid rgba(249,115,22,0.3);border-radius:14px;padding:0;margin:18px 0;overflow:hidden}
+  .audit-copy .pbar{background:rgba(249,115,22,0.08);border-bottom-color:rgba(249,115,22,0.2)}
+  .audit-copy .ptag{color:var(--orange)}
+
+  .footer{margin-top:60px;padding:24px 0;border-top:1px solid var(--border);font-size:13px;color:var(--subtle);display:flex;gap:14px;justify-content:space-between;flex-wrap:wrap}
+  .footer a{color:var(--lime);text-decoration:none}
+
+  @media (max-width:980px){
+    .tabs{grid-template-columns:1fr 1fr}
+    .submit-grid{grid-template-columns:1fr}
+  }
+  @media (max-width:680px){
+    .tabs{grid-template-columns:1fr}
+    .wrap{padding:24px 18px 80px}
+    .hero{padding:24px 22px}
+    .pcard{padding:18px 18px}
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <span class="dot"></span>
+  <span class="brand">COMANDOS AI</span>
+  <span class="sep">·</span>
+  <span class="crumb">Воркшоп 2 — Память + Бэкап</span>
+  <span class="right"><a href="https://t.me/ai_comandos" target="_blank" rel="noopener">@ai_comandos</a></span>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <span class="hero-tag">Воркшоп 2 · 8 ноября 2026 · v2.1 · patches v1.3 (Tailscale, 12 мая)</span>
+    <h1>Бот <span class="acc">помнит</span>.<br>Бот <span class="acc">бэкапится</span>.</h1>
+    <p class="lede">9 промптов вместо 21. Каждый — крупный логический блок. Источник истины — <code>standards/workshop-2-standard.md</code> в репо. AI-агент сам читает стандарт и закрывает критерии. Голос (TTS) вынесен в В3 как опц.</p>
+    <div class="hero-meta">
+      <div class="item"><span class="lbl">Длительность</span><span class="val">100–120 минут</span></div>
+      <div class="item"><span class="lbl">Промптов</span><span class="val lime">9</span></div>
+      <div class="item"><span class="lbl">Артефактов сдачи</span><span class="val">6</span></div>
+      <div class="item"><span class="lbl">Доплата</span><span class="val">~$1–2 / мес</span></div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="1" onclick="goTab(1)">
+      <span class="tab-num">01 · AI-агент</span>
+      <span class="tab-title">Установка</span>
+      <span class="tab-desc">9 промптов: память, защита, Mem0, бэкап</span>
+    </button>
+    <button class="tab" data-tab="2" onclick="goTab(2)">
+      <span class="tab-num">02 · Новый чат</span>
+      <span class="tab-title">Аудитор</span>
+      <span class="tab-desc">Один промпт — независимый вердикт</span>
+    </button>
+    <button class="tab" data-tab="3" onclick="goTab(3)">
+      <span class="tab-num">03 · Финал</span>
+      <span class="tab-title">Сдача · Домашка</span>
+      <span class="tab-desc">5 доказательств — скрины из Telegram + ссылка</span>
+    </button>
+    <button class="tab" data-tab="4" onclick="goTab(4)">
+      <span class="tab-num">04 · NEW</span>
+      <span class="tab-title">🩹 Патчи v1.3</span>
+      <span class="tab-desc">Tailscale + 5 фиксов памяти — для тех кто прошёл В2 до 12 мая</span>
+    </button>
+  </div>
+
+  <div class="banner-v12">
+    <span class="badge">v1.3 · 12 мая</span><strong>Что нового — Tailscale (SSH-защита) + 5 фиксов памяти</strong>
+    <ul>
+      <li>🟢 <strong>Не начинал или в начале</strong> → иди обычным путём, новые критерии C.17/D.4/E.15/F.5 уже встроены в Промпты 3, 4, 7. После В2 рекомендуем Закладку «🩹 Патчи» → Промпт A.1 Tailscale для полной защиты SSH.</li>
+      <li>🟡 <strong>На середине</strong> → дойди до конца Установки, потом открой Закладку «🩹 Патчи v1.3».</li>
+      <li>🔴 <strong>Уже закончил В2 / получил вердикт Аудитора</strong> → сразу в Закладку «🩹 Патчи v1.3»: A.1 Tailscale (рекомендуется) ИЛИ A.2 базовый, потом B-F (память), потом перепрогон Аудитора.</li>
+    </ul>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- TAB 1 — УСТАНОВКА (9 ПРОМПТОВ)                                  -->
+  <!-- ============================================================ -->
+  <div class="panel active" id="panel-1">
+
+    <div class="notice info"><div class="ni">ℹ️</div><span>Скопируй <strong>Промпт #0</strong> один раз — это контекст. Затем по очереди — 9 промптов. После каждого жди от AI «готово / закрыл пункты X.Y, X.Z».</span></div>
+
+    <div class="notice tip"><div class="ni">💡</div><span><strong>Где запускать:</strong> любой AI-чат который работает в папке проекта — Claude Code в VSCode / Antigravity / Cursor agent / даже обычный Claude. AI сам выбирает метод по доступным инструментам (SSH через Bash или команды для копипаста).</span></div>
+
+    <!-- ПРОМПТ #0 — КОНТЕКСТ -->
+    <div class="pcard">
+      <div class="pcard-head">
+        <div class="pcard-badge">#0</div>
+        <div class="pcard-info">
+          <div class="pcard-tool">Один раз в начале</div>
+          <div class="pcard-title">Контекст + git pull свежего стандарта</div>
+        </div>
+      </div>
+      <p class="pcard-desc">AI сначала <strong>обновляет репо</strong> (там лежит стандарт В2), читает его и подтверждает что у него — все инструменты. Только после этого даём Промпт 1.</p>
+      <div class="pb"><div class="pbar"><span class="ptag">AI-чат</span><button class="cbtn" onclick="cp(this,'p0')">📋 Копировать</button></div><pre class="pcode" id="p0">Помоги мне пройти Воркшоп 2 спринта по AI-сотруднику OpenClaw. В1 пройден, бот в Telegram отвечает. В2 = постоянная память (Mem0+Qdrant), защита контекста, бэкап в GitHub, доделки В1.
+
+⚠️ САМЫМ ПЕРВЫМ ШАГОМ — определи версию OpenClaw на VPS:
+  ssh -i ~/.ssh/clawd_ed25519 clawd@$VPS_IP "openclaw --version"
+Запиши версию (например 2026.4.29 или 2026.5.6) — она определяет команды дальше:
+- Mem0 install: `plugins install --dangerously-force-unsafe-install` (≥2026.5) vs `skills install` (старая)
+- Compaction keys: `keepRecentTokens/maxHistoryShare/mode` (≥2026.5) vs `softThresholdTokens/hardThresholdTokens` (старая)
+- Адаптируй команды под установленную версию. Если сомневаешься — спроси меня.
+
+ПЕРЕД НАЧАЛОМ — обновить локальный репо проекта:
+1. cd в папку проекта (где .env)
+2. git pull origin main — там свежий standards/workshop-2-standard.md (источник истины В2)
+3. Прочитай standards/workshop-2-standard.md ЦЕЛИКОМ — это твой чек-лист. После каждого моего промпта отчитывайся какие критерии (A.1, B.3, C.5 и т.д.) ты закрыл.
+4. Прочитай standards/workshop-1-standard.md раздел C — это каскад моделей. НЕ выдумывай новые slugs.
+5. Прочитай .env — узнаешь VPS_IP, SSH-ключ, ключи API.
+
+ТВОИ ИНСТРУМЕНТЫ — определи сам и используй всё что доступно:
+- Bash + ssh ~/.ssh/clawd_ed25519 clawd@$VPS_IP 'команда' — для one-shot SSH-команд
+- Тяжёлые команды (tar/npm/update) — `ssh ... 'nohup cmd > /tmp/log.log 2>&1 &'` чтобы сессия не разорвалась
+- Read/Edit/Write — для локальных файлов на Mac
+- Если SSH недоступен — давай мне команды для копипаста, я выполняю сам и возвращаю вывод
+
+ПРАВИЛА (из workshop-2-standard.md, секция «Известные ограничения»):
+1. После любой правки openclaw.json — `openclaw doctor --fix && openclaw gateway restart && chmod 600 ~/.openclaw/openclaw.json` (баг #18866)
+2. Anthropic-модели в стеке НЕТ напрямую (Max ban). Если нужна Haiku — только через `openrouter/anthropic/...`
+3. После каждой настройки — конкретная проверка с реальным выводом команды
+4. issue #54408 (memoryFlush leak), #74813 (continuation-skip), #30894 (heartbeat.model) — учитывай fallback'и
+
+ПЕРВЫМ ДЕЛОМ:
+1. git pull
+2. Прочитай standards/workshop-2-standard.md (раздел A–G)
+3. Проверь SSH через `ssh -i ~/.ssh/clawd_ed25519 clawd@$VPS_IP 'openclaw doctor --deep'`
+4. Отчитайся: какие пункты стандарта В2 уже закрыты с В1, какие предстоит делать.
+
+После этого жди Промпт 1.</pre></div>
+      <div class="rbox"><div class="rtitle">Что должно произойти</div><div class="rrow">AI делает <code>git pull</code>, читает стандарт В2, проверяет SSH, отчитывается о текущем состоянии — что уже работает с В1</div></div>
+    </div>
+
+    <h2>9 промптов · <span class="acc">логические блоки</span></h2>
+
+    <!-- ПРОМПТ 1 — ДОДЕЛКИ В1 -->
+    <div class="pcard">
+      <div class="pcard-head">
+        <div class="pcard-badge">1</div>
+        <div class="pcard-info">
+          <div class="pcard-tool">Доделки В1 · 15 мин</div>
+          <div class="pcard-title">Закрой раздел G стандарта (6 доделок)</div>
+        </div>
+      </div>
+      <p class="pcard-desc">Раздел <strong>G</strong> в стандарте — 9 пунктов с В1 которые не доделали. Закрой все ❗-пункты.</p>
+      <div class="pb"><div class="pbar"><span class="ptag">AI-чат</span><button class="cbtn" onclick="cp(this,'p1')">📋 Копировать</button></div><pre class="pcode" id="p1">Промпт 1: Закрой раздел G стандарта (доделки В1).
+
+Все ❗-пункты G.1, G.3, G.4, G.6, G.8 + желательные G.2, G.5, G.7 + опциональный G.9.
+
+Конкретно:
+- G.1 Heartbeat реально на gemini-2.5-flash-lite — проверка через `openclaw logs --grep heartbeat --tail 30`
+- G.2 Prompt caching включён, cache hit ≥60% после прогрева 5 одинаковых запросов
+- G.3 Нет timestamps вида YYYY-MM-DD в SOUL.md/USER.md/IDENTITY.md (они инвалидируют кэш)
+- G.4 chmod 600 на openclaw.json (after doctor)
+- G.5 Watchdog проверяет права openclaw.json ежедневно (если 644 → alert + auto-chmod)
+- G.6 Привычка: после правки конфига — doctor --fix → gateway restart → chmod 600
+- G.7 /context list и /usage full работают в Telegram
+- G.8 Сверка моделей с OpenRouter — все slugs в openclaw.json живые
+- G.9 ackReaction "👀" в Telegram channel
+
+После — restart gateway, chmod 600. Отчёт: ✅/⚠️/❌ по каждому из G.1–G.9 с цитатой команды.</pre></div>
+      <div class="rbox"><div class="rtitle">Что должно произойти</div><div class="rrow">AI отчитывается по 9 пунктам G — что закрыто с цитатой команды</div></div>
+    </div>
+
+    <!-- ПРОМПТ 2 — АРХИТЕКТУРА ПАМЯТИ -->
+    <div class="pcard">
+      <div class="pcard-head">
+        <div class="pcard-badge">2</div>
+        <div class="pcard-info">
+          <div class="pcard-tool">Архитектура памяти · 10 мин</div>
+          <div class="pcard-title">Закрой раздел A стандарта (workspace files)</div>
+        </div>
+      </div>
+      <p class="pcard-desc">3-уровневая структура файлов + MEMORY.md скелет + папка memory/ + проверка дублирующих плагинов.</p>
+      <div class="pb"><div class="pbar"><span class="ptag">AI-чат</span><button class="cbtn" onclick="cp(this,'p2')">📋 Копировать</button></div><pre class="pcode" id="p2">Промпт 2: Закрой раздел A стандарта (архитектура памяти).
+
+A.1 — разложи файлы workspace по 3 уровням (личность / операции / знания)
+A.2 — создай MEMORY.md с 5 жёсткими секциями (Предпочтения / Активные клиенты / Ключевые решения / Контакты / Фреймворки). Заполни 👤 и 📇 на основе фактов из истории В1 (если есть в ~/.openclaw/sessions/), если нет — оставь _<empty>_, НЕ ВЫДУМЫВАЙ.
+A.3 — держи MEMORY.md ≤200 строк
+A.4 — создай папку memory/ + шаблон _template.md
+A.5 — создай файл memory/$(date +%Y-%m-%d).md с одной строкой
+A.6 — `openclaw skills list | grep -iE "mem|memory"` ≤2 строки. Если больше — отчитайся, я выберу.
+A.7 — в openclaw.json инжект MEMORY.md один раз при старте сессии (НЕ на каждое сообщение).
+
+После — restart, chmod 600. Покажи `tree ~/.openclaw/workspace/`. Отчёт по A.1–A.7.</pre></div>
+      <div class="rbox"><div class="rtitle">Что должно произойти</div><div class="rrow">tree показывает 3 группы файлов раздельно, MEMORY.md создан с пустыми секциями</div></div>
+    </div>
+
+    <!-- ПРОМПТ 3 — ЗАЩИТА КОНТЕКСТА -->
+    <div class="pcard">
+      <div class="pcard-head">
+        <div class="pcard-badge">3</div>
+        <div class="pcard-info">
+          <div class="pcard-tool">Защита контекста · 15 мин</div>
+          <div class="pcard-title">Закрой раздел B стандарта (compaction + pruning)</div>
+        </div>
+      </div>
+      <p class="pcard-desc">11 пунктов раздела B — compaction + memoryFlush + contextPruning + continuation-skip + проверочный тест.</p>
+      <div class="pb"><div class="pbar"><span class="ptag">AI-чат</span><button class="cbtn" onclick="cp(this,'p3')">📋 Копировать</button></div><pre class="pcode" id="p3">Промпт 3: Закрой раздел B стандарта (защита контекста).
+
+Все пункты B.1–B.11. Конкретно из стандарта:
+- B.1–B.6: compaction enabled, summarize-middle, **summarizerModel: "openrouter/moonshotai/kimi-k2.6"** (НЕ Anthropic-Haiku напрямую!), preserveTags [decision, fact, action-required]
+
+⚠️ ВАЖНО про ключи compaction (зависит от версии OpenClaw):
+- Если ≥2026.5.0 (большинство сейчас) — реальные ключи: `mode: "summarize-middle"`, `keepRecentTokens: 40000`, `maxHistoryShare: 0.5`, `customInstructions` (для preserveTags). Старые ключи `softThresholdTokens/hardThresholdTokens` молча игнорируются.
+- Если <2026.5.0 — старые ключи: `softThresholdTokens: 40000`, `hardThresholdTokens: 80000`.
+- Проверь схему: `openclaw config schema | grep -iE "compaction|threshold|keepRecent"` — увидишь что реально принимается.
+- ПОСЛЕ установки → `openclaw doctor --deep` НЕ должен показывать warnings по compaction-секции. Если показывает — значит ключи не из той версии схемы.
+- B.7–B.8: memoryFlush enabled, model тот же openrouter/moonshotai/kimi-k2.6. Учти issue #54408 — мониторь логи первые сутки на «Pre-compaction memory flush...» в Telegram-чате; если увидишь — отключи enabled: false.
+- B.9: contextPruning.mode "cache-ttl"
+- B.10: contextInjection "continuation-skip" (учти #74813 — fallback на "always" если бот забывает контекст)
+- B.11: тест 3 сообщений подряд — бот помнит факт из первого
+
+ДОПОЛНИТЕЛЬНО (anti-verbosity для MiniMax M2.7) — добавь в ~/.openclaw/SOUL.md раздел «Поведение» жёсткие правила:
+
+## Anti-verbosity (КРИТИЧНО)
+ЗАПРЕЩЕНО:
+- Повторять вопрос пользователя в следующем сообщении («Ты спросил X, отвечаю...»)
+- Выводить chain-of-thought / рассуждения наружу
+- Начинать ответ с воды («Отличный вопрос!», «Хорошо, давайте разберёмся», «Ща, момент»)
+- Markdown-заголовки в коротких ответах (1 абзац = без заголовка)
+
+ОБЯЗАТЕЛЬНО:
+- Простой вопрос → один абзац ответа, всё
+- Сложный вопрос → структурированный ответ без воды
+- Если думаешь — думай молча, наружу только результат
+
+Без этого MiniMax по характеру будет повторять вопрос и выводить рассуждения.
+
+После — restart, chmod 600. Отчёт ✅/⚠️/❌ по B.1–B.11.</pre></div>
+      <div class="rbox"><div class="rtitle">Что должно произойти</div><div class="rrow">Compaction настроен на Kimi K2.6 (через OpenRouter), 3-сообщенческий тест проходит</div></div>
+    </div>
+
+    <!-- ПРОМПТ 4 — Qdrant + Mem0 + Privacy -->
+    <div class="pcard">
+      <div class="pcard-head">
+        <div class="pcard-badge">4</div>
+        <div class="pcard-info">
+          <div class="pcard-tool">Постоянная память · 25 мин</div>
+          <div class="pcard-title">Закрой раздел C стандарта (Qdrant + Mem0 + Privacy)</div>
+        </div>
+      </div>
+      <p class="pcard-desc">Самый большой блок — 16 пунктов C: Qdrant в Docker, Mem0 SDK, hybrid search, reranker, privacy guard.</p>
+      <div class="pb"><div class="pbar"><span class="ptag">AI-чат</span><button class="cbtn" onclick="cp(this,'p4')">📋 Копировать</button></div><pre class="pcode" id="p4">Промпт 4: Закрой раздел C стандарта (постоянная память + privacy).
+
+C.1–C.4 — Qdrant: docker compose с qdrant/qdrant:v1.12.4 (фиксированная версия, НЕ :latest), порты ТОЛЬКО на 127.0.0.1:6333/6334, restart unless-stopped, healthcheck.
+КРИТИЧНО: проверь `ss -tlnp | grep 6333` → 127.0.0.1, НЕ 0.0.0.0. Иначе векторная БД с памятью открыта в интернет.
+
+C.5–C.6 — Mem0 SDK install. ПЕРВЫМ ДЕЛОМ определи версию OpenClaw:
+  openclaw --version
+
+→ Если ≥2026.5.0 (большинство сейчас) — ОСНОВНАЯ команда:
+  openclaw plugins install --dangerously-force-unsafe-install @mem0/openclaw-mem0
+  (issue #4645 — dangerous-code-detection срабатывает на pattern «env vars + outbound network», флаг обязателен. Это known compat-shift, не баг.)
+
+→ Если <2026.5.0 (старые установки) — fallback:
+  openclaw skills install mem0
+  (старый API, на 2026.5+ НЕ работает)
+
+Конфиг: vector_store qdrant://127.0.0.1:6333, collection openclaw_main.
+Документируй выбранную команду в RECOVERY.md секция «Known compatibility shifts».
+
+C.7 — embedder: спроси меня перед выбором: «text-embedding-3-small (OpenAI, ~$1/мес, твои данные у них) ИЛИ локальный bge-m3 через Ollama (приватно, медленнее)?». Дождись моего ответа.
+
+C.8–C.11 — hybrid search: vec/BM25 0.7/0.3, MMR lambda 0.7, temporalDecay halfLifeDays 30, reranker bge-reranker-v2-m3 локально.
+
+⚠️ ЗНАЙ ОГРАНИЧЕНИЕ: Mem0 SDK 2.x НЕ открывает эти настройки публично (vectorWeight/textWeight/lambda/halfLifeDays/reranker — внутри SDK на дефолтах). Если попытаешься выставить через `mem0_config.set("hybrid.vectorWeight", 0.7)` — получишь silent ignore или AttributeError. План действий: оставь дефолты SDK (они вменяемые), документируй в REPORT-W2.md «C.8-C.11 — Mem0 SDK 2.x library limit, defer to W3». Это НЕ блокер для D.1/D.2.
+
+C.12 — autoCapture true, dedupe_threshold 0.92.
+
+C.13–C.16 — privacy guard: detect-secrets pre-write hook + regex (sk-/ghp-/AKIA/JWT/password/СНИЛС/ИНН/credit). Fallback на LLM-classifier через openrouter/google/gemini-2.5-flash-lite (только когда regex не сработал). blockOnDetect: true.
+
+Импортируй MEMORY.md как seed в Qdrant (каждая секция = одна запись).
+
+C.17 — Memory Search Protocol (КРИТИЧНО, без этого LLM не зовёт mem0 а фабрикует):
+
+Добавь в ~/.openclaw/workspace/AGENTS.md сразу после YAML-метадаты секцию:
+
+## Memory Search Protocol — ОБЯЗАТЕЛЬНО
+Перед ответом на ЛЮБОЙ фактологический вопрос про пользователя (его проекты, клиентов, привычки, имена, цифры, события) — ОБЯЗАТЕЛЬНО вызови tool memory_search ИЛИ exec → ~/.openclaw/skills/mem0/mem0-search.js "<query>".
+
+ЗАПРЕЩЕНО:
+- Отвечать про факты пользователя без вызова memory_search
+- Уходить в web_search для фактов о пользователе
+- Доверять только startupContext — там устаревший срез
+
+ОБЯЗАТЕЛЬНО:
+- На «что я говорил про X», «помнишь Y», «напомни Z» — сначала memory_search, потом ответ с цитатой «Из памяти (<date>):...»
+- Если memory_search вернул пусто — «в долговременной памяти этого нет»
+
+Дублирующий буллет в SOUL.md раздел «Поведение»:
+- «Перед фактологическими ответами про меня — всегда memory_search. Без вызова → отвечай "не помню" вместо выдумывания.»
+
+После — restart, chmod 600. Тест: `openclaw memory recall "пробный факт"`. Покажи мне ✅/⚠️/❌ по C.1–C.17.</pre></div>
+      <div class="rbox"><div class="rtitle">Что должно произойти</div><div class="rrow">Qdrant healthy на 127.0.0.1:6333, Mem0 active, 5 privacy-тестов проходят</div></div>
+    </div>
+
+    <!-- ПРОМПТ 5 — ТЕСТ AUTO-CAPTURE -->
+    <div class="pcard">
+      <div class="pcard-head">
+        <div class="pcard-badge">5</div>
+        <div class="pcard-info">
+          <div class="pcard-tool">Промежуточный тест · 10 мин</div>
+          <div class="pcard-title">Закрой D.1 стандарта (auto-capture тест)</div>
+        </div>
+      </div>
+      <p class="pcard-desc">Главное доказательство что Mem0+Qdrant реально запоминает. Через 5 минут — без команды «запомни». Факты <strong>любые твои собственные</strong> — никаких хардкод-Иванов.</p>
+      <div class="pb"><div class="pbar"><span class="ptag">AI-чат + Telegram</span><button class="cbtn" onclick="cp(this,'p5')">📋 Копировать</button></div><pre class="pcode" id="p5">Промпт 5: Закрой D.1 стандарта (auto-capture тест 5 минут).
+
+ПЕРЕД ТЕСТОМ убедись:
+- В Mem0 конфиге autoCapture: true (Промпт 4 C.12)
+- privacy guard включён, но не блокирует обычные факты
+
+Спроси меня: «Расскажи боту 3 любых факта про себя — про работу/клиента, про семью, про планы или что угодно. Любые имена, цифры, даты. Просто перечисли мне здесь в чате что ты ему сказал — буду проверять что он именно ЭТО запомнил.»
+
+Когда я перечислю тебе 3 факта — запиши их у себя (в этом чате) и подожди подтверждения «отправил боту в Telegram, прошло 5 минут».
+
+После моего подтверждения — попроси меня в Telegram спросить бота 3 проверочных вопроса по моим фактам (один вопрос на факт, без слов «запомни» или «вспомни»). Если бот ответил по сути на все 3 — D.1 закрыт, auto-capture работает.
+
+Если не помнит — диагностируй:
+- логи event memory.write были?
+- Mem0 запросил Qdrant? (curl http://127.0.0.1:6333/collections/openclaw_main/points/count)
+- privacy guard не блокировал?
+
+Скажи когда готов принимать мои 3 факта.</pre></div>
+      <div class="rbox"><div class="rtitle">Что должно произойти</div><div class="rrow">Бот через 5 минут отвечает по сути на 3 проверочных вопроса по фактам, которые ты ему ввёл — D.1 стандарта закрыт</div></div>
+    </div>
+
+    <!-- ПРОМПТ 6 — GIT + git-crypt (без push) -->
+    <div class="pcard">
+      <div class="pcard-head">
+        <div class="pcard-badge">6</div>
+        <div class="pcard-info">
+          <div class="pcard-tool">Бэкап (часть 1) · 15 мин</div>
+          <div class="pcard-title">Закрой E.1–E.7 (git init + crypt + ключ в менеджер)</div>
+        </div>
+      </div>
+      <p class="pcard-desc"><strong>Шифрование ДО первого пуша.</strong> Это самая опасная часть воркшопа.</p>
+      <div class="pb"><div class="pbar"><span class="ptag">AI-чат</span><button class="cbtn" onclick="cp(this,'p6')">📋 Копировать</button></div><pre class="pcode" id="p6">Промпт 6: Закрой E.1–E.7 стандарта (git init + .gitignore + git-crypt + ключ).
+
+E.2 — `cd ~/.openclaw && git init -b main`. Сразу .gitignore (полный список из стандарта E.2): openclaw.json, *.token, *.key, secrets/**, .env, qdrant/storage/**, tmp/, logs/, *.ogg, agents/*/sessions/cache/.
+
+E.3 — ПЕРВЫЙ И ЕДИНСТВЕННЫЙ коммит сейчас: только .gitignore + пустой README.md. НИКАКИХ других коммитов до завершения этого промпта (баг утечки токенов).
+
+E.4–E.5 — `git-crypt init`. .gitattributes:
+openclaw.json filter=git-crypt diff=git-crypt
+*.token filter=git-crypt diff=git-crypt
+secrets/** filter=git-crypt diff=git-crypt
+.env filter=git-crypt diff=git-crypt
+
+E.6 — Тестовый коммит, проверка `git-crypt status` → openclaw.json: encrypted: YES.
+
+E.7 — `git-crypt export-key ~/openclaw-gitcrypt.key && chmod 600 ~/openclaw-gitcrypt.key`.
+
+⚠️⚠️⚠️ КРИТИЧНО — СТОП. Дай мне 3 шага для сохранения ключа:
+1. На Mac: `set -a && source .env && set +a && scp -i ~/.ssh/clawd_ed25519 clawd@$VPS_IP:~/openclaw-gitcrypt.key ~/Documents/openclaw-key-backup-$(date +%F).key`
+2. Я открою файл в TextEdit, скопирую содержимое, создам новую запись в моём менеджере паролей (1Password / Apple Keychain / Bitwarden) с заголовком "openclaw git-crypt key" и paste'ом содержимого. Убежусь что облачная синхронизация менеджера включена.
+3. Удалю файл с диска: `shred -u ~/Documents/openclaw-key-backup-*.key && ssh ... 'shred -u ~/openclaw-gitcrypt.key'`
+
+Дай эти 3 команды/шага. Жди моего подтверждения «ключ в менеджере паролей с синхронизацией» прежде чем переходить к Промпту 7.</pre></div>
+      <div class="rbox"><div class="rtitle">Что должно произойти</div><div class="rrow"><code>git-crypt status</code> → encrypted: YES, ключ только в менеджере паролей с iCloud/cloud sync</div></div>
+    </div>
+
+    <!-- ПРОМПТ 7 — GitHub репо + cron + RECOVERY -->
+    <div class="pcard">
+      <div class="pcard-head">
+        <div class="pcard-badge">7</div>
+        <div class="pcard-info">
+          <div class="pcard-tool">Бэкап (часть 2) · 15 мин</div>
+          <div class="pcard-title">Закрой E.8–E.14 (gh + Push Protection + cron + RECOVERY)</div>
+        </div>
+      </div>
+      <p class="pcard-desc">Удалённый репо + защиты + автокоммит + runbook.</p>
+      <div class="pb"><div class="pbar"><span class="ptag">AI-чат + браузер</span><button class="cbtn" onclick="cp(this,'p7')">📋 Копировать</button></div><pre class="pcode" id="p7">Промпт 7: Закрой E.8–E.14 стандарта (GitHub + cron + RECOVERY).
+
+E.8 — `gitleaks` pre-commit hook (pre-commit + .gitleaks.toml с allowlist для git-crypted файлов).
+
+E.1, E.9 — `gh auth login` → создай ПРИВАТНЫЙ репо: `gh repo create openclaw-backup --private --source=. --push`. Дважды проверь: `gh repo view --json visibility` → PRIVATE. На GitHub в Settings → Code security → включи Push Protection (дай мне URL).
+
+E.10–E.13, E.15 — Cron автокоммит. Скрипт ~/.openclaw/scripts/openclaw-autocommit.sh с ЯВНЫМ whitelist путей (НЕ `git add -A`, НЕ `git add .`!). Whitelist: workspace/MEMORY.md, workspace/SOUL.md, workspace/USER.md, workspace/AGENTS.md, workspace/IDENTITY.md, workspace/HEARTBEAT.md, memory/*.md, archive/*.md, RECOVERY.md, REPORT-W2.md, .gitignore, .gitattributes. Используй функцию `stage_workspace_if_exists()` (проверка существования перед git add). Blocklist-guard: после staging проверь `git diff --cached --name-only` — если попало `openclaw.json`/`auth-profiles.json`/`secrets/`/`.env`/`*.token`/`*.key` → `git reset HEAD && exit 1`. Cron `0 * * * *` с flock. Ветка auto/cron, daily squash в main `0 23 * * *`.
+
+F.5 — Permission-watchdog cron `*/15 * * * *` (не раз в сутки!) — `~/.openclaw/scripts/permission-watchdog.sh` каждые 15 мин проверяет chmod 600 на openclaw.json/SOUL.md/auth-profiles.json/secrets/, при 644 → auto-chmod + Telegram alert (#18866 регрессия лечится за ≤15 мин вместо 24h).
+
+E.14 — ~/.openclaw/RECOVERY.md с 3 сценариями: VPS сгорел / git-crypt ключ потерян / бот не отвечает. Включи команды восстановления (git clone, git-crypt unlock из менеджера паролей, openclaw doctor + restart).
+
+Через 1 час проверь `git log --oneline auto/cron | head -3` — должен быть свежий коммит. Это E.12.
+
+Отчёт ✅/⚠️/❌ по E.8–E.14. Когда коммит появится — запомни URL репо, он понадобится в «Сдаче».</pre></div>
+      <div class="rbox"><div class="rtitle">Что должно произойти</div><div class="rrow">Cron каждый час пушит на ветку auto/cron в твоём приватном GitHub-репо. URL репо запомни — пригодится в Сдаче.</div></div>
+    </div>
+
+    <!-- ПРОМПТ 8 — ГИГИЕНА -->
+    <div class="pcard">
+      <div class="pcard-head">
+        <div class="pcard-badge">8</div>
+        <div class="pcard-info">
+          <div class="pcard-tool">Гигиена · 10 мин</div>
+          <div class="pcard-title">Закрой раздел F стандарта (4 cron-задачи)</div>
+        </div>
+      </div>
+      <p class="pcard-desc">Архивация + weekly digest + pre-update backup. Все ⚠️.</p>
+      <div class="pb"><div class="pbar"><span class="ptag">AI-чат</span><button class="cbtn" onclick="cp(this,'p8')">📋 Копировать</button></div><pre class="pcode" id="p8">Промпт 8: Закрой раздел F стандарта (гигиена памяти).
+
+F.1 — archive-memory.sh: find memory/ -mtime +30 → archive/. Cron `0 3 * * 0`.
+F.2 — В memorySearch.paths добавь archive/ (старое в поиске).
+F.3 — Weekly digest cron `0 10 * * 1` (понедельник 10:00 МСК). Модель: openrouter/moonshotai/kimi-k2.6 (та же что для compaction). Промпт digest'а: «Прочитай файлы memory/ за прошлые 7 дней. Суммируй: 3-5 ключевых тем, 5 фактов, 3 решения, action items на следующую неделю. Допиши в MEMORY.md под секцию '## Week of YYYY-MM-DD'.»
+F.4 — pre-update-backup.sh: tar+gpg всей ~/.openclaw/ + Qdrant snapshot. Запускается ВРУЧНУЮ перед каждым `openclaw update`.
+
+Запусти один тестовый прогон archive-memory.sh — должно работать. pre-update-backup.sh — тестовый прогон без openclaw update, должен создать .tgz.gpg в ~/.openclaw/backups/.
+
+Отчёт ✅/⚠️/❌ по F.1–F.4.</pre></div>
+      <div class="rbox"><div class="rtitle">Что должно произойти</div><div class="rrow">3 cron-задачи стоят, тестовые прогоны прошли</div></div>
+    </div>
+
+    <!-- ПРОМПТ 9 — ФИНАЛЬНЫЙ AMNESIA TEST + САМООТЧЁТ -->
+    <div class="pcard">
+      <div class="pcard-head">
+        <div class="pcard-badge">9</div>
+        <div class="pcard-info">
+          <div class="pcard-tool">Финал · 10 мин</div>
+          <div class="pcard-title">Amnesia test (D.2) + самоотчёт по стандарту</div>
+        </div>
+      </div>
+      <p class="pcard-desc">Финальный тест памяти после <code>/reset</code> + самоотчёт основного AI по всем критериям В2.</p>
+      <div class="pb"><div class="pbar"><span class="ptag">AI-чат + Telegram</span><button class="cbtn" onclick="cp(this,'p9')">📋 Копировать</button></div><pre class="pcode" id="p9">Промпт 9: Закрой D.2 стандарта (amnesia test) + сделай самоотчёт.
+
+ШАГ 1 — Amnesia test (используем те же факты что я ввёл в Промпте 5):
+
+ПЕРЕД ТЕСТОМ — убедись что мои факты из Промпта 5 в Qdrant: `curl http://127.0.0.1:6333/collections/openclaw_main/points/count`. Должно быть ≥3.
+
+Сделай Qdrant snapshot для отката: `curl -X POST http://127.0.0.1:6333/collections/openclaw_main/snapshots`.
+
+Скажи мне «отправь /reset боту в Telegram, потом задай те же 3 проверочных вопроса что и в Промпте 5». Бот должен ответить по сути на все 3 — память пережила полный сброс контекста.
+
+Если не помнит — диагностируй (MEMORY.md загружается? Mem0 запрашивает Qdrant? логи memory_search?). Если совсем сломано — восстанови из snapshot.
+
+ШАГ 2 — Самоотчёт ~/.openclaw/REPORT-W2.md:
+Пройдись по ВСЕМ критериям стандарта В2 (A.1–G.9), для каждого ✅/⚠️/❌ с цитатой команды/файла. Это самоотчёт основного AI — Аудитор будет читать его в новом чате и независимо проверять каждое утверждение.
+
+Подсчёт: сколько ❗ закрыто из стандарта (минимум для зачёта — все ❗ из A–E + критичные G.1, G.3, G.4, G.6, G.8).
+
+ШАГ 3 — Финальное сообщение:
+Скажи мне дословно: «Установка завершена. Открывай в гайде закладку „Аудитор", запускай независимую проверку в новом чате. Когда получишь вердикт — переходи на закладку „Сдача · Домашка" и собирай 5 доказательств в Telegram-боте.»</pre></div>
+      <div class="rbox"><div class="rtitle">Что должно произойти</div><div class="rrow">Бот после <code>/reset</code> отвечает на 3 проверочных вопроса по твоим фактам из Промпта 5 — D.2 стандарта закрыт</div><div class="rrow">Создан <code>~/.openclaw/REPORT-W2.md</code> с проходом по всем критериям A.1–G.9</div></div>
+    </div>
+
+    <div class="final"><div class="final-title"><span class="acc">Установка завершена</span></div><div class="final-desc">Дальше — две закладки в этом гайде. <strong>«Аудитор»</strong> прогонит независимую проверку в новом чате. <strong>«Сдача · Домашка»</strong> — соберёшь 5 доказательств напрямую через Telegram-бота за 10 минут.</div></div>
+
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- TAB 2 — АУДИТОР                                                 -->
+  <!-- ============================================================ -->
+  <div class="panel panel-orange" id="panel-2">
+
+    <div class="notice info"><div class="ni">🛡</div><span>Это <strong>независимая проверка</strong> другим AI в <strong>новом чате</strong> — без bias главного AI который тебе устанавливал. Аудитор сравнит твоё состояние со стандартом В2 и выдаст вердикт.</span></div>
+
+    <h2>Один <span class="acc">большой промпт</span> аудитору</h2>
+    <p class="lede">Открой <strong>новый чат с любым AI</strong> в той же папке проекта. Скопируй промпт целиком. AI прочитает стандарт сам, проверит самоотчёт основного AI (<code>~/.openclaw/REPORT-W2.md</code>) и выдаст вердикт.</p>
+
+    <div class="audit-copy">
+      <div class="pbar"><span class="ptag">Новый чат AI · в папке проекта</span><button class="cbtn" onclick="cp(this,'audit')">📋 Копировать ВЕСЬ промпт</button></div>
+      <pre class="pcode" id="audit">Ты — независимый аудитор настройки OpenClaw после Воркшопа 2. Я только что прошёл воркшоп с другим AI-агентом, и теперь хочу независимую проверку.
+
+ПОДГОТОВКА:
+1. cd в папку проекта (где .env)
+2. git pull origin main
+3. Прочитай standards/workshop-2-standard.md — это твой источник истины (50+ критериев в разделах A–G).
+4. Прочитай ~/.openclaw/REPORT-W2.md — это самоотчёт основного AI который тебе устанавливал OpenClaw.
+5. Если есть SSH — запусти команды проверки самостоятельно. Если нет — давай мне команды для копипаста.
+
+ТВОЯ ЗАДАЧА:
+1. Пройдись по КАЖДОМУ критерию стандарта В2 (A.1...G.9) и определи статус:
+   ✅ Соответствует (с цитатой команды + вывода)
+   ⚠️ Частично/неясно
+   ❌ Не соответствует
+   ❓ Невозможно проверить (нет данных)
+
+2. Сделай таблицу: | Пункт | Уровень (❗⚠️💡) | Статус | Доказательство |
+
+3. Подсчитай: ❗ ✅ из всего ❗, ❗ ❌ из всего ❗, ⚠️ всего, 💡 всего.
+
+4. Для каждого ❌ или ⚠️ — конкретный план доделки: что не так + точная команда фикса.
+
+5. ВЕРДИКТ:
+   🎉 ВОРКШОП 2 ПРОЙДЕН — все ❗ A–E + критичные G.1/G.3/G.4/G.6/G.8 закрыты
+   🟡 ПОЧТИ ГОТОВО — все ❗ закрыты но много ⚠️
+   ❌ ЕСТЬ КРИТИЧЕСКИЕ ПРОБЛЕМЫ — есть нерешённые ❗
+
+6. Рекомендация что доделать ДО Воркшопа 3.
+
+ВАЖНО:
+- НЕ доверяй REPORT-W2.md на слово — проверяй фактическим выводом команд
+- Если git-crypt status показал unencrypted → ❌ для E.6
+- Если в логах amnesia-test бот сказал «не помню» → ❌ для D.2
+- Если в logs heartbeat использует primary вместо gemini-flash-lite → ❌ для G.1
+- Если порт qdrant 0.0.0.0 (а не 127.0.0.1) → ❌ для C.3 (это security blocker!)
+
+D.4 (НОВОЕ КРИТИЧНО v1.1) — Trajectory tool_call check:
+- Запусти: SESS=$(ls -t ~/.openclaw/agents/main/sessions/ | head -1); tail -200 ~/.openclaw/agents/main/sessions/$SESS/trajectory.jsonl | grep -cE "memory_search|mem0-search"
+- Должно быть ≥3 за amnesia-сессию (по числу D.1/D.2 вопросов). Если 0 — бот «помнит» через startup-injection, реального retrieval из Qdrant нет → D НЕ ПРОЙДЕН независимо от точности ответов.
+- Если на разделе AGENTS.md нет «Memory Search Protocol» секции — C.17 ❌, скажи участнику применить Промпт B из закладки «Патчи v1.2».
+
+A.11-A.14 (НОВОЕ КРИТИЧНО v1.2 для W1) — SSH-hardening:
+- grep ^Port /etc/ssh/sshd_config → не 22
+- grep PasswordAuthentication /etc/ssh/sshd_config → no
+- sudo fail2ban-client get sshd bantime → ≥86400
+- Если что-то из этого красное → ❌ A.11/A.12/A.13, скажи участнику Промпт A из «Патчи v1.2»
+
+E.15 (НОВОЕ v1.1) — autocommit whitelist:
+- grep -E "git add (-A|\.)" ~/.openclaw/scripts/openclaw-autocommit.sh — если найдено, это ❌ E.15
+- В скрипте должен быть explicit whitelist + blocklist guard
+
+F.5 (НОВОЕ v1.1) — permission watchdog */15:
+- crontab -l | grep watchdog — должно быть `*/15 * * * *`, не `17 4 * * *`
+
+- Будь строг. Лучше ⚠️ сейчас чем сюрприз на В3.
+
+Готов? Делай аудит.</pre>
+    </div>
+
+    <h3>Так выглядит зелёный вердикт</h3>
+    <div class="verdict">
+      <div class="verdict-h"><span class="em">🎉</span>Воркшоп 2 пройден</div>
+      <p style="font-family:'Inter',sans-serif;font-size:13.5px;color:var(--muted);margin-bottom:8px">Все критичные пункты A–E + G закрыты. Бот помнит, защищён, бэкапится.</p>
+      <p style="font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--green);margin-bottom:8px">❗ ✅: 28/28 · ⚠️ ✅: 14/15 · 💡: 2/3</p>
+      <div class="verdict-h" style="color:var(--lime);font-size:18px"><span class="em">🎉</span>ВЕРДИКТ: ВОРКШОП 2 ПРОЙДЕН</div>
+    </div>
+
+    <p class="lede" style="font-size:14px;margin-top:14px">Если не зелёный — иди в главный чат, доделай по плану аудитора, прогоняй заново до 🎉.</p>
+
+    <div class="rbox" style="margin-top:18px"><div class="rtitle">📸 Это будет Доказательство №5 для Сдачи</div><div class="rrow">Скриншот этого вердикта (с финальной строкой «🎉 ВОРКШОП 2 ПРОЙДЕН») — пятое из пяти доказательств. Сдашь его в Telegram спринт-боту вместе с остальными четырьмя.</div></div>
+
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- TAB 3 — СДАЧА · ДОМАШКА                                          -->
+  <!-- ============================================================ -->
+  <div class="panel panel-red" id="panel-3">
+
+    <div class="notice danger"><div class="ni">🎓</div><span><strong>Финал Воркшопа 2.</strong> 5 доказательств спринт-боту <strong>@ai_comandos_bot</strong>. Никаких bash-команд, никаких VPS-логинов — только <strong>скриншоты ответов твоего бота</strong> в Telegram и одна ссылка. Время сдачи: <strong>~10 минут</strong>.</span></div>
+
+    <h2>5 <span class="acc">доказательств</span> сдачи</h2>
+    <p class="lede">Каждое доказательство добывается одной командой боту. Бот сам выполняет, отвечает в чат, ты делаешь скриншот. Никакого SSH в VPS, никаких терминалов — всё через Telegram.</p>
+
+    <div class="submit-grid">
+      <div class="submit-card"><div class="submit-num">№ 1</div><div class="submit-icon">🧠</div><div class="submit-title">Бот помнит твои факты после /reset</div><div class="submit-from">Скрин Telegram</div></div>
+      <div class="submit-card"><div class="submit-num">№ 2</div><div class="submit-icon">🔍</div><div class="submit-title">Mem0 + Qdrant + compaction видны</div><div class="submit-from">Скрин Telegram</div></div>
+      <div class="submit-card"><div class="submit-num">№ 3</div><div class="submit-icon">📦</div><div class="submit-title">git log автокоммитов + URL бэкапа</div><div class="submit-from">Скрин Telegram</div></div>
+      <div class="submit-card"><div class="submit-num">№ 4</div><div class="submit-icon">🔗</div><div class="submit-title">Ссылка на твой приватный GitHub-репо</div><div class="submit-from">URL текстом</div></div>
+      <div class="submit-card" style="grid-column:span 2;border-left-color:var(--lime)"><div class="submit-num" style="color:var(--lime)">№ 5 — финальный</div><div class="submit-icon">🎉</div><div class="submit-title">Вердикт «Воркшоп 2 пройден» от Аудитора</div><div class="submit-from">Скрин из Antigravity (см. закладку «Аудитор»)</div></div>
+    </div>
+
+    <h3 style="margin-top:34px;font-family:'Barlow Condensed',sans-serif;font-style:italic;font-size:24px;font-weight:800;text-transform:uppercase;letter-spacing:0.01em;color:var(--text)">Как собрать каждое <span class="acc">доказательство</span></h3>
+
+    <!-- Доказательство №1 — Память после /reset -->
+    <div class="pcard" style="margin-top:14px">
+      <div class="pcard-head">
+        <div class="pcard-badge">🧠</div>
+        <div class="pcard-info">
+          <div class="pcard-tool">Доказательство №1 · Telegram · ~3 минуты</div>
+          <div class="pcard-title">Память выжила /reset</div>
+        </div>
+      </div>
+      <p class="pcard-desc"><strong>Шаг 1.</strong> Если в течение В2 ты уже рассказывал боту про свою работу, семью, планы, клиентов — переходи сразу к Шагу 2.<br>
+      Если не успел — пошли боту <strong>3 любых факта про себя</strong> (любые имена, цифры, даты — какие хочешь) и подожди <strong>60 секунд</strong>, чтобы auto-capture сохранил их в Mem0+Qdrant.</p>
+
+      <p class="pcard-desc"><strong>Шаг 2.</strong> Сбрось контекст:</p>
+      <div class="pb"><div class="pbar"><span class="ptag">в свой Telegram-бот</span><button class="cbtn" onclick="cp(this,'sd1a')">📋 Копировать</button></div><pre class="pcode" id="sd1a">/reset</pre></div>
+
+      <p class="pcard-desc" style="margin-top:10px"><strong>Шаг 3.</strong> Подожди 5 секунд (бот должен подтвердить сброс) и отправь:</p>
+      <div class="pb"><div class="pbar"><span class="ptag">в свой Telegram-бот</span><button class="cbtn" onclick="cp(this,'sd1b')">📋 Копировать</button></div><pre class="pcode" id="sd1b">Перечисли все факты которые я тебе говорил о себе за этот спринт. Используй mem0_search чтобы достать их из своей долговременной памяти. Ответь буллетами, без воды.</pre></div>
+
+      <div class="rbox" style="margin-top:14px"><div class="rtitle">📸 Скриншот №1 — что должно быть видно</div><div class="rrow">— твой <code>/reset</code> и подтверждение бота</div><div class="rrow">— твой вопрос «перечисли факты...»</div><div class="rrow">— ответ бота со списком <strong>твоих собственных</strong> фактов (минимум 2-3 пункта)</div></div>
+      <div class="rbox" style="margin-top:10px"><div class="rtitle">Что это доказывает</div><div class="rrow">Память пережила <code>/reset</code> — это и есть главное достижение Воркшопа 2 (D.1, D.2 стандарта). Бот помнит тебя как человека, а не только как собеседника в текущей сессии.</div></div>
+    </div>
+
+    <!-- Доказательство №2 — Mem0/Qdrant/compaction -->
+    <div class="pcard" style="margin-top:14px">
+      <div class="pcard-head">
+        <div class="pcard-badge">🔍</div>
+        <div class="pcard-info">
+          <div class="pcard-tool">Доказательство №2 · Telegram · ~1 минута</div>
+          <div class="pcard-title">Бот видит свою инфраструктуру памяти</div>
+        </div>
+      </div>
+      <p class="pcard-desc">Отправь боту одно сообщение:</p>
+      <div class="pb"><div class="pbar"><span class="ptag">в свой Telegram-бот</span><button class="cbtn" onclick="cp(this,'sd2')">📋 Копировать</button></div><pre class="pcode" id="sd2">Сделай мне технический отчёт о своей памяти, в 4-5 строк:
+
+1. Сколько фактов у тебя в Mem0+Qdrant обо мне (используй mem0_count или mem0_search)
+2. Какая стратегия compaction — mode, keepRecentTokens, maxHistoryShare (прочитай ~/.openclaw/openclaw.json, секция compaction)
+3. Какая embedding-модель у Mem0 (text-embedding-3-small или другая — посмотри в конфиге Mem0)
+4. Жив ли Qdrant: ответь "qdrant: up" если контейнер работает, иначе "qdrant: down"
+
+Сухой отчёт, без вступления.</pre></div>
+
+      <div class="rbox" style="margin-top:14px"><div class="rtitle">📸 Скриншот №2 — что должно быть видно</div><div class="rrow">Ответ бота с конкретными цифрами и значениями: количество фактов, mode/keepRecentTokens из openclaw.json, имя embedding-модели, статус Qdrant</div></div>
+      <div class="rbox" style="margin-top:10px"><div class="rtitle">Что это доказывает</div><div class="rrow">Инфраструктура памяти — Mem0+Qdrant+compaction — реально настроена и доступна боту изнутри (A, B, C, D разделы стандарта).</div></div>
+    </div>
+
+    <!-- Доказательство №3 — git log -->
+    <div class="pcard" style="margin-top:14px">
+      <div class="pcard-head">
+        <div class="pcard-badge">📦</div>
+        <div class="pcard-info">
+          <div class="pcard-tool">Доказательство №3 · Telegram · ~1 минута</div>
+          <div class="pcard-title">Автобэкап реально пушится в GitHub</div>
+        </div>
+      </div>
+      <p class="pcard-desc">Отправь боту:</p>
+      <div class="pb"><div class="pbar"><span class="ptag">в свой Telegram-бот</span><button class="cbtn" onclick="cp(this,'sd3')">📋 Копировать</button></div><pre class="pcode" id="sd3">Покажи мне последние 5 автокоммитов своего бэкапа: запусти у себя
+cd ~/.openclaw && git log auto/cron --oneline -5
+
+И отдельной строкой выведи URL приватного GitHub-репо в который ты пушишь:
+git remote get-url origin
+
+Никаких пояснений — только вывод обеих команд.</pre></div>
+
+      <div class="rbox" style="margin-top:14px"><div class="rtitle">📸 Скриншот №3 — что должно быть видно</div><div class="rrow">— список из 5 коммитов с короткими хешами и сообщениями (видно что они сделаны cron'ом)</div><div class="rrow">— URL твоего приватного GitHub-репо в формате <code>git@github.com:USER/comandos-openclaw-backup.git</code> или <code>https://...</code></div></div>
+      <div class="rbox" style="margin-top:10px"><div class="rtitle">Что это доказывает</div><div class="rrow">Cron реально запускается каждый час, реально коммитит и пушит в GitHub. Если VPS внезапно умрёт — память и конфиг восстановятся из репо за 5 минут (E раздел стандарта).</div></div>
+    </div>
+
+    <!-- Доказательство №4 — GitHub URL -->
+    <div class="pcard" style="margin-top:14px">
+      <div class="pcard-head">
+        <div class="pcard-badge">🔗</div>
+        <div class="pcard-info">
+          <div class="pcard-tool">Доказательство №4 · текст в спринт-бот · 30 секунд</div>
+          <div class="pcard-title">Ссылка на твой приватный GitHub-репо</div>
+        </div>
+      </div>
+      <p class="pcard-desc">В отличие от первых трёх — это не скриншот, а <strong>обычное текстовое сообщение спринт-боту</strong> <strong>@ai_comandos_bot</strong>:</p>
+      <div class="pb"><div class="pbar"><span class="ptag">в спринт-бот @ai_comandos_bot</span><button class="cbtn" onclick="cp(this,'sd4')">📋 Шаблон</button></div><pre class="pcode" id="sd4">Доказательство №4 — мой приватный GitHub-репо для бэкапа OpenClaw:
+https://github.com/MYUSER/comandos-openclaw-backup</pre></div>
+      <p class="pcard-desc" style="margin-top:10px">Замени <code>MYUSER</code> на свой ник в GitHub. Репо <strong>приватный</strong> — никто не увидит твой контент, проверка только что репо существует и привязан к твоему аккаунту.</p>
+
+      <div class="rbox" style="margin-top:14px"><div class="rtitle">Что это доказывает</div><div class="rrow">У тебя есть персональный бэкап в твоём собственном GitHub-аккаунте (а не на чужом VPS). Это страховка от потери — если VPS умрёт сегодня ночью, ты ничего не теряешь.</div></div>
+    </div>
+
+    <!-- Доказательство №5 — Аудитор -->
+    <div class="pcard" style="margin-top:14px;border-left-color:var(--lime)">
+      <div class="pcard-head">
+        <div class="pcard-badge" style="color:var(--lime);background:rgba(200,255,0,0.1);border-color:rgba(200,255,0,0.25)">🎉</div>
+        <div class="pcard-info">
+          <div class="pcard-tool" style="color:var(--lime)">Доказательство №5 · финальное · ~3 минуты</div>
+          <div class="pcard-title">Вердикт от независимого Аудитора</div>
+        </div>
+      </div>
+      <p class="pcard-desc">Это единственное доказательство которое делается <strong>не из Telegram</strong>, а из Antigravity:</p>
+      <ol class="pcard-desc" style="padding-left:22px;line-height:1.85">
+        <li>Открой закладку <strong>«Аудитор»</strong> в этом гайде</li>
+        <li>Скопируй один большой промт</li>
+        <li>Открой <strong>новый чат</strong> в Antigravity (важно — новый, не тот в котором шла установка) и вставь промт</li>
+        <li>AI прочитает стандарт В2, проверит твоё состояние и выдаст вердикт</li>
+      </ol>
+
+      <div class="rbox" style="margin-top:14px"><div class="rtitle">📸 Скриншот №5 — что должно быть видно</div><div class="rrow">Финальная строка вердикта: <strong>🎉 ВОРКШОП 2 ПРОЙДЕН</strong> (если все ❗ закрыты) или <strong>🟡 ПОЧТИ ГОТОВО</strong> (если ❗ закрыты, но есть ⚠️)</div><div class="rrow">Делается в Antigravity — простой скриншот окна с ответом AI</div></div>
+      <div class="rbox" style="margin-top:10px"><div class="rtitle">Что это доказывает</div><div class="rrow">Независимая AI-проверка против стандарта — без bias главного AI который тебе устанавливал. Если Аудитор сказал 🎉 — В2 объективно пройден.</div></div>
+    </div>
+
+    <!-- Куда сдавать -->
+    <div class="final" style="margin-top:36px;background:linear-gradient(135deg,rgba(244,114,114,0.06),rgba(13,14,15,1));border-color:rgba(244,114,114,0.3)">
+      <div class="final-title">Куда отправлять <span class="acc" style="color:var(--red)">все 5 доказательств</span></div>
+      <div class="final-desc" style="line-height:1.7">Открой Telegram, найди спринт-бота <strong>@ai_comandos_bot</strong> и отправь <strong>5 сообщений подряд</strong>:<br><br>
+      <strong>Сообщение 1:</strong> скриншот №1 (память после /reset)<br>
+      <strong>Сообщение 2:</strong> скриншот №2 (Mem0/Qdrant/compaction)<br>
+      <strong>Сообщение 3:</strong> скриншот №3 (git log + URL)<br>
+      <strong>Сообщение 4:</strong> текст-ссылка №4 (твой GitHub-репо)<br>
+      <strong>Сообщение 5:</strong> скриншот №5 (вердикт Аудитора)<br><br>
+      На любое из них спринт-бот ответит подтверждением. Если что-то не зачлось — он подскажет что переснять.</div>
+    </div>
+
+    <div class="final" style="margin-top:24px">
+      <div class="final-title">Это <span class="acc">первый день</span> с настоящей памятью</div>
+      <div class="final-desc">У тебя бот, который <strong>помнит между сессиями</strong>, <strong>защищён от раздувания контекста</strong> и <strong>бэкапится в GitHub</strong> каждый час. На Воркшопе 3 он научится <strong>сам действовать</strong> — утренний брифинг, проактивные напоминания, голос (опц).</div>
+    </div>
+
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- TAB 4 — ПАТЧИ v1.2                                              -->
+  <!-- ============================================================ -->
+  <div class="panel panel-violet" id="panel-4">
+
+    <div class="banner-v12" style="margin-bottom:18px"><span class="badge">v1.2 · 12 мая</span><strong>Догнать до v1.2 — 6 промптов</strong>. Эти патчи устанавливают то что отсутствовало в первой версии стандарта. Запускай <strong>по порядку</strong> A → B → C → D → E → F → финал. Каждый в свой AI-агент в папке проекта (как обычные промпты установки). Между прогонами жди «готово / закрыл X».</div>
+
+    <h2>Что и почему <span class="acc" style="color:var(--violet)">патчим</span></h2>
+    <p class="lede">После полевых отчётов когорты Nov-2026 (Григорий, Андрей и др.) вскрылись 5 пробелов: SSH-hardening, Memory Search Protocol, watchdog timing, autocommit whitelist, MiniMax verbosity. Эти патчи их закрывают. Если ты ещё не проходил В1/В2 — патчи тебе НЕ НУЖНЫ, всё уже в Закладке «Установка».</p>
+
+    <!-- ===== ПРОМПТ A — SSH защита (refers to W1) ===== -->
+    <div style="margin-top:18px;padding:18px 22px;background:rgba(6,182,212,0.06);border:1px solid rgba(6,182,212,0.3);border-radius:8px">
+      <p style="margin:0 0 8px;color:#06b6d4;font-weight:600;font-size:15px">🛡 Патч A — SSH защита делается в W1</p>
+      <p style="margin:0 0 10px;color:var(--muted);font-size:13.5px;line-height:1.7">SSH-hardening это W1-территория (VPS-база). Не дублируем здесь.</p>
+      <p style="margin:0 0 10px;color:var(--muted);font-size:13.5px;line-height:1.7">Если ты <strong style="color:var(--text)">ещё не сделал</strong> A.1 Tailscale (рекомендуется) или A.2 Базовый в W1 — открой <a href="https://proud-mill-zysx.here.now/" target="_blank" style="color:#06b6d4;text-decoration:underline">https://proud-mill-zysx.here.now/</a> → Закладка <strong>«🩹 Патчи v1.3»</strong> → один из 2 промптов.</p>
+      <p style="margin:0;color:var(--muted);font-size:13.5px;line-height:1.7">После SSH-патча возвращайся сюда и продолжай с <strong style="color:var(--text)">Промпта B</strong> ниже — это уже W2-specific фиксы (Mem0 retrieval, watchdog, whitelist, anti-verbosity).</p>
+    </div>
+
+    <!-- ===== ПРОМПТ B — Memory Search Protocol ===== -->
+    <div class="pcard" style="margin-top:14px">
+      <div class="pcard-head">
+        <div class="pcard-badge">B</div>
+        <div class="pcard-info">
+          <div class="pcard-tool">Патч B · W2 · 10 мин</div>
+          <div class="pcard-title">Memory Search Protocol (C.17 + D.4)</div>
+        </div>
+      </div>
+      <p class="pcard-desc">Главный патч. Бот формально «помнил» факты через startup-injection, но реально не звал mem0_search во время диалога. До фикса: web_search=8 calls, memory_search=0. После: 0/8.</p>
+      <div class="pb"><div class="pbar"><span class="ptag">AI-чат + Telegram</span><button class="cbtn" onclick="cp(this,'pb')">📋 Копировать</button></div><pre class="pcode" id="pb">Промпт B: Закрой C.17 и D.4 стандарта W2 v1.1 (Memory Search Protocol).
+
+1. Открой ~/.openclaw/workspace/AGENTS.md. Добавь сразу после YAML-метадаты:
+
+## Memory Search Protocol — ОБЯЗАТЕЛЬНО
+
+Перед ответом на ЛЮБОЙ фактологический вопрос про пользователя (его проекты, клиентов, привычки, имена, цифры, события) — ОБЯЗАТЕЛЬНО вызови tool memory_search ИЛИ exec → ~/.openclaw/skills/mem0/mem0-search.js "<query>".
+
+ЗАПРЕЩЕНО:
+- Отвечать про факты пользователя без вызова memory_search
+- Уходить в web_search для фактов о пользователе (web_search только для внешних данных — новости, курсы, документация)
+- Доверять только startupContext — там устаревший срез, не текущее состояние
+- Фабриковать факты («примерно 3 локации») если их нет в памяти
+
+ОБЯЗАТЕЛЬНО:
+- На «что я говорил про X», «помнишь Y», «напомни Z», «сколько у меня было A» — сначала memory_search, потом ответ с цитатой «Из памяти (<date>):...»
+- Если memory_search пусто — «в долговременной памяти этого нет, расскажи ещё раз»
+- На КАЖДЫЙ retrieval-вопрос в trajectory.jsonl должен быть tool_call memory_search — иначе D.4 не пройден.
+
+2. Добавь в ~/.openclaw/SOUL.md раздел «Поведение» дублирующий буллет:
+- «Перед фактологическими ответами про меня — всегда memory_search. Без вызова → отвечай "не помню в долговременной памяти" вместо выдумывания.»
+
+3. openclaw doctor --fix && openclaw gateway restart && chmod 600 ~/.openclaw/openclaw.json ~/.openclaw/SOUL.md ~/.openclaw/workspace/AGENTS.md
+
+4. Тест D.4 (ты ведёшь, я делаю):
+- Спроси меня: «Расскажи боту 3 новых факта про вымышленный объект (например мой кот Брэйн рыжий любит сметану родился 2024)». Жди мой ответ.
+- После моего «сказал» — подожди 60 сек (auto-capture в Qdrant).
+- Скажи: «/reset, потом через 5 сек спроси про этот объект».
+- После моего ответа: SESS=$(ls -t ~/.openclaw/agents/main/sessions/ | head -1); tail -100 ~/.openclaw/agents/main/sessions/$SESS/trajectory.jsonl | grep -cE "memory_search|mem0-search"
+- ≥1 → C.17 ✅, D.4 ✅. 0 → диагностируй (AGENTS.md не загружается? проверь openclaw.json workspace.injectFiles).
+
+Отчёт ✅/⚠️/❌ по C.17 и D.4 с цитатой trajectory.jsonl.</pre></div>
+      <div class="rbox" style="margin-top:14px"><div class="rtitle">Что должно произойти</div><div class="rrow">grep memory_search в trajectory.jsonl ≥1 → бот РЕАЛЬНО зовёт mem0, не фабрикует через web_search.</div></div>
+    </div>
+
+    <!-- ===== ПРОМПТ C — Permission watchdog */15 ===== -->
+    <div class="pcard" style="margin-top:14px">
+      <div class="pcard-head">
+        <div class="pcard-badge">C</div>
+        <div class="pcard-info">
+          <div class="pcard-tool">Патч C · W2 · 3 мин</div>
+          <div class="pcard-title">Permission-watchdog каждые 15 мин (F.5)</div>
+        </div>
+      </div>
+      <p class="pcard-desc">Старый watchdog 17 4 * * * ловил chmod 644 регрессию (#18866) раз в сутки. Меняем на каждые 15 мин — drift-окно ≤15 мин.</p>
+      <div class="pb"><div class="pbar"><span class="ptag">AI-чат</span><button class="cbtn" onclick="cp(this,'pc')">📋 Копировать</button></div><pre class="pcode" id="pc">Промпт C: Закрой F.5 стандарта W2 v1.1 (watchdog */15).
+
+1. crontab -l под clawd. Если есть строка 17 4 * * * — поменяй на */15 * * * *. Если строки нет — создай ~/.openclaw/scripts/permission-watchdog.sh:
+
+#!/bin/bash
+set -euo pipefail
+FILES=(
+  "$HOME/.openclaw/openclaw.json"
+  "$HOME/.openclaw/SOUL.md"
+  "$HOME/.openclaw/agents/main/agent/auth-profiles.json"
+)
+SECRETS_DIR="$HOME/.openclaw/secrets"
+LOG="$HOME/.openclaw/logs/watchdog-perm.log"
+mkdir -p "$(dirname $LOG)"
+source "$HOME/.openclaw/.env" 2>/dev/null || true
+
+for f in "${FILES[@]}"; do
+  if [ -f "$f" ]; then
+    perm=$(stat -c %a "$f")
+    if [ "$perm" != "600" ]; then
+      echo "$(date -Iseconds) FIX $f was $perm" >> "$LOG"
+      chmod 600 "$f"
+      if [ -n "${TG_TOKEN:-}" ] && [ -n "${TG_USER_ID:-}" ]; then
+        curl -s -X POST "https://api.telegram.org/bot$TG_TOKEN/sendMessage" \
+          -d "chat_id=$TG_USER_ID" \
+          -d "text=⚠️ watchdog: $f was $perm fixed to 600" >/dev/null
+      fi
+    fi
+  fi
+done
+[ -d "$SECRETS_DIR" ] && find "$SECRETS_DIR" -type f ! -perm 600 -exec chmod 600 {} \;
+
+2. chmod +x ~/.openclaw/scripts/permission-watchdog.sh
+
+3. Добавь в crontab: */15 * * * * /home/clawd/.openclaw/scripts/permission-watchdog.sh > /dev/null 2>&1
+
+4. Тест: chmod 644 ~/.openclaw/openclaw.json && bash ~/.openclaw/scripts/permission-watchdog.sh && stat -c %a ~/.openclaw/openclaw.json (должно быть 600)
+
+Покажи crontab -l + лог теста.</pre></div>
+      <div class="rbox" style="margin-top:14px"><div class="rtitle">Что должно произойти</div><div class="rrow">Watchdog каждые 15 мин. Регрессия chmod 644 лечится за ≤15 мин, не 24h.</div></div>
+    </div>
+
+    <!-- ===== ПРОМПТ D — Autocommit whitelist ===== -->
+    <div class="pcard" style="margin-top:14px">
+      <div class="pcard-head">
+        <div class="pcard-badge">D</div>
+        <div class="pcard-info">
+          <div class="pcard-tool">Патч D · W2 · 5 мин</div>
+          <div class="pcard-title">Autocommit whitelist (E.15)</div>
+        </div>
+      </div>
+      <p class="pcard-desc">Защита от утечки auth-profiles.json с plaintext API-ключами. Старые скрипты могут использовать git add . — заменяем на ЯВНЫЙ whitelist + blocklist guard.</p>
+      <div class="pb"><div class="pbar"><span class="ptag">AI-чат</span><button class="cbtn" onclick="cp(this,'pd')">📋 Копировать</button></div><pre class="pcode" id="pd">Промпт D: Закрой E.15 стандарта W2 v1.1 (autocommit whitelist).
+
+1. Покажи мне текущий ~/.openclaw/scripts/openclaw-autocommit.sh.
+
+2. Если в нём git add -A или git add . или git add * — перепиши на explicit whitelist:
+
+#!/bin/bash
+set -euo pipefail
+cd "$HOME/.openclaw"
+[ -f .lock ] && exit 0
+touch .lock
+trap "rm -f .lock" EXIT
+
+WHITELIST=(
+  workspace/MEMORY.md workspace/SOUL.md workspace/USER.md workspace/AGENTS.md
+  workspace/IDENTITY.md workspace/HEARTBEAT.md
+  RECOVERY.md REPORT-W2.md .gitignore .gitattributes
+)
+stage_if_exists() { for p in "$@"; do [ -e "$p" ] && git add "$p"; done; }
+stage_if_exists "${WHITELIST[@]}"
+git ls-files --others --modified -- 'memory/*.md' 2>/dev/null | xargs -r git add
+git ls-files --others --modified -- 'archive/*.md' 2>/dev/null | xargs -r git add
+
+BLOCKLIST=(openclaw.json secrets .env *.token *.key auth-profiles.json)
+for bad in "${BLOCKLIST[@]}"; do
+  if git diff --cached --name-only | grep -E "$bad" >/dev/null; then
+    echo "BLOCKLIST HIT: $bad — ABORTING"
+    git reset HEAD; exit 1
+  fi
+done
+
+git diff --cached --quiet && exit 0
+git -c user.name=clawd-cron -c user.email=cron@openclaw.local commit -m "auto: $(date -Iseconds) $(git diff --cached --name-only | wc -l) files"
+git push origin auto/cron 2>>~/.openclaw/logs/autocommit-push.log
+
+3. Тестовый прогон: bash ~/.openclaw/scripts/openclaw-autocommit.sh && git log -1 --stat auto/cron — в коммите не должно быть openclaw.json или auth-profiles.json.
+
+4. Проверь .gitignore: grep -E "openclaw.json|auth-profiles|secrets|\.env|\.token|\.key" ~/.openclaw/.gitignore
+
+Отчёт ✅ E.15 закрыт, blocklist guard стоит.</pre></div>
+      <div class="rbox" style="margin-top:14px"><div class="rtitle">Что должно произойти</div><div class="rrow">Autocommit использует whitelist + blocklist guard. auth-profiles.json не утечёт в git даже случайно.</div></div>
+    </div>
+
+    <!-- ===== ПРОМПТ E — MiniMax anti-verbosity ===== -->
+    <div class="pcard" style="margin-top:14px">
+      <div class="pcard-head">
+        <div class="pcard-badge">E</div>
+        <div class="pcard-info">
+          <div class="pcard-tool">Патч E · W1+W2 · 5 мин</div>
+          <div class="pcard-title">Anti-verbosity MiniMax M2.7 (улучшение H.2)</div>
+        </div>
+      </div>
+      <p class="pcard-desc">MiniMax по характеру выводит chain-of-thought и повторяет вопрос пользователя. Лечится агрессивным SOUL.md. Если после фикса бот всё ещё болтает — переключай primary.</p>
+      <div class="pb"><div class="pbar"><span class="ptag">AI-чат + Telegram</span><button class="cbtn" onclick="cp(this,'pe')">📋 Копировать</button></div><pre class="pcode" id="pe">Промпт E: Подави болтливость MiniMax (H.2 стандарта).
+
+1. Открой ~/.openclaw/SOUL.md. Найди раздел «Поведение» (создай если нет). Добавь:
+
+## Anti-verbosity (КРИТИЧНО)
+
+ЗАПРЕЩЕНО:
+- Повторять вопрос пользователя в следующем сообщении («Ты спросил X, отвечаю...»)
+- Выводить chain-of-thought наружу («Сначала мне нужно...», «Дай-ка я подумаю...»)
+- Начинать ответ с воды («Отличный вопрос!», «Хорошо, давайте разберёмся», «Ща момент»)
+- Преамбулы «Прежде чем ответить...»
+- Markdown-заголовки в коротких ответах (1 абзац = без заголовка)
+
+ОБЯЗАТЕЛЬНО:
+- Простой вопрос → один абзац, всё. Точка.
+- Сложный → структурированный ответ без воды между блоками
+- Нужно подумать → думай молча, наружу только результат
+- Уверенности нет → одна строка «не уверен, нужно проверить X»
+
+ВНУТРЕННИЙ ЧЕКЛИСТ перед отправкой:
+1. Не повторил ли вопрос? Если да — стереть.
+2. Нет ли преамбулы? Если есть — стереть.
+3. Ответ соразмерен вопросу? «Как дела?» → 1 предложение.
+
+2. openclaw doctor --fix && openclaw gateway restart && chmod 600 ~/.openclaw/SOUL.md
+
+3. Тест: скажи мне написать боту «Привет, как дела?». Ответ должен быть ≤2 коротких предложений, без повтора вопроса.
+
+4. Если MiniMax продолжает болтать — спроси меня: «Переключить primary на openrouter/anthropic/claude-haiku-4.5 (платно токенами, чистый) или deepseek-flash (если есть подписка)? Без переключения H.2 невозможно.»</pre></div>
+      <div class="rbox" style="margin-top:14px"><div class="rtitle">Что должно произойти</div><div class="rrow">Бот на «привет, как дела?» отвечает 1-2 фразами, без повтора вопроса, без рассуждений.</div></div>
+    </div>
+
+    <!-- ===== ПРОМПТ F — Dangerous code bypass для 2026.5.x ===== -->
+    <div class="pcard" style="margin-top:14px">
+      <div class="pcard-head">
+        <div class="pcard-badge">F</div>
+        <div class="pcard-info">
+          <div class="pcard-tool">Патч F · W2 · 2 мин (только если OpenClaw ≥2026.5.0)</div>
+          <div class="pcard-title">Dangerous-code-detection bypass для Mem0 install</div>
+        </div>
+      </div>
+      <p class="pcard-desc">С 2026.5.0 OpenClaw ужесточил dangerous-code-detection (#4645). Mem0 SDK срабатывает на pattern «env vars + outbound network». Standard install падает с warning. Это compat-shift, не баг.</p>
+      <div class="pb"><div class="pbar"><span class="ptag">AI-чат</span><button class="cbtn" onclick="cp(this,'pf')">📋 Копировать</button></div><pre class="pcode" id="pf">Промпт F: Bypass dangerous-code-detection для Mem0 (только если ≥2026.5.0).
+
+1. openclaw --version → если &lt;2026.5.0, пропусти этот промпт.
+
+2. Если ≥2026.5.0:
+   - openclaw plugins list | grep mem0 (проверь не установлен ли)
+   - Если не установлен: openclaw plugins install --dangerously-force-unsafe-install @mem0/openclaw-mem0
+   - Проверь: openclaw plugins list | grep mem0 → ready
+
+3. Допиши в ~/.openclaw/RECOVERY.md под секцией «Known compatibility shifts» (создай если нет):
+
+## Known compatibility shifts
+### OpenClaw 2026.5.x
+- Mem0 SDK install требует --dangerously-force-unsafe-install (issue #4645)
+- Причина: detection срабатывает на pattern «env vars + outbound network»
+- Known issue, не баг setup'а. Безопасно при условии что Mem0 из официального @mem0/openclaw-mem0.
+
+Отчёт: версия OpenClaw, статус mem0 plugin, обновлённый RECOVERY.md.</pre></div>
+      <div class="rbox" style="margin-top:14px"><div class="rtitle">Что должно произойти</div><div class="rrow">Mem0 plugin → ready на любой версии OpenClaw. RECOVERY.md документирует флаг для будущих апгрейдов.</div></div>
+    </div>
+
+    <!-- ===== ФИНАЛЬНЫЙ — перепрогон ===== -->
+    <div class="pcard" style="margin-top:14px;border-left-color:var(--lime)">
+      <div class="pcard-head">
+        <div class="pcard-badge" style="color:var(--lime);background:rgba(200,255,0,0.1);border-color:rgba(200,255,0,0.25)">🔁</div>
+        <div class="pcard-info">
+          <div class="pcard-tool" style="color:var(--lime)">Финал · 5 мин</div>
+          <div class="pcard-title">Регресс-тест + перепрогон Аудитора</div>
+        </div>
+      </div>
+      <p class="pcard-desc">После всех патчей — заново прогоняем Аудитора. Должен быть зелёный 🎉. Если 🟡 — пиши в чат канала.</p>
+      <div class="pb"><div class="pbar"><span class="ptag">AI-чат</span><button class="cbtn" onclick="cp(this,'pfinal')">📋 Копировать</button></div><pre class="pcode" id="pfinal">Промпт-финал: Регресс после патчей B-F (A — SSH-защита — делается в W1).
+
+1. Проверь критерии стандарта W1 v1.3 (A.15 Tailscale ИЛИ A.11-A.14 базовый) + W2 v1.1 (C.17, D.4, E.15, F.5).
+
+2. Заново прогони amnesia test (как Промпт 9 Установки): я даю 3 факта → /reset → проверка → ты смотришь trajectory.jsonl на memory_search.
+
+3. Обнови ~/.openclaw/REPORT-W2.md строкой «Patched <today>: B-F applied (A from W1 v1.3), regression tests passed, criteria v1.3 closed».
+
+4. Подтверди auto-commit: git log auto/cron --oneline -3 — свежие записи.
+
+5. Скажи мне дословно: «Патчи v1.3 применены. Открывай Закладку "Аудитор" и прогоняй финальную проверку. Нужен зелёный 🎉 для зачёта В2 на новой версии.»</pre></div>
+      <div class="rbox" style="margin-top:14px"><div class="rtitle">Что должно произойти</div><div class="rrow">После всех 6 патчей + перепрогона Аудитора — вердикт 🎉 ВОРКШОП 2 ПРОЙДЕН на v1.2 стандарта.</div></div>
+    </div>
+
+    <div class="final" style="margin-top:36px;background:linear-gradient(135deg,rgba(167,139,250,0.06),rgba(13,14,15,1));border-color:rgba(167,139,250,0.3)">
+      <div class="final-title">Скрин нового вердикта = обновлённое <span class="acc" style="color:var(--violet)">Доказательство №5</span></div>
+      <div class="final-desc">Если у тебя был старый скрин вердикта 🟡 / ❌ — замени его в спринт-боте на новый зелёный после патчей. Просто пошли спринт-боту новый скрин с подписью «обновление после v1.2 патчей».</div>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    <span><strong>Дмитрий Попов</strong> · AI Бизнес Стратег</span>
+    <a href="https://t.me/ai_comandos" target="_blank">@ai_comandos</a>
+    <span>Воркшоп 2 · v2.1 · 9 промптов + patches v1.3 (Tailscale)</span>
+  </div>
+
+</div>
+
+<script>
+function goTab(n){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelector('.tab[data-tab="'+n+'"]').classList.add('active');
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-'+n).classList.add('active');
+  window.scrollTo({top:document.querySelector('.tabs').offsetTop-20,behavior:'smooth'});
+}
+function cp(btn,id){
+  const el=document.getElementById(id);
+  const t=el.innerText;
+  navigator.clipboard.writeText(t).then(()=>{
+    btn.classList.add('copied');
+    const orig=btn.textContent;
+    btn.textContent='✓ Скопировано';
+    setTimeout(()=>{btn.classList.remove('copied');btn.textContent=orig;},1800);
+  });
+}
+</script>
+</body>
+</html>
