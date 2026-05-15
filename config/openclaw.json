@@ -275,7 +275,8 @@
       "openai",
       "device-pair",
       "memory-core",
-      "gonka"
+      "gonka",
+      "openclaw-mem0"
     ],
     "entries": {
       "telegram": { "enabled": true },
@@ -286,7 +287,54 @@
       "openai": { "enabled": true },
       "device-pair": { "enabled": true },
       "memory-core": { "enabled": true },
-      "gonka": { "enabled": true }
+      "gonka": { "enabled": true },
+      "openclaw-mem0": {
+        "enabled": true,
+        "config": {
+          "mode": "open-source",
+          "userId": "clawd",
+          "apiKey": "",
+          "oss": {
+            "llm": {
+              "provider": "openai",
+              "config": {
+                "model": "openrouter/moonshotai/kimi-k2.6",
+                "apiKey": "${OPENAI_API_KEY}"
+              }
+            },
+            "embedder": {
+              "provider": "ollama",
+              "config": {
+                "model": "nomic-embed-text",
+                "ollamaUrl": "http://localhost:11434",
+                "embeddingDims": 768
+              }
+            },
+            "vectorStore": {
+              "provider": "qdrant",
+              "config": {
+                "url": "http://localhost:6333",
+                "onDisk": true,
+                "dimension": 768,
+                "embeddingModelDims": 768,
+                "collectionName": "mem0_768d"
+              }
+            }
+          },
+          "skills": {
+            "triage": { "enabled": true },
+            "recall": {
+              "enabled": true,
+              "tokenBudget": 1500,
+              "rerank": true,
+              "keywordSearch": true,
+              "identityAlwaysInclude": true
+            },
+            "dream": { "enabled": true },
+            "domain": "companion"
+          }
+        }
+      }
     }
   },
 
