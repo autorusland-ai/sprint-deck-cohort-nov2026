@@ -51,7 +51,7 @@ else
 fi
 
 # 2. JSON-валидация config
-if ! python3 -c "import json; json.load(open('config/openclaw.json'))" 2>/dev/null; then
+if ! python3 -c "import json; json.load(open('config/openclaw.json', encoding='utf-8'))" 2>/dev/null; then
   echo "❌ config/openclaw.json — невалидный JSON"
   exit 1
 fi
