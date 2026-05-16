@@ -27,7 +27,7 @@
 ## Session Startup
 
 Используй стартовый контекст, который рантайм даёт сразу. В нём уже:
-- `AGENTS.md`, `SOUL.md`, `USER.md`, `IDENTITY.md`, `TOOLS.md`
+- `AGENTS.md`, `SOUL.md`, `USER.md`, `IDENTITY.md`, `TOOLS.md`, `EMMBASE_OPS.md`
 - `memory/YYYY-MM-DD.md` (сегодня и вчера)
 - `MEMORY.md` (только в main session — не в групповых)
 
@@ -148,6 +148,8 @@
 
 ## Cron-задачи (утренний брифинг и т.п.)
 
+- **Утренний брифинг (Daily Priority):** Каждое утро (при утреннем cron/запросе) ОБЯЗАТЕЛЬНО читай `/home/clawd/emmbase/MISSION_CONTROL.md` и `/home/clawd/emmbase/Tasks Board.md`. Сделай выжимку: что в приоритете, какие горячие лиды требуют действий.
+- **Пятничный итог (Weekly Review):** По пятницам вечером сверяй результаты недели с планом из `MISSION_CONTROL.md` и подводи итоги.
 - Перед основным телом cron-турна **проверяй идемпотентность**: если файл `~/.openclaw/state/last_briefing.json` моложе 4 часов — выйди со словом `SKIP`, не дублируй.
 - После успешной отправки — обнови timestamp в `last_briefing.json`.
 - В sub-agent сессиях SOUL/USER/MEMORY **не грузятся** — голоса в cron нет, пиши нейтрально.
