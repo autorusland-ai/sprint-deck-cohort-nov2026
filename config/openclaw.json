@@ -196,6 +196,16 @@
     }
   },
 
+  "fs": {
+    "allow": [
+      { "path": "/home/clawd/emmbase", "mode": "r" },
+      { "path": "~/.openclaw/workspace", "mode": "rw" },
+      { "path": "~/.openclaw/state", "mode": "rw" },
+      { "path": "~/.openclaw/logs", "mode": "rw" }
+    ]
+  },
+
+
   "tools": {
     "// КРИТИЧНО: profile=full включает browser. profile=messaging его отключает!": "блок-07 + Browser troubleshoot",
     "profile": "full",
