@@ -32,7 +32,7 @@
 
   "agents": {
     "defaults": {
-      "workspace": "~/.openclaw/workspace",
+      "workspace": "/home/clawd/.openclaw/workspace",
       "userTimezone": "Europe/Moscow",
       "timeFormat": "24",
       "contextInjection": "continuation-skip",
@@ -199,7 +199,8 @@
   "fs": {
     "allow": [
       { "path": "/home/clawd/emmbase", "mode": "r" },
-      { "path": "~/.openclaw/workspace", "mode": "rw" },
+      { "path": "/home/clawd/.openclaw/workspace", "mode": "rw" },
+      { "path": "/home/clawd/.openclaw/media", "mode": "rw" },
       { "path": "~/.openclaw/state", "mode": "rw" },
       { "path": "~/.openclaw/logs", "mode": "rw" }
     ]
@@ -209,6 +210,15 @@
   "tools": {
     "// КРИТИЧНО: profile=full включает browser. profile=messaging его отключает!": "блок-07 + Browser troubleshoot",
     "profile": "full",
+    "media": {
+      "audio": {
+        "models": [
+          {
+            "provider": "groq"
+          }
+        ]
+      }
+    },
     "exec": {
       "ask": "on",
       "allowlist": ["ls", "cat", "git status", "git diff", "openclaw audit", "openclaw doctor", "free", "df", "uptime", "uname"],
@@ -374,7 +384,12 @@
   },
 
   "gateway": {
-    "configReload": "hybrid"
+    "configReload": "hybrid",
+    "mode": "local",
+    "auth": {
+      "mode": "token",
+      "token": "${GATEWAY_AUTH_TOKEN}"
+    }
   },
 
   "hooks": {
