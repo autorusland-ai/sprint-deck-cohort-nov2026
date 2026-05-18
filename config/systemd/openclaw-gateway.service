@@ -37,11 +37,11 @@ CPUQuota=200%
 # Node.js heap — соответствует MemoryMax
 Environment="NODE_OPTIONS=--max-old-space-size=2048"
 
-# Системный путь — node 22 LTS через nodesource
-Environment="PATH=%h/.npm-global/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin"
+# Системный путь — node 22 LTS через nodesource + локальный bin
+Environment="PATH=/home/clawd/.npm-global/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin"
 
 # Workspace
-Environment="OPENCLAW_HOME=%h/.openclaw"
+Environment="OPENCLAW_HOME=/home/clawd/.openclaw"
 WorkingDirectory=%h/.openclaw
 
 # Optional: trajectory recording для дебага (раскомментировать при необходимости)
