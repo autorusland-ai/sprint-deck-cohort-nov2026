@@ -71,8 +71,8 @@ echo "💾 Backup текущего конфига на VPS..."
 $SSH "$VPS" "test -f ~/.openclaw/openclaw.json && cp ~/.openclaw/openclaw.json ~/.openclaw/openclaw.json.backup-\$(date +%s) || true"
 
 # 5. Render openclaw.json с подстановкой переменных из .env
-TMP_CONFIG=$(mktemp)
-trap "rm -f $TMP_CONFIG" EXIT
+TMP_CONFIG=".tmp_openclaw.json"
+trap "rm -rf $TMP_CONFIG .tmp_ws" EXIT
 
 # Простейшая подстановка ${VAR} → значение из env
 envsubst < config/openclaw.json > "$TMP_CONFIG"
@@ -80,8 +80,9 @@ envsubst < config/openclaw.json > "$TMP_CONFIG"
 # 6. Rsync workspace
 echo ""
 echo "📤 Заливаем workspace/ → $VPS:~/.openclaw/workspace/..."
-TMP_WS=$(mktemp -d)
-cp -r workspace/* "$TMP_WS"
+TMP_WS=".tmp_ws"
+mkdir -p "$TMP_WS"
+cp -r workspace/* "$TMP_WS/"
 rm -rf "$TMP_WS/memory"
 scp -i "$SSH_KEY" -r "$TMP_WS"/* "$VPS:~/.openclaw/workspace/"
 rm -rf "$TMP_WS"
