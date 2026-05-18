@@ -70,34 +70,22 @@ echo ""
 echo "💾 Backup текущего конфига на VPS..."
 $SSH "$VPS" "test -f ~/.openclaw/openclaw.json && cp ~/.openclaw/openclaw.json ~/.openclaw/openclaw.json.backup-\$(date +%s) || true"
 
-# 5. Render openclaw.json с подстановкой переменных из .env
-TMP_CONFIG=".tmp_openclaw.json"
-trap "rm -rf $TMP_CONFIG .tmp_ws" EXIT
-
-# Простейшая подстановка ${VAR} → значение из env
-envsubst < config/openclaw.json > "$TMP_CONFIG"
-
-# 6. Rsync workspace
-echo ""
-echo "📤 Заливаем workspace/ → $VPS:~/.openclaw/workspace/..."
-TMP_WS=".tmp_ws"
-mkdir -p "$TMP_WS"
-cp -r workspace/* "$TMP_WS/"
-rm -rf "$TMP_WS/memory"
-scp -i "$SSH_KEY" -r "$TMP_WS"/* "$VPS:~/.openclaw/workspace/"
-rm -rf "$TMP_WS"
-
-# 7. Залить openclaw.json
+# 5. Render openclaw.json с подстановкой переменных из .env и заливка
 echo ""
 echo "📤 Заливаем openclaw.json..."
-scp -i "$SSH_KEY" "$TMP_CONFIG" "$VPS:~/.openclaw/openclaw.json"
+envsubst < config/openclaw.json | $SSH "$VPS" "cat > ~/.openclaw/openclaw.json"
+
+# 6. Rsync workspace (via tar over SSH)
+echo ""
+echo "📤 Заливаем workspace/ → $VPS:~/.openclaw/workspace/..."
+tar czf - --exclude='memory' -C workspace . | $SSH "$VPS" "mkdir -p ~/.openclaw/workspace && tar xzf - -C ~/.openclaw/workspace"
 
 # 8. Залить systemd unit (только если в config/systemd/)
 if [ -f "config/systemd/openclaw-gateway.service" ]; then
   echo ""
   echo "📤 Заливаем systemd unit..."
   $SSH "$VPS" "mkdir -p ~/.config/systemd/user/"
-  scp -i "$SSH_KEY" config/systemd/openclaw-gateway.service "$VPS:~/.config/systemd/user/"
+  cat config/systemd/openclaw-gateway.service | $SSH "$VPS" "cat > ~/.config/systemd/user/openclaw-gateway.service"
   $SSH "$VPS" "systemctl --user daemon-reload"
 fi
 
