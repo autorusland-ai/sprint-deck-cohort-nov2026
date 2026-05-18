@@ -41,7 +41,6 @@ Environment="NODE_OPTIONS=--max-old-space-size=2048"
 Environment="PATH=/home/clawd/.npm-global/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin"
 
 # Workspace
-Environment="OPENCLAW_HOME=/home/clawd/.openclaw"
 WorkingDirectory=%h/.openclaw
 
 # Optional: trajectory recording для дебага (раскомментировать при необходимости)
