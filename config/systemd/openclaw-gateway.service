@@ -21,7 +21,7 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/openclaw gateway
+ExecStart=%h/.npm-global/bin/openclaw gateway
 Restart=on-failure
 RestartSec=10
 StartLimitInterval=300
@@ -38,7 +38,7 @@ CPUQuota=200%
 Environment="NODE_OPTIONS=--max-old-space-size=2048"
 
 # Системный путь — node 22 LTS через nodesource
-Environment="PATH=/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin"
+Environment="PATH=%h/.npm-global/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin"
 
 # Workspace
 Environment="OPENCLAW_HOME=%h/.openclaw"
@@ -48,18 +48,19 @@ WorkingDirectory=%h/.openclaw
 # Environment="OPENCLAW_TRAJECTORY=%h/.openclaw/traces"
 
 # Security hardening (см. PRO-04)
-NoNewPrivileges=true
-PrivateTmp=true
-ProtectSystem=strict
-ProtectHome=read-only
-ReadWritePaths=%h/.openclaw
-ProtectKernelTunables=true
-ProtectKernelModules=true
-ProtectControlGroups=true
-RestrictNamespaces=true
-LockPersonality=true
-RestrictRealtime=true
-RestrictSUIDSGID=true
+# Закомментировано: systemd --user не поддерживает эти директивы (218/CAPABILITIES)
+# NoNewPrivileges=true
+# PrivateTmp=true
+# ProtectSystem=strict
+# ProtectHome=read-only
+# ReadWritePaths=%h/.openclaw
+# ProtectKernelTunables=true
+# ProtectKernelModules=true
+# ProtectControlGroups=true
+# RestrictNamespaces=true
+# LockPersonality=true
+# RestrictRealtime=true
+# RestrictSUIDSGID=true
 
 # Логи в journald
 StandardOutput=journal
