@@ -80,11 +80,11 @@ envsubst < config/openclaw.json > "$TMP_CONFIG"
 # 6. Rsync workspace
 echo ""
 echo "📤 Заливаем workspace/ → $VPS:~/.openclaw/workspace/..."
-rsync -avz --progress \
-  -e "$SSH" \
-  --exclude='memory/*' \
-  --exclude='.gitkeep' \
-  workspace/ "$VPS:~/.openclaw/workspace/"
+TMP_WS=$(mktemp -d)
+cp -r workspace/* "$TMP_WS"
+rm -rf "$TMP_WS/memory"
+scp -i "$SSH_KEY" -r "$TMP_WS"/* "$VPS:~/.openclaw/workspace/"
+rm -rf "$TMP_WS"
 
 # 7. Залить openclaw.json
 echo ""
