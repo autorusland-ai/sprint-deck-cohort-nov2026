@@ -1,0 +1,1 @@
+test scp -i /c/Users/rus-f/.ssh/clawd_ed25519  clawd@100.76.223.48:~/.openclaw/test.json
