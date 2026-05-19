@@ -86,10 +86,16 @@ if [ -f "config/systemd/openclaw-gateway.service" ]; then
   echo "📤 Заливаем systemd unit..."
   $SSH "$VPS" "mkdir -p ~/.config/systemd/user/"
   cat config/systemd/openclaw-gateway.service | $SSH "$VPS" "cat > ~/.config/systemd/user/openclaw-gateway.service"
+  $SSH "$VPS" "rm -f ~/.config/systemd/user/openclaw-gateway.service.d/override.conf"
   $SSH "$VPS" "systemctl --user daemon-reload"
 fi
 
-# 9. Перезапуск daemon
+# 9. Repair config
+echo ""
+echo "🔧 Исправляем формат конфига (openclaw doctor --fix)..."
+$SSH "$VPS" "/home/clawd/.npm-global/bin/openclaw doctor --fix" || true
+
+# 10. Перезапуск daemon
 echo ""
 echo "♻️  Перезапускаю daemon..."
 $SSH "$VPS" 'systemctl --user restart openclaw-gateway' || {
