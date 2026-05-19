@@ -134,7 +134,7 @@ ssh -i "$SSH_KEY" "$CLAWD_VPS" "
 "
 
 echo "7/8 🐘 Запуск Qdrant (векторная память)..."
-scp -i "$SSH_KEY" config/docker-compose.qdrant.yml "$CLAWD_VPS:~/.openclaw/"
+cat config/docker-compose.qdrant.yml | ssh -i "$SSH_KEY" "$CLAWD_VPS" "cat > ~/.openclaw/docker-compose.qdrant.yml"
 ssh -i "$SSH_KEY" "$CLAWD_VPS" "
   cd ~/.openclaw
   docker compose -f docker-compose.qdrant.yml up -d
