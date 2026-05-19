@@ -22,7 +22,7 @@ Wants=network-online.target
 [Service]
 Type=simple
 ExecStart=%h/.npm-global/bin/openclaw gateway
-Restart=on-failure
+Restart=always
 RestartSec=10
 StartLimitInterval=300
 StartLimitBurst=5
