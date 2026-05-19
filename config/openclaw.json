@@ -151,10 +151,6 @@
           }
         ]
       }
-    },
-    "exec": {
-      "ask": "on",
-      "security": "ask"
     }
   },
   "memory": {},
