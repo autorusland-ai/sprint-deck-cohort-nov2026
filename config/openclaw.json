@@ -189,6 +189,9 @@
             "domain": "companion"
           }
         }
+      },
+      "codex": {
+        "enabled": true
       }
     },
     "allow": [
@@ -200,7 +203,8 @@
       "openai",
       "openclaw-mem0",
       "openrouter",
-      "telegram"
+      "telegram",
+      "codex"
     ],
     "bundledDiscovery": "compat",
     "slots": {
@@ -314,14 +318,14 @@
     }
   },
   "wizard": {
-    "lastRunAt": "2026-05-22T12:22:32.128Z",
+    "lastRunAt": "2026-05-22T16:06:01.736Z",
     "lastRunVersion": "2026.5.19",
     "lastRunCommand": "doctor",
     "lastRunMode": "local"
   },
   "meta": {
     "lastTouchedVersion": "2026.5.19",
-    "lastTouchedAt": "2026-05-22T12:36:37.414Z"
+    "lastTouchedAt": "2026-05-22T16:06:01.947Z"
   },
   "commands": {
     "ownerAllowFrom": [
