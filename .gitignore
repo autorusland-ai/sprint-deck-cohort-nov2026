@@ -9,6 +9,11 @@ secrets/
 id_*
 !id_*.example
 
+# Отладочные build-снимки конфига (содержат живые ключи — только локально)
+build_openclaw.json
+build_openclaw_fixed.json
+build_openclaw_fixed2.json
+
 # Память и логи бота (живут на VPS, локально только ради debug)
 workspace/memory/*
 !workspace/memory/.gitkeep
