@@ -169,13 +169,16 @@ ssh -t clawd-vps "bash -lc 'openclaw models auth login --provider openai-codex -
 
 `GOOGLE_WORKSPACE_REFRESH_TOKEN` живёт ~6 мес и при восстановлении на новом проекте получается заново:
 
-1. Google Cloud Console → проект → OAuth client ID (Desktop) → в `.env`: `GOOGLE_OAUTH_CLIENT_ID`/`SECRET`.
-2. Прогони OAuth-флоу (получить refresh token):
+1. Google Cloud Console → проект → OAuth client ID (Desktop) → в `.env`: `GOOGLE_OAUTH_CLIENT_ID`/`SECRET`. Файл client-secrets: `~/.openclaw/secrets/google-oauth.json`.
+2. Залей и запусти `scripts/reauth-google.py` с **пробросом порта** (на VPS нет браузера, редирект уходит по туннелю):
    ```bash
-   ssh -t clawd-vps '~/browser-env/bin/google-workspace-worker --auth'   # откроет ссылку
+   scp -i ~/.ssh/clawd_ed25519 scripts/reauth-google.py clawd@$VPS_IP:~/reauth-google.py
+   ssh -t -L 8765:localhost:8765 -i ~/.ssh/clawd_ed25519 clawd@$VPS_IP \
+       "~/browser-env/bin/python ~/reauth-google.py"
    ```
-3. Скопируй полученный refresh token в `.env` → `GOOGLE_WORKSPACE_REFRESH_TOKEN`, затем `./scripts/deploy.sh`.
-   - Scopes: `gmail.readonly`, `gmail.send`, `calendar` (для записи событий — НЕ `calendar.readonly`).
+   Скрипт напечатает ссылку → открой в браузере на компьютере → дай согласие (отметь Календарь). Scopes: `gmail.readonly`, `gmail.send`, `calendar` (полный read+write, НЕ `calendar.readonly`).
+3. Перенеси новый refresh token в `GOOGLE_WORKSPACE_REFRESH_TOKEN` (`.env` + конфиг на VPS — он встречается в `env` И в `mcp.servers.google-workspace.env`), затем рестарт: `systemctl --user restart openclaw-gateway`.
+4. Проверка записи: обмен refresh→access токеном и `tokeninfo` должны показать scope `.../auth/calendar`.
 
 ### 7.4 — Проверка браузерного стека
 
