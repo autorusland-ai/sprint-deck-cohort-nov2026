@@ -156,6 +156,12 @@ ssh -i "$SSH_KEY" "$CLAWD_VPS" "
     patchright==1.60.0 PyVirtualDisplay==3.0 playwright-stealth==2.0.3 \
     fake-useragent==2.2.0 google-workspace-mcp==2.0.1 browser-use-sdk==3.4.2
 
+  # ФИКС бага google-workspace-mcp 2.0.1: __main__ оборачивает синхронный
+  # FastMCP.run() в asyncio.run() → 'a coroutine was expected, got None',
+  # сервер не стартует. Вызываем mcp.run() напрямую.
+  GWMAIN=\$(~/browser-env/bin/python -c 'import google_workspace_mcp, os; print(os.path.join(os.path.dirname(google_workspace_mcp.__file__), \"__main__.py\"))')
+  sed -i 's/        asyncio.run(mcp.run())/        mcp.run()/' \"\$GWMAIN\"
+
   # browser-use форк: импорт playwright → patchright (нативные антидетект-патчи)
   if [ ! -d ~/browser-use-fork ]; then
     git clone https://github.com/browser-use/browser-use ~/browser-use-fork
