@@ -141,6 +141,64 @@ ssh clawd-vps 'cd ~/.openclaw && docker compose -f docker-compose.qdrant.yml up 
 
 ---
 
+## Этап 7 — Воркшоп 3: ручные шаги (OAuth + браузер)
+
+`bootstrap-vps.sh` (этап 7b) уже ставит **Tor**, браузерный стек (Patchright/Xvfb/browser-use форк, Chrome) и Xvfb-unit. Но три вещи требуют **живого TTY/браузера** и делаются вручную:
+
+### 7.1 — Tor (обход геоблока OpenAI)
+
+VPS в РФ → OpenAI отдаёт `403 unsupported_country_region_territory`. Поэтому весь OpenAI-трафик идёт через Tor SOCKS5. Проверь:
+
+```bash
+ssh clawd-vps 'systemctl is-active tor && curl -s --socks5 127.0.0.1:9050 https://api.ipify.org; echo'
+```
+Должен вернуть IP **не из РФ**. В `.env` уже стоит `OPENAI_SOCKS_PROXY=socks5://127.0.0.1:9050`, конфиг подставляет его в `env`.
+
+### 7.2 — Codex OAuth (primary = openai/gpt-5)
+
+Команда требует **интерактивный TTY** (в автоматизации НЕ работает) и проходит OAuth в браузере:
+
+```bash
+ssh -t clawd-vps "bash -lc 'openclaw models auth login --provider openai-codex --set-default --device-code'"
+```
+Откроется ссылка + код → подтверди в браузере под аккаунтом ChatGPT Plus. Проверка: `openclaw models auth list` покажет `openai-codex:...`.
+
+> Если OAuth снова упрётся в гео-403 — убедись, что Tor активен (7.1), либо как fallback используй `openrouter/openai/gpt-5` через `OPENROUTER_API_KEY` (работает без OAuth).
+
+### 7.3 — Google OAuth (Gmail + Calendar MCP)
+
+`GOOGLE_WORKSPACE_REFRESH_TOKEN` живёт ~6 мес и при восстановлении на новом проекте получается заново:
+
+1. Google Cloud Console → проект → OAuth client ID (Desktop) → в `.env`: `GOOGLE_OAUTH_CLIENT_ID`/`SECRET`.
+2. Прогони OAuth-флоу (получить refresh token):
+   ```bash
+   ssh -t clawd-vps '~/browser-env/bin/google-workspace-worker --auth'   # откроет ссылку
+   ```
+3. Скопируй полученный refresh token в `.env` → `GOOGLE_WORKSPACE_REFRESH_TOKEN`, затем `./scripts/deploy.sh`.
+   - Scopes: `gmail.readonly`, `gmail.send`, `calendar` (для записи событий — НЕ `calendar.readonly`).
+
+### 7.4 — Проверка браузерного стека
+
+```bash
+ssh clawd-vps 'systemctl --user is-active xvfb && ~/browser-env/bin/browser-use --version'
+```
+Оба должны ответить. Скиллы (`web-quick`, `page-reader`, `deep-research`, `browser-agent`, `mail-handler`, `calendar-keeper`) приезжают вместе с `workspace/` при `deploy.sh`. `self-improving-agent` ставится отдельно: `openclaw skills install self-improving-agent`.
+
+---
+
+## Актуализация конфига перед бэкапом
+
+Бот/мастер мог менять `~/.openclaw/openclaw.json` прямо на VPS. Чтобы git-шаблон не отстал, периодически пере-снимай его (секреты автоматически заменяются на `${VAR}`, leak-scan не даст утечь):
+
+```bash
+scp -i ~/.ssh/clawd_ed25519 clawd@$VPS_IP:~/.openclaw/openclaw.json /tmp/oc-live.json
+python scripts/snapshot-config.py /tmp/oc-live.json   # → перезапишет config/openclaw.json
+rm /tmp/oc-live.json
+git add config/openclaw.json && git commit -m "sync config snapshot"
+```
+
+---
+
 ## Что не восстановится автоматически
 
 - **`memory/YYYY-MM-DD.md`** — daily logs бота. Если не делал `./scripts/pull.sh` регулярно — потеряны.

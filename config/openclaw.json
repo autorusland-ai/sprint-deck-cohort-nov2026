@@ -1,145 +1,98 @@
 {
-  "auth": {
-    "profiles": {
-      "minimax": {
-        "endpoint": "https://api.minimax.io/v1",
-        "apiKey": "${MINIMAX_API_KEY}"
-      },
-      "deepseek": {
-        "endpoint": "https://api.deepseek.com/v1",
-        "apiKey": "${DEEPSEEK_API_KEY}"
-      },
-      "openrouter": {
-        "endpoint": "https://openrouter.ai/api/v1",
-        "apiKey": "${OPENROUTER_API_KEY}"
-      },
-      "groq": {
-        "endpoint": "https://api.groq.com/openai/v1",
-        "apiKey": "${GROQ_API_KEY}"
-      },
-      "openai": {
-        "endpoint": "https://api.openai.com/v1",
-        "apiKey": "${OPENAI_API_KEY}"
-      }
-    }
-  },
   "agents": {
     "defaults": {
       "workspace": "/home/clawd/.openclaw/workspace",
-      "userTimezone": "Europe/Moscow",
-      "timeFormat": "24",
-      "contextInjection": "continuation-skip",
-      "timeoutSeconds": 180,
+      "models": {
+        "minimax/MiniMax-M2.7": {
+          "alias": "Minimax"
+        },
+        "deepseek/deepseek-v4-flash": {},
+        "deepseek/deepseek-v4-pro": {
+          "alias": "premium"
+        },
+        "deepseek/deepseek-v4-pro:thinking": {
+          "alias": "think"
+        },
+        "gonka/Qwen/Qwen3-235B-A22B-Instruct-2507-FP8": {
+          "alias": "qwen235b"
+        },
+        "gonka/moonshotai/Kimi-K2.6": {
+          "alias": "kimi26"
+        }
+      },
       "model": {
-        "// PRIMARY: geo-aware. Для RU/EU VPS DeepSeek ближе; для Asia можно переключить на minimax/MiniMax-M2.7": "PENDING-FIXES-v1.8",
-        "primary": "deepseek/deepseek-v4-flash",
-        "// FALLBACK: не добавляем дорогой auto-fallback для DeepSeek primary": "АУДИТ",
-        "fallbacks": []
+        "primary": "openai/gpt-5",
+        "fallbacks": [
+          "minimax/MiniMax-M2.7",
+          "deepseek/deepseek-v4-flash"
+        ]
+      },
+      "timeoutSeconds": 180,
+      "imageGenerationModel": {
+        "primary": "openrouter/google/gemini-2.5-flash-image",
+        "fallbacks": [
+          "openrouter/black-forest-labs/flux-schnell"
+        ]
       },
       "heartbeat": {
-        "// Дешёвая модель для 24/7 фоновых проверок": "блок-12",
-        "model": "openrouter/google/gemini-2.5-flash-lite",
-        "fallbacks": [
-          "deepseek/deepseek-v4-flash"
-        ],
-        "lightContext": true,
-        "every": "60m",
-        "isolatedSession": true,
-        "skipWhenBusy": true,
-        "activeHours": {
-          "start": "08:00",
-          "end": "22:00",
-          "timezone": "Europe/Moscow"
-        },
-        "rateLimit": {
-          "perMinute": 1,
-          "perHour": 5,
-          "perDay": 50
-        }
+        "model": "openrouter/google/gemini-2.5-flash-lite"
       },
-      "subagents": {
-        "// Kimi специально создана для sub-agent parallelism": "блок-03",
-        "model": "openrouter/moonshotai/kimi-k2.6",
-        "fallbacks": [
-          "deepseek/deepseek-v4-flash"
-        ]
-      },
+      "contextInjection": "continuation-skip",
       "compaction": {
+        "keepRecentTokens": 40000,
+        "maxHistoryShare": 0.5,
         "memoryFlush": {
           "enabled": true,
-          "softThresholdTokens": 4000,
-          "reserveTokensFloor": 20000,
-          "model": "deepseek/deepseek-v4-flash",
-          "systemPrompt": "Сохрани durable факты в memory/YYYY-MM-DD.md. Если ничего важного — ответь NO_REPLY."
+          "model": "openrouter/moonshotai/kimi-k2.6"
         }
-      }
-    }
-  },
-  "models": {
-    "providers": {
-      "gonka": {
-        "baseUrl": "https://gonka-gateway.mingles.ai/v1",
-        "apiKey": "${GONKA_API_KEY}",
-        "auth": "api-key",
-        "api": "openai-completions",
-        "authHeader": true,
-        "models": [
-          {
-            "id": "Qwen/Qwen3-235B-A22B-Instruct-2507-FP8",
-            "name": "Qwen3-235B",
-            "api": "openai-completions",
-            "reasoning": true,
-            "input": [
-              "text"
-            ],
-            "cost": {
-              "input": 0,
-              "output": 0
-            },
-            "contextWindow": 200000,
-            "maxTokens": 8192
-          },
-          {
-            "id": "moonshotai/Kimi-K2.6",
-            "name": "moonshotai/Kimi-K2.6",
-            "api": "openai-completions",
-            "reasoning": false,
-            "input": [
-              "text"
-            ],
-            "cost": {
-              "input": 0,
-              "output": 0
-            },
-            "contextWindow": 200000,
-            "maxTokens": 8192
-          }
-        ]
       },
-      "minimax": {
-        "timeoutSeconds": 120
+      "contextPruning": {
+        "mode": "cache-ttl"
       }
     }
   },
-  "channels": {
-    "telegram": {
-      "accounts": {
-        "main": {
-          "tokenFile": "~/.openclaw/secrets/telegram.token",
-          "// dmPolicy allowlist + числовой user ID = только владелец пишет в DM": "блок-04",
-          "dmPolicy": "allowlist",
-          "allowFrom": [
-            "${TELEGRAM_USER_ID}"
-          ],
-          "groupPolicy": "manual",
-          "pollingStallThresholdMs": 30000,
-          "mediaMaxMb": 50,
-          "transcribeVoiceMessages": true,
-          "audioMaxDurationSec": 300,
-          "voiceReplies": "auto"
-        }
-      }
+  "gateway": {
+    "mode": "local",
+    "auth": {
+      "mode": "token",
+      "token": "${GATEWAY_AUTH_TOKEN}"
+    },
+    "port": 18789,
+    "bind": "loopback",
+    "tailscale": {
+      "mode": "off",
+      "resetOnExit": false
+    },
+    "controlUi": {
+      "allowInsecureAuth": true
+    },
+    "nodes": {
+      "denyCommands": [
+        "camera.snap",
+        "camera.clip",
+        "screen.record",
+        "contacts.add",
+        "calendar.add",
+        "reminders.add",
+        "sms.send",
+        "sms.search"
+      ]
     }
+  },
+  "session": {
+    "dmScope": "per-channel-peer"
+  },
+  "env": {
+    "GROQ_API_KEY": "${GROQ_API_KEY}",
+    "OPENAI_SOCKS_PROXY": "${OPENAI_SOCKS_PROXY}",
+    "OPENROUTER_API_KEY": "${OPENROUTER_API_KEY}",
+    "BRAVE_API_KEY": "${BRAVE_API_KEY}",
+    "TAVILY_API_KEY": "${TAVILY_API_KEY}",
+    "GOOGLE_OAUTH_CLIENT_ID": "${GOOGLE_OAUTH_CLIENT_ID}",
+    "GOOGLE_OAUTH_CLIENT_SECRET": "${GOOGLE_OAUTH_CLIENT_SECRET}",
+    "GOOGLE_WORKSPACE_CLIENT_ID": "${GOOGLE_WORKSPACE_CLIENT_ID}",
+    "GOOGLE_WORKSPACE_CLIENT_SECRET": "${GOOGLE_WORKSPACE_CLIENT_SECRET}",
+    "GOOGLE_WORKSPACE_REFRESH_TOKEN": "${GOOGLE_WORKSPACE_REFRESH_TOKEN}"
   },
   "tools": {
     "profile": "full",
@@ -151,51 +104,19 @@
           }
         ]
       }
-    }
-  },
-  "memory": {},
-  "mcp": {
-    "servers": {
-      "tavily": {
-        "command": "npx",
-        "args": [
-          "-y",
-          "tavily-mcp"
-        ],
-        "env": {
-          "TAVILY_API_KEY": "${TAVILY_API_KEY}"
-        }
-      },
-      "playwright": {
-        "command": "npx",
-        "args": [
-          "-y",
-          "@playwright/mcp@latest"
-        ]
-      }
-    }
-  },
-  "skills": {
-    "entries": {}
+    },
+    "deny": [
+      "~/.openclaw/openclaw.json",
+      "~/.openclaw/credentials/",
+      "~/.openclaw/secrets/"
+    ]
   },
   "plugins": {
-    "allow": [
-      "telegram",
-      "minimax",
-      "deepseek",
-      "openrouter",
-      "groq",
-      "openai",
-      "device-pair",
-      "memory-core",
-      "gonka",
-      "openclaw-mem0"
-    ],
     "entries": {
-      "telegram": {
+      "minimax": {
         "enabled": true
       },
-      "minimax": {
+      "telegram": {
         "enabled": true
       },
       "deepseek": {
@@ -216,15 +137,10 @@
       "memory-core": {
         "enabled": true
       },
-      "gonka": {
-        "enabled": true
-      },
       "openclaw-mem0": {
         "enabled": true,
         "config": {
-          "mode": "open-source",
-          "userId": "clawd",
-          "apiKey": "",
+          "anonymousTelemetryId": "openclaw-anon-165abdbc2a464d9e91d53a6fc67c749e",
           "oss": {
             "llm": {
               "provider": "openai",
@@ -252,6 +168,9 @@
               }
             }
           },
+          "apiKey": "",
+          "userId": "clawd",
+          "mode": "open-source",
           "skills": {
             "triage": {
               "enabled": true
@@ -270,49 +189,337 @@
           }
         }
       }
+    },
+    "allow": [
+      "deepseek",
+      "device-pair",
+      "groq",
+      "memory-core",
+      "minimax",
+      "openai",
+      "openclaw-mem0",
+      "openrouter",
+      "telegram"
+    ],
+    "bundledDiscovery": "compat",
+    "slots": {
+      "memory": "openclaw-mem0"
     }
   },
-  "ui": {
-    "// Control UI на 127.0.0.1 — не 0.0.0.0! Удалённый доступ через SSH-туннель": "блок-13",
-    "enabled": true,
-    "host": "127.0.0.1",
-    "port": 4000,
-    "auth": {
-      "type": "token",
-      "tokenFile": "~/.openclaw/secrets/ui.token"
+  "models": {
+    "mode": "merge",
+    "providers": {
+      "minimax": {
+        "baseUrl": "https://api.minimax.io/anthropic",
+        "models": [
+          {
+            "id": "MiniMax-M2.7",
+            "name": "MiniMax M2.7",
+            "reasoning": true,
+            "input": [
+              "text"
+            ],
+            "cost": {
+              "input": 0.3,
+              "output": 1.2,
+              "cacheRead": 0.06,
+              "cacheWrite": 0.375
+            },
+            "contextWindow": 204800,
+            "maxTokens": 131072
+          }
+        ],
+        "api": "anthropic-messages",
+        "authHeader": true,
+        "timeoutSeconds": 120
+      },
+      "gonka": {
+        "baseUrl": "https://gonka-gateway.mingles.ai/v1",
+        "apiKey": "${GONKA_API_KEY}",
+        "auth": "api-key",
+        "api": "openai-completions",
+        "authHeader": true,
+        "models": [
+          {
+            "id": "Qwen/Qwen3-235B-A22B-Instruct-2507-FP8",
+            "name": "Qwen/Qwen3-235B-A22B-Instruct-2507-FP8",
+            "api": "openai-completions",
+            "reasoning": true,
+            "input": [
+              "text"
+            ],
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "contextWindow": 131072,
+            "maxTokens": 8192
+          },
+          {
+            "id": "moonshotai/Kimi-K2.6",
+            "name": "moonshotai/Kimi-K2.6",
+            "api": "openai-completions",
+            "reasoning": false,
+            "input": [
+              "text"
+            ],
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "contextWindow": 200000,
+            "maxTokens": 8192
+          }
+        ]
+      }
     }
   },
-  "gateway": {
-    "mode": "local",
-    "auth": {
-      "mode": "token",
-      "token": "${GATEWAY_AUTH_TOKEN}"
+  "auth": {
+    "profiles": {
+      "minimax:global": {
+        "provider": "minimax",
+        "mode": "api_key"
+      },
+      "gonka:global": {
+        "provider": "gonka",
+        "mode": "api_key"
+      },
+      "openai-codex:manual": {
+        "provider": "openai-codex",
+        "mode": "token"
+      }
+    }
+  },
+  "channels": {
+    "telegram": {
+      "enabled": true,
+      "groups": {
+        "*": {
+          "requireMention": true
+        }
+      },
+      "botToken": "${TELEGRAM_BOT_TOKEN}",
+      "allowFrom": [
+        "8527528241"
+      ],
+      "ackReaction": "????",
+      "groupAllowFrom": [
+        "8527528241"
+      ]
+    }
+  },
+  "wizard": {
+    "lastRunAt": "2026-05-22T12:22:32.128Z",
+    "lastRunVersion": "2026.5.19",
+    "lastRunCommand": "doctor",
+    "lastRunMode": "local"
+  },
+  "meta": {
+    "lastTouchedVersion": "2026.5.19",
+    "lastTouchedAt": "2026-05-22T12:36:37.414Z"
+  },
+  "commands": {
+    "ownerAllowFrom": [
+      "telegram:8527528241"
+    ]
+  },
+  "messages": {
+    "groupChat": {
+      "visibleReplies": "message_tool"
+    }
+  },
+  "skills": {
+    "entries": {
+      "1password": {
+        "enabled": false
+      },
+      "apple-notes": {
+        "enabled": false
+      },
+      "apple-reminders": {
+        "enabled": false
+      },
+      "bear-notes": {
+        "enabled": false
+      },
+      "blogwatcher": {
+        "enabled": false
+      },
+      "blucli": {
+        "enabled": false
+      },
+      "bluebubbles": {
+        "enabled": false
+      },
+      "camsnap": {
+        "enabled": false
+      },
+      "clawhub": {
+        "enabled": false
+      },
+      "coding-agent": {
+        "enabled": false
+      },
+      "discord": {
+        "enabled": false
+      },
+      "eightctl": {
+        "enabled": false
+      },
+      "gemini": {
+        "enabled": false
+      },
+      "gh-issues": {
+        "enabled": false
+      },
+      "gifgrep": {
+        "enabled": false
+      },
+      "github": {
+        "enabled": false
+      },
+      "gog": {
+        "enabled": false
+      },
+      "goplaces": {
+        "enabled": false
+      },
+      "himalaya": {
+        "enabled": false
+      },
+      "imsg": {
+        "enabled": false
+      },
+      "mcporter": {
+        "enabled": false
+      },
+      "model-usage": {
+        "enabled": false
+      },
+      "nano-pdf": {
+        "enabled": false
+      },
+      "notion": {
+        "enabled": false
+      },
+      "obsidian": {
+        "enabled": false
+      },
+      "openai-whisper": {
+        "enabled": false
+      },
+      "openai-whisper-api": {
+        "enabled": false
+      },
+      "openhue": {
+        "enabled": false
+      },
+      "oracle": {
+        "enabled": false
+      },
+      "ordercli": {
+        "enabled": false
+      },
+      "peekaboo": {
+        "enabled": false
+      },
+      "sag": {
+        "enabled": false
+      },
+      "session-logs": {
+        "enabled": false
+      },
+      "sherpa-onnx-tts": {
+        "enabled": false
+      },
+      "slack": {
+        "enabled": false
+      },
+      "songsee": {
+        "enabled": false
+      },
+      "sonoscli": {
+        "enabled": false
+      },
+      "spotify-player": {
+        "enabled": false
+      },
+      "summarize": {
+        "enabled": false
+      },
+      "things-mac": {
+        "enabled": false
+      },
+      "trello": {
+        "enabled": false
+      },
+      "video-frames": {
+        "enabled": false
+      },
+      "voice-call": {
+        "enabled": false
+      },
+      "wacli": {
+        "enabled": false
+      },
+      "xurl": {
+        "enabled": false
+      },
+      "memory-dream": {
+        "enabled": false
+      },
+      "memory-triage": {
+        "enabled": false
+      }
     }
   },
   "hooks": {
     "internal": {
-      "enabled": true,
       "entries": {
-        "boot-md": {
-          "enabled": true
+        "session-memory": {
+          "enabled": false
         }
       }
     }
   },
-  "commands": {
-    "debug": true
-  },
-  "logging": {
-    "level": "info",
-    "redactSensitive": true,
-    "redactPatterns": [
-      "sk-[A-Za-z0-9]+",
-      "Bearer\\s+[A-Za-z0-9]+",
-      "ghp_[A-Za-z0-9]+"
-    ],
-    "rotate": {
-      "maxSizeMb": 100,
-      "maxFiles": 7
+  "mcp": {
+    "servers": {
+      "browser-use": {
+        "command": "/home/clawd/browser-env/bin/browser-use",
+        "args": [
+          "--mcp"
+        ],
+        "env": {
+          "OPENROUTER_API_KEY": "${OPENROUTER_API_KEY}",
+          "OPENROUTER_BASE_URL": "https://openrouter.ai/api/v1",
+          "BROWSER_USE_LLM": "openrouter/google/gemini-2.5-flash-lite",
+          "DISPLAY": ":99",
+          "BROWSER_HEADLESS": "false",
+          "BROWSER_PROFILE_DIR": "/home/clawd/.browser-profiles/default"
+        }
+      },
+      "tavily": {
+        "command": "npx",
+        "args": [
+          "-y",
+          "@marcopirazzini/tavily-mcp@latest"
+        ],
+        "env": {
+          "TAVILY_API_KEY": "${TAVILY_API_KEY}"
+        }
+      },
+      "google-workspace": {
+        "command": "/home/clawd/browser-env/bin/google-workspace-worker",
+        "env": {
+          "GOOGLE_WORKSPACE_CLIENT_ID": "${GOOGLE_OAUTH_CLIENT_ID}",
+          "GOOGLE_WORKSPACE_CLIENT_SECRET": "${GOOGLE_OAUTH_CLIENT_SECRET}",
+          "GOOGLE_WORKSPACE_REFRESH_TOKEN": "${GOOGLE_WORKSPACE_REFRESH_TOKEN}"
+        }
+      }
     }
   }
 }

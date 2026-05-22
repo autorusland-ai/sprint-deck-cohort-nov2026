@@ -140,6 +140,45 @@ ssh -i "$SSH_KEY" "$CLAWD_VPS" "
   docker compose -f docker-compose.qdrant.yml up -d
 "
 
+echo "7b/8 🌐 ЭТАП W3: Tor (обход геоблока OpenAI) + браузерный стек (Patchright/Xvfb)..."
+ssh -i "$SSH_KEY" "$CLAWD_VPS" "sudo -S bash -c '
+  apt install -y tor xvfb xdotool x11-utils python3.12-venv
+  systemctl enable --now tor          # SOCKS5 на 127.0.0.1:9050 → OPENAI_SOCKS_PROXY
+'"
+
+# Браузерное окружение, Patchright + browser-use форк (playwright→patchright), Chrome
+BROWSER_USE_COMMIT="5f99e737c5e7ef3d3d4cbb121cc501991fdee72e"
+ssh -i "$SSH_KEY" "$CLAWD_VPS" "
+  set -e
+  python3 -m venv ~/browser-env
+  ~/browser-env/bin/pip install --upgrade pip
+  ~/browser-env/bin/pip install \
+    patchright==1.60.0 PyVirtualDisplay==3.0 playwright-stealth==2.0.3 \
+    fake-useragent==2.2.0 google-workspace-mcp==2.0.1 browser-use-sdk==3.4.2
+
+  # browser-use форк: импорт playwright → patchright (нативные антидетект-патчи)
+  if [ ! -d ~/browser-use-fork ]; then
+    git clone https://github.com/browser-use/browser-use ~/browser-use-fork
+  fi
+  cd ~/browser-use-fork && git checkout ${BROWSER_USE_COMMIT} || true
+  grep -rl 'from playwright' --include='*.py' . | xargs -r sed -i 's/from playwright/from patchright/g'
+  grep -rl 'import playwright' --include='*.py' . | xargs -r sed -i 's/import playwright/import patchright/g'
+  ~/browser-env/bin/pip install -e .
+
+  # Chrome для Patchright
+  ~/browser-env/bin/python -m patchright install chrome --with-deps
+
+  # Профиль браузера (persistent — куки/история)
+  mkdir -p ~/.browser-profiles/default
+"
+
+# Xvfb systemd-user unit (виртуальный дисплей :99)
+cat config/systemd/xvfb.service | ssh -i "$SSH_KEY" "$CLAWD_VPS" "mkdir -p ~/.config/systemd/user && cat > ~/.config/systemd/user/xvfb.service"
+ssh -i "$SSH_KEY" "$CLAWD_VPS" "systemctl --user daemon-reload && systemctl --user enable --now xvfb.service"
+
+echo "  ⚠️  Codex OAuth и Google OAuth — РУЧНЫЕ шаги (нужен TTY/браузер)."
+echo "      См. checklists/disaster-recovery.md, раздел «Воркшоп 3»."
+
 echo "8/8 🚀 Обновление .env и финальный деплой бота..."
 # Обновляем IP в .env
 if grep -q "^VPS_IP=" .env; then
