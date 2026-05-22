@@ -24,7 +24,8 @@
         "primary": "openai/gpt-5",
         "fallbacks": [
           "minimax/MiniMax-M2.7",
-          "deepseek/deepseek-v4-flash"
+          "deepseek/deepseek-v4-flash",
+          "gonka/Qwen/Qwen3-235B-A22B-Instruct-2507-FP8"
         ]
       },
       "timeoutSeconds": 180,
