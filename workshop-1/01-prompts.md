@@ -139,39 +139,247 @@ VPS_IP и ROOT_PASSWORD читай из .env через
 ```
 Промпт 4: Подготовь VPS по разделу A стандарта (standards/workshop-1-standard.md).
 
-Подключайся как root через ~/.ssh/clawd_ed25519. Выполни:
+Подключайся как root через ~/.ssh/clawd_ed25519. Выполни лестницу с обязательными
+проверками — НЕ перепрыгивай через STOP-gate, иначе можно потерять доступ к VPS.
 
-1. apt update && apt upgrade -y (без интерактива: DEBIAN_FRONTEND=noninteractive)
-2. Создать пользователя clawd (--disabled-password, в группу sudo)
-3. ⚠️ КРИТИЧНО: passwordless sudo для clawd ДО блокировки root:
+1. Обнови систему:
+   DEBIAN_FRONTEND=noninteractive apt update
+   DEBIAN_FRONTEND=noninteractive apt upgrade -y
+
+2. Создай пользователя clawd:
+   adduser --disabled-password --gecos "" clawd
+   usermod -aG sudo clawd
+
+3. Настрой passwordless sudo ДО любых SSH-блокировок:
    echo "clawd ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/clawd
    chmod 440 /etc/sudoers.d/clawd
+   visudo -cf /etc/sudoers.d/clawd
 
-   ОБЯЗАТЕЛЬНО проверь: su - clawd -c "sudo -n whoami" → должно ответить root.
-   Если нет — СТОП, скажи мне, не блокируй root SSH!
+   Проверка внутри root-сессии:
+     su - clawd -c "sudo -n whoami"
+   Ожидаемый вывод: root
 
-4. Скопировать SSH-ключ из /root/.ssh/authorized_keys в /home/clawd/.ssh/
-   (chmod 600, owner clawd:clawd)
+   Если вывод другой — СТОП. Root SSH НЕ закрывать. ufw / fail2ban / смену порта НЕ включать.
 
-5. Заблокировать root SSH:
-   PermitRootLogin no
-   PasswordAuthentication no
-   systemctl restart ssh
+4. Скопируй SSH-ключ пользователю clawd:
+   install -d -m 700 -o clawd -g clawd /home/clawd/.ssh
+   cp /root/.ssh/authorized_keys /home/clawd/.ssh/authorized_keys
+   chown clawd:clawd /home/clawd/.ssh/authorized_keys
+   chmod 600 /home/clawd/.ssh/authorized_keys
 
-6. ufw: deny incoming, allow outgoing, limit 22/tcp, enable
+🛑 5. STOP-GATE 1 — проверка запасного входа ДО блокировки root.
 
-7. fail2ban: install, enable, start
+   ⚠️ Эту команду выполнять с ЛОКАЛЬНОЙ машины (Mac), где лежит приватный ключ
+   ~/.ssh/clawd_ed25519. НЕ выполнять внутри root-сессии на VPS: на VPS нет
+   локального приватного ключа Mac.
 
-8. Swap 4GB через /swapfile + /etc/fstab
+   Текущую root-сессию на VPS держи ОТКРЫТОЙ как страховочный канал.
 
-9. unattended-upgrades + Automatic-Reboot=false
+   На Mac в новом терминале:
+     ssh -i ~/.ssh/clawd_ed25519 -o BatchMode=yes clawd@<VPS_IP> "whoami && sudo -n whoami"
 
-10. loginctl enable-linger clawd
+   Или через .env:
+     set -a && source .env && set +a && ssh -i ~/.ssh/clawd_ed25519 -o BatchMode=yes clawd@$VPS_IP "whoami && sudo -n whoami"
 
-После — обнови .env: VPS_USER=root → VPS_USER=clawd.
+   Ожидаемый вывод СТРОГО:
+     clawd
+     root
 
-Покажи какие критерии A.1-A.10 закрыл.
+   Если вывод другой — СТОП. НЕЛЬЗЯ:
+     - закрывать root SSH (PermitRootLogin no);
+     - включать fail2ban;
+     - включать ufw;
+     - менять порт SSH;
+     - продолжать hardening.
+   Покажи пользователю вывод и жди — разберёмся с ключом/sudo.
+
+6. Только после успешного STOP-GATE 1 — закрой root SSH.
+   В /etc/ssh/sshd_config выставить:
+     PermitRootLogin no
+     PasswordAuthentication no
+     PubkeyAuthentication yes
+
+   Перед перезапуском обязательно:
+     sshd -t
+   Если sshd -t показывает ошибку — СТОП. НЕ перезапускай SSH.
+   Если ошибок нет:
+     systemctl reload ssh || systemctl reload sshd
+
+7. Ещё раз проверь вход clawd после закрытия root (с Mac, не на VPS):
+     ssh -i ~/.ssh/clawd_ed25519 -o BatchMode=yes clawd@<VPS_IP> "whoami && sudo -n whoami"
+   Или через .env:
+     set -a && source .env && set +a && ssh -i ~/.ssh/clawd_ed25519 -o BatchMode=yes clawd@$VPS_IP "whoami && sudo -n whoami"
+
+   Ожидаемый вывод: clawd / root. Если другой — СТОП.
+
+8. Настрой ufw, ПОКА не закрывая текущий рабочий SSH-путь:
+   ufw default deny incoming
+   ufw default allow outgoing
+   ufw allow 22/tcp comment "temporary SSH during setup"
+
+9. Установи fail2ban (после этого НЕ делать массовых SSH-проверок):
+   apt install -y fail2ban
+
+   Создать /etc/fail2ban/jail.local:
+     [sshd]
+     enabled = true
+     bantime = 86400
+     findtime = 600
+     maxretry = 3
+
+   systemctl enable fail2ban
+   systemctl start fail2ban
+   systemctl is-active fail2ban
+
+   ⚠️ После этого НЕ делай много SSH-подключений подряд. НЕ проверяй root-вход циклом.
+
+10. Включи ufw:
+    ufw --force enable
+    ufw status
+
+🛑 11. STOP-GATE 2 — смена SSH-порта без потери доступа.
+
+    Выбрать новый порт:
+      NEW_PORT=$(shuf -i 10000-60000 -n 1)
+      echo $NEW_PORT
+
+    Открыть новый порт ДО изменения sshd:
+      ufw allow ${NEW_PORT}/tcp comment "SSH new port"
+
+    Поменять порт в sshd_config:
+      sed -i "s/^#*Port .*/Port ${NEW_PORT}/" /etc/ssh/sshd_config
+
+    Добавить ограничения:
+      grep -q "^MaxStartups" /etc/ssh/sshd_config || echo "MaxStartups 5:30:10" >> /etc/ssh/sshd_config
+      grep -q "^MaxSessions" /etc/ssh/sshd_config || echo "MaxSessions 5" >> /etc/ssh/sshd_config
+
+    Проверить синтаксис:
+      sshd -t
+    Если ошибка — СТОП. НЕ перезапускай SSH.
+    Если ОК:
+      systemctl reload ssh || systemctl reload sshd
+
+12. Проверь новый порт во ВТОРОЙ SSH-сессии (с Mac, не закрывая текущую).
+
+    СКАЖИ ПОЛЬЗОВАТЕЛЮ:
+      «СТОП. Открой второй терминал на локальной машине и проверь:»
+
+      ssh -p <NEW_PORT> -i ~/.ssh/clawd_ed25519 -o BatchMode=yes clawd@<VPS_IP> "whoami && sudo -n whoami"
+    Или через .env:
+      set -a && source .env && set +a && ssh -p $NEW_PORT -i ~/.ssh/clawd_ed25519 -o BatchMode=yes clawd@$VPS_IP "whoami && sudo -n whoami"
+
+    Ожидаемый вывод: clawd / root.
+
+    Только после подтверждения пользователя «работает» — продолжай.
+    Если не подтвердил — НЕЛЬЗЯ удалять allow 22/tcp.
+
+13. Только после подтверждения — удали порт 22:
+    ufw delete allow 22/tcp
+    ufw status
+
+14. Обнови .env на локальной машине:
+    VPS_USER=clawd
+    SSH_PORT=<NEW_PORT>
+
+15. Финальная проверка + остальная инфраструктура:
+    ssh -p <NEW_PORT> -i ~/.ssh/clawd_ed25519 -o BatchMode=yes clawd@<VPS_IP> "whoami && sudo -n whoami"
+    Ожидаемый вывод: clawd / root.
+
+    Покажи:
+      grep -E "^(Port|PermitRootLogin|PasswordAuthentication|PubkeyAuthentication|MaxStartups|MaxSessions)" /etc/ssh/sshd_config
+      fail2ban-client get sshd bantime
+      ufw status
+
+    Доделай (через sudo от clawd):
+      sudo fallocate -l 4G /swapfile && sudo chmod 600 /swapfile && sudo mkswap /swapfile && sudo swapon /swapfile && echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+      sudo apt install -y unattended-upgrades && echo 'Unattended-Upgrade::Automatic-Reboot "false";' | sudo tee /etc/apt/apt.conf.d/52unattended-upgrades-local
+      sudo loginctl enable-linger clawd
+
+Покажи какие критерии A.1-A.14 закрыл.
+
+КЛЮЧЕВЫЕ ПРАВИЛА:
+1. Root SSH нельзя закрывать, пока clawd не проверен в новой SSH-сессии с Mac.
+2. Порт 22 нельзя закрывать, пока новый порт не проверен пользователем во второй сессии.
+3. Старую рабочую SSH-сессию нельзя закрывать до конца проверки.
+4. Если проверка не прошла — агент обязан остановиться. Нельзя «попробовать продолжить».
+5. После включения fail2ban нельзя делать много SSH-подключений подряд.
+6. Проверку root-входа нельзя делать циклом.
+7. Если агент видит ошибку SSH — показать вывод пользователю и ждать решения.
 ```
+
+---
+
+### 🚨 Если SSH отвалился после Промпта 4 (rescue)
+
+**Симптом** — при попытке подключиться SSH сразу обрывается:
+
+```
+kex_exchange_identification: Connection closed by remote host
+Connection closed by <IP> port 22
+```
+
+**Это обычно НЕ проблема SSH-ключа.** Сервер закрыл соединение ещё до handshake. Частые причины:
+
+- `fail2ban` забанил твой IP после серии попыток входа;
+- `ufw limit 22/tcp` сработал из-за залпа SSH-команд (часто — агент циклил `su - clawd` или повторные проверки root SSH);
+- меняется внешний IP (VPN / мобильный интернет);
+- `sshd` слушает другой порт или перезапущен с ошибкой.
+
+**Что делать:**
+
+1. **Не долби SSH агентом.** Каждая попытка усиливает бан.
+2. Зайди в VPS через **web-console / VNC / console провайдера** (Beget / Hetzner / etc.).
+3. В web-console выполни:
+
+```bash
+sudo systemctl status ssh --no-pager
+sudo journalctl -u ssh -n 80 --no-pager
+sudo fail2ban-client status sshd || true
+sudo ufw status numbered
+sudo ss -tlnp | grep ssh
+```
+
+4. На Mac узнай свой текущий внешний IP:
+
+```bash
+curl -4 ifconfig.me
+```
+
+5. Если IP в бане — разбань (в web-console VPS):
+
+```bash
+sudo fail2ban-client set sshd unbanip <ТВОЙ_IP>
+sudo systemctl restart fail2ban
+```
+
+6. Проверь обычный SSH из терминала Mac (не через агента):
+
+```bash
+ssh -vvv -i ~/.ssh/clawd_ed25519 clawd@<VPS_IP>
+```
+
+7. Если снова рвёт — временно (только для диагностики) останови fail2ban:
+
+```bash
+sudo systemctl stop fail2ban
+```
+
+После восстановления доступа **обязательно** включи обратно:
+
+```bash
+sudo systemctl start fail2ban
+sudo systemctl is-active fail2ban
+```
+
+**Чего НЕ делать:**
+
+- не добавлять IP участника в `ignoreip` по умолчанию;
+- не ограничивать SSH «только с моего IP» (мобильный/VPN меняют его);
+- не пересоздавать SSH-ключ и не переустанавливать VPS — это редко настоящая причина;
+- не отключать fail2ban навсегда;
+- после включения `fail2ban` / `ufw limit` — не пускать параллельные SSH-команды и не циклить проверки root-входа.
+
+Критерии стандарта **A.5** (ufw active с rate-limit) и **A.6** (fail2ban active) остаются обязательными — этот раздел только про восстановление доступа, не про отключение защиты.
 
 ---
 
