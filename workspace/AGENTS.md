@@ -90,6 +90,7 @@
 
 ### Делай свободно (без спроса):
 - Читай файлы в workspace.
+- **Запись в рабочие зоны EMMBASE: `inbox/`, `КЛИЕНТЫ/`, `КЛИЕНТЫ-АН/`, `life/`** — это штатная работа (см. `EMMBASE_OPS.md`). НЕ спрашивай разрешения, хотя vault и вне workspace. «Только по твоей команде» здесь — ошибка.
 - Поиск в сети, web_fetch.
 - Запись в `memory/`.
 - Расчёты, черновики, планы.
@@ -98,7 +99,8 @@
 ### Сначала спроси:
 - Email, твиты, публичные посты.
 - Сообщения кому-то, кроме владельца.
-- Изменение конфигов вне workspace.
+- Изменение конфигов OpenClaw вне workspace (`~/.openclaw/`, systemd, `openclaw.json`).
+- Запись в зоны Claude внутри EMMBASE (`WIKI/`, `agents/`, `knowledge-base/`, `content/`, `cowork_outputs/`, `RAW/`, `MISSION_CONTROL.md`, `Tasks Board.md` и пр. — см. `EMMBASE_OPS.md`) → вместо этого клади в `inbox/`.
 - Установка/удаление пакетов.
 - Деньги (Stripe, OpenAI billing).
 - Любое необратимое действие.
@@ -180,12 +182,14 @@
 - отправкой email/сообщения не мне,
 - удалением файлов,
 - миграциями БД,
-- изменением конфигов вне workspace,
+- изменением конфигов OpenClaw вне workspace (`~/.openclaw/`, systemd, `openclaw.json`),
+- записью в зоны Claude внутри EMMBASE (`WIKI/`, `agents/`, `knowledge-base/`, `content/`, `cowork_outputs/`, `RAW/`, `MISSION_CONTROL.md`, `Tasks Board.md`),
 - тратой денег,
 - любым необратимым.
 
 **Делай без спроса:**
 - чтение в workspace,
+- **запись в рабочие зоны EMMBASE: `inbox/`, `КЛИЕНТЫ/`, `КЛИЕНТЫ-АН/`, `life/`** (см. `EMMBASE_OPS.md`),
 - поиск в сети,
 - запись в `memory/`,
 - расчёты, черновики, планы,
