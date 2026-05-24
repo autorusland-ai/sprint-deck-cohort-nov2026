@@ -405,3 +405,26 @@ ssh clawd-vps-tail   # ����� Tailscale (��������)
 | 13.05.2026 | KB planning | ���������� ����������� ������� KB (97 ������), �������� sync |
 | 14.05.2026 | Groq fix | env-not-in-systemd: ������ env.conf override, Whisper ��������� |
 | 14.05.2026 | A.15 | Tailscale: ��������� SSH ������, ������� ����� 100.76.223.48 |
+
+
+---
+
+## 📝 Сессия 2026-05-24 — Синхронизация правил бота (EMMBASE-зоны)
+
+**Контекст:** отчёт о 3 расхождениях между правилами и реальным поведением бота на VPS.
+
+**Корень проблемы #1 (главное):** в `~/.openclaw/workspace/AGENTS.md` правило «изменение конфигов вне workspace → спроси» перебивало разрешение из `EMMBASE_OPS.md`. Vault `/home/clawd/emmbase` лежит вне workspace, поэтому бот трактовал запись в КЛИЕНТЫ/ и life/ как «вне workspace → спроси» и осторожничал («только по твоей команде»). Простой ре-синк не помог бы — файлы уже были идентичны.
+
+**Что сделано:**
+- `EMMBASE_OPS.md` v18.05 → v24.05: архитектура разбита на 🟢 «Зоны записи (без спроса)» (inbox/, КЛИЕНТЫ/, КЛИЕНТЫ-АН/, life/) и 🔴 «Зоны Claude (не писать)». В 🔴 добавлены ранее отсутствовавшие WIKI/, agents/, content/, cowork_outputs/, RAW/. Новый раздел ⛔ — запрет workspace/prompts/.
+- `AGENTS.md`: в обоих блоках принятия решений («External vs Internal» + «Decision Framework») рабочие зоны EMMBASE явно переведены в «без спроса», конфиги OpenClaw и зоны Claude — в «спроси».
+- `workspace/prompts/neurotranscriber.md` → перенесён в `emmbase/inbox/2026-05-24_промт-нейротранскрибатор.md`, папка prompts/ удалена.
+- Канон `emmbase/agents/openclaw-bot-системный-промт.md` обновлён до v24.05 (→ Syncthing → C:/PROJECTS/EMMBASE/).
+
+**Развёрнуто:** VPS (~/.openclaw/workspace + ~/emmbase/agents), бэкапы оригиналов `*.bak-<ts>`. Бот перезагружен (`systemctl --user restart openclaw-gateway`, active). Deck закоммичен: `992f667`.
+
+**Архитектурный вывод (важно на будущее):** правила бота живут в `~/.openclaw/workspace/` (конфиг OpenClaw), а база знаний — в `~/emmbase/` (Obsidian vault, Syncthing). Это РАЗНЫЕ места. Канон-промт в vault — справочник для Claude, бот его не грузит; бот грузит SOUL/AGENTS/EMMBASE_OPS/USER/TOOLS из workspace.
+
+| Дата | Сессия | Что сделано |
+|---|---|---|
+| 24.05.2026 | Bot rules sync | EMMBASE-зоны, фикс write-without-ask для КЛИЕНТЫ/life, запрет prompts/, перезагрузка бота |
