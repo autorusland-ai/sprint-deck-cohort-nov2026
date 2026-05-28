@@ -89,18 +89,18 @@
 ## External vs Internal
 
 ### Делай свободно (без спроса):
-- Читай файлы в workspace.
-- **Запись в рабочие зоны EMMBASE: `inbox/`, `КЛИЕНТЫ/`, `КЛИЕНТЫ-АН/`, `life/`** — это штатная работа (см. `EMMBASE_OPS.md`). НЕ спрашивай разрешения, хотя vault и вне workspace. «Только по твоей команде» здесь — ошибка.
+- Читай файлы в workspace **и в EMMBASE** (vault полностью открыт на чтение).
+- **Запись в `~/emmbase/inbox/` с правильной разметкой** — единственная точка входа в EMMBASE, это штатная работа (см. `EMMBASE_OPS.md`). НЕ спрашивай разрешения, не отвечай «только по твоей команде» — клади в inbox/ сразу.
 - Поиск в сети, web_fetch.
 - Запись в `memory/`.
 - Расчёты, черновики, планы.
 - Read-only shell (`ls`, `cat`, `git status`, `df`, `free`).
 
-### Сначала спроси:
+### Сначала спроси (или вообще не делай — клади в inbox/):
 - Email, твиты, публичные посты.
 - Сообщения кому-то, кроме владельца.
 - Изменение конфигов OpenClaw вне workspace (`~/.openclaw/`, systemd, `openclaw.json`).
-- Запись в зоны Claude внутри EMMBASE (`WIKI/`, `agents/`, `knowledge-base/`, `content/`, `cowork_outputs/`, `RAW/`, `MISSION_CONTROL.md`, `Tasks Board.md` и пр. — см. `EMMBASE_OPS.md`) → вместо этого клади в `inbox/`.
+- **Любая прямая запись в EMMBASE вне `inbox/`** — `КЛИЕНТЫ/`, `КЛИЕНТЫ-АН/`, `life/`, `WIKI/`, `agents/`, `knowledge-base/`, `content/`, `cowork_outputs/`, `RAW/`, `Tasks Board.md`, `MISSION_CONTROL.md`, `LIFE_CONTROL.md` и пр. — **запрещена**, всегда клади в `inbox/`, Claude разнесёт.
 - Установка/удаление пакетов.
 - Деньги (Stripe, OpenAI billing).
 - Любое необратимое действие.
@@ -183,13 +183,13 @@
 - удалением файлов,
 - миграциями БД,
 - изменением конфигов OpenClaw вне workspace (`~/.openclaw/`, systemd, `openclaw.json`),
-- записью в зоны Claude внутри EMMBASE (`WIKI/`, `agents/`, `knowledge-base/`, `content/`, `cowork_outputs/`, `RAW/`, `MISSION_CONTROL.md`, `Tasks Board.md`),
+- **любой прямой записью в EMMBASE вне `inbox/`** — `КЛИЕНТЫ/`, `КЛИЕНТЫ-АН/`, `life/`, `WIKI/`, `agents/`, `knowledge-base/` и пр. **запрещены**, всегда клади в `inbox/` (см. `EMMBASE_OPS.md`),
 - тратой денег,
 - любым необратимым.
 
 **Делай без спроса:**
-- чтение в workspace,
-- **запись в рабочие зоны EMMBASE: `inbox/`, `КЛИЕНТЫ/`, `КЛИЕНТЫ-АН/`, `life/`** (см. `EMMBASE_OPS.md`),
+- чтение в workspace и в EMMBASE (vault полностью открыт на чтение),
+- **запись в `~/emmbase/inbox/` с правильной разметкой** — единственная точка входа в EMMBASE (см. `EMMBASE_OPS.md`),
 - поиск в сети,
 - запись в `memory/`,
 - расчёты, черновики, планы,
