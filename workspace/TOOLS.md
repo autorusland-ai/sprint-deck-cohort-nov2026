@@ -6,17 +6,11 @@
 
 ---
 
-## SSH (алиасы из ~/.ssh/config на VPS, если настроены)
+## SSH
 
-- `{{SSH_ALIAS_1}}` → `{{SSH_HOST_1}}` — `{{SSH_DESC_1}}`
-- `{{SSH_ALIAS_2}}` → `{{SSH_HOST_2}}` — `{{SSH_DESC_2}}`
+- `clawd-vps-tail` → `100.76.223.48` — продакшн VPS через Tailscale, пользователь `clawd`.
 
-<!-- Образец:
-- `vps-main` → продакшн VPS, Hetzner CX22, Ubuntu 24.04 — где живу я (бот)
-- `nas` → Synology DS923+ дома, бэкапы
--->
-
-Используй `ssh <alias> "команда"`. Без `-p` и `user@`.
+Используй `ssh clawd-vps-tail "команда"` или ключ `~/.ssh/clawd_ed25519` с `clawd@100.76.223.48`.
 
 ---
 
@@ -38,7 +32,7 @@
   - Initial prompt: `OpenClaw, OpenRouter, MiniMax, DeepSeek, Telegram` — улучшает распознавание имён.
 - **TTS (выход):** OpenAI `tts-1` (НЕ `tts-1-hd` — в 2x дороже).
   - Голос: `alloy` (нейтральный, поддерживает русский).
-  - Альтернатива: ElevenLabs `{{ELEVENLABS_VOICE_ID}}` для лучшего качества.
+  - ElevenLabs не настроен.
 - **Voice replies:** включены автоматически (`voiceReplies: "auto"`) — если входящее голосовое, ответ тоже голосом, но только короткий (< 200 символов). Длинные ответы — текстом.
 
 ---
@@ -109,7 +103,7 @@
 
 ## Что НЕ используем
 
-- AWS — VPS у `{{HOSTING_PROVIDER}}` (Hetzner / Beget / DO).
+- AWS.
 - Windows / WSL — VPS на Linux.
 - snap-версия Chromium — конфликт с AppArmor (см. `docs/troubleshooting.md`).
 

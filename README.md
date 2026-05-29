@@ -4,7 +4,7 @@
 > Это рабочее окружение, которое ты открываешь в Antigravity. AI-плагин (Claude Code или Codex) управляет ботом по SSH через скрипты из этой папки.
 
 **Версия deck:** 1.8.0 — geo-aware primary, OpenClaw gateway unit, tuning after onboard
-**Подготовлено:** Дмитрий Попов (@ai_comandos)
+**Владелец:** Руслан Фёдоров (@ruslanfedorov)
 
 ---
 

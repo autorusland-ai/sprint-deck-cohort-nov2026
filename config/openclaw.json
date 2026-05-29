@@ -309,11 +309,11 @@
       },
       "botToken": "${TELEGRAM_BOT_TOKEN}",
       "allowFrom": [
-        "8527528241"
+        "215087477"
       ],
       "ackReaction": "????",
       "groupAllowFrom": [
-        "8527528241"
+        "215087477"
       ]
     }
   },
@@ -329,7 +329,7 @@
   },
   "commands": {
     "ownerAllowFrom": [
-      "telegram:8527528241"
+      "telegram:215087477"
     ]
   },
   "messages": {

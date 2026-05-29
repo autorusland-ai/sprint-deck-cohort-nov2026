@@ -115,10 +115,12 @@ comandos-claw-deck/
 
 | Роль | Модель | Канал | Зачем |
 |---|---|---|---|
-| **PRIMARY** | `minimax/minimax-m2.7` | MiniMax Coding $10/мес | 90% диалогов |
-| **FALLBACK** | `deepseek/deepseek-v4-flash` | DeepSeek API | дёшево, всегда дешевле primary |
+| **PRIMARY** | `openai/gpt-5` | OpenAI | основной диалоговый маршрут |
+| **FALLBACK 1** | `minimax/MiniMax-M2.7` | MiniMax Coding $10/мес | дешёвый длинный контекст |
+| **FALLBACK 2** | `deepseek/deepseek-v4-flash` | DeepSeek API | дешёвый быстрый fallback |
+| **FALLBACK 3** | `gonka/Qwen/Qwen3-235B-A22B-Instruct-2507-FP8` | Gonka | бесплатный/резервный reasoning |
 | **HEARTBEAT** | `openrouter/google/gemini-2.5-flash-lite` | OpenRouter | 24/7 фон, lightContext |
-| **SUBAGENTS** | `openrouter/moonshotai/kimi-k2.6` | OpenRouter | parallelism |
+| **SUBAGENTS / COMPACTION** | `openrouter/moonshotai/kimi-k2.6` / `gonka/moonshotai/Kimi-K2.6` | OpenRouter / Gonka | parallelism, memory flush |
 | **PREMIUM** (по `/model premium`) | `deepseek/deepseek-v4-pro` | DeepSeek API | сложные задачи |
 | **THINKING** | `deepseek/deepseek-v4-pro:thinking` | DeepSeek API | reasoning |
 
@@ -191,7 +193,7 @@ comandos-claw-deck/
 ```
 Deck version: 1.8.0
 OpenClaw target: 0.9.x (на момент 2026-04)
-Owner: Дмитрий Попов (@ai_comandos)
+Owner: Руслан Фёдоров (@ruslanfedorov, Telegram ID 215087477)
 ```
 
 Получить обновления: `git pull origin main`.

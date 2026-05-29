@@ -38,6 +38,7 @@ desktop.ini
 # Antigravity локальные файлы
 .antigravity/
 .antigravity.local.json
+.claude/
 
 # Node / Python (если что-то ставится локально)
 node_modules/
