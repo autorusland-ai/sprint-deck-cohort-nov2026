@@ -165,7 +165,7 @@ comandos-claw-deck/
 
 1. **Config cap:** `spending.dailyCapUsd: 2`, `monthlyCapUsd: 30`, `killSwitchAt: 5`.
 2. **Provider hard limit:** OpenRouter $30/мес (ставится у провайдера).
-3. **Watchdog kill-switch:** cron каждые 30 мин проверяет `openclaw spend`.
+3. **Watchdog kill-switch:** локальный watchdog должен работать fail-closed: если текущая версия OpenClaw не отдаёт spend/cost, он не должен молча считать `$0`. Основной hard-limit по деньгам ставится у провайдера.
 4. **Heartbeat rate limit:** `1/мин, 5/час, 50/день`.
 
 Если видишь что что-то «горит» — `./scripts/emergency-stop.sh` или `checklists/emergency-stop.md`.

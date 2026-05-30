@@ -49,6 +49,9 @@
       },
       "contextPruning": {
         "mode": "cache-ttl"
+      },
+      "sandbox": {
+        "mode": "all"
       }
     }
   },
@@ -110,7 +113,15 @@
       "~/.openclaw/openclaw.json",
       "~/.openclaw/credentials/",
       "~/.openclaw/secrets/"
-    ]
+    ],
+    "byProvider": {
+      "gonka/Qwen/Qwen3-235B-A22B-Instruct-2507-FP8": {
+        "deny": [
+          "group:web",
+          "browser"
+        ]
+      }
+    }
   },
   "plugins": {
     "entries": {
