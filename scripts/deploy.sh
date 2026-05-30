@@ -107,7 +107,7 @@ sleep 5
 # 10. Verify
 echo ""
 echo "🩺 openclaw doctor --deep:"
-$SSH "$VPS" 'openclaw doctor --deep 2>&1 | tail -15' || echo "⚠️  doctor возможно не доступен в этой версии"
+$SSH "$VPS" '/home/clawd/.npm-global/bin/openclaw doctor --deep 2>&1 | tail -15' || echo "⚠️  doctor возможно не доступен в этой версии"
 
 echo ""
 echo "✅ Deploy завершён"

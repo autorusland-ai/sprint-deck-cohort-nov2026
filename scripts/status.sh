@@ -6,8 +6,8 @@
 #   - daemon (systemctl)
 #   - openclaw doctor
 #   - gateway listen (порт 18789)
-#   - spending today
-#   - models test (4 провайдера)
+#   - spending command availability
+#   - model status
 #   - RAM, диск
 # ============================================================================
 
@@ -27,6 +27,7 @@ set +a
 : "${VPS_USER:=clawd}"
 SSH_KEY="${HOME}/.ssh/clawd_ed25519"
 SSH="ssh -i $SSH_KEY"
+OPENCLAW_BIN="/home/clawd/.npm-global/bin/openclaw"
 if [ -n "${VPS_IP:-}" ]; then
   VPS="${VPS_USER}@${VPS_IP}"
 elif [ -n "${SSH_ALIAS:-}" ]; then
@@ -50,7 +51,7 @@ fi
 
 echo ""
 echo "🩺 openclaw doctor:"
-$SSH "$VPS" 'openclaw doctor --deep 2>&1 | tail -10' || echo "  ⚠️  doctor недоступен"
+$SSH "$VPS" "$OPENCLAW_BIN doctor --deep 2>&1 | tail -10" || echo "  ⚠️  doctor недоступен"
 
 echo ""
 echo "🌐 Gateway (порт 18789):"
@@ -62,12 +63,11 @@ fi
 
 echo ""
 echo "💰 Spending today:"
-SPEND=$($SSH "$VPS" 'openclaw spend --since="today" --json 2>/dev/null | jq -r ".total // 0"' 2>/dev/null || echo "?")
-echo "  💵 \$${SPEND} USD"
+echo "  ⚠️  openclaw spend недоступен в этой версии CLI"
 
 echo ""
-echo "🤖 Models test:"
-$SSH "$VPS" 'openclaw models test --json 2>/dev/null | jq -r ".[] | \"  \(.name): \(.status)\""' 2>/dev/null || echo "  ⚠️  models test недоступен"
+echo "🤖 Model status:"
+$SSH "$VPS" "$OPENCLAW_BIN models status --plain 2>/dev/null | sed 's/^/  /'" 2>/dev/null || echo "  ⚠️  models status недоступен"
 
 echo ""
 echo "📊 Memory:"
