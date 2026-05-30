@@ -51,7 +51,12 @@
         "mode": "cache-ttl"
       },
       "sandbox": {
-        "mode": "all"
+        "mode": "all",
+        "backend": "docker",
+        "scope": "agent",
+        "docker": {
+          "image": "comandos-openclaw-sandbox:bookworm-slim"
+        }
       }
     }
   },
