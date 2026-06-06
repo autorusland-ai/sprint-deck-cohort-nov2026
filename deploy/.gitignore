@@ -1,0 +1,30 @@
+# Реальные секреты — никогда не комитить
+secrets.env
+secrets.env.local
+*.token
+*.key
+*-creds.json
+yandex-caldav.json
+google-token.json
+google-credentials.json
+google-oauth.json
+google_storage_token.json
+auth-profiles.json
+auth-state.json
+openclaw.json
+
+# GPG-backup секретов (хранится отдельно, не рядом с bundle)
+*.tgz.gpg
+*.tar.gpg
+openclaw-secrets-backup.*
+
+# Runtime data при тестовых запусках
+*.log
+__pycache__/
+*.pyc
+.venv/
+node_modules/
+
+# OS
+.DS_Store
+Thumbs.db

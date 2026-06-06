@@ -1,0 +1,70 @@
+# OpenClaw — user-level systemd unit
+# Источник: блок-02-установка-openclaw.md, PRO-04-production-hardening.md.
+#
+# Установка:
+#   1. mkdir -p ~/.config/systemd/user/
+#   2. cp openclaw-gateway.service ~/.config/systemd/user/
+#   3. systemctl --user daemon-reload
+#   4. systemctl --user enable --now openclaw-gateway
+#   5. loginctl enable-linger clawd      # юнит работает даже когда юзер не залогинен
+#
+# Управление:
+#   systemctl --user status openclaw-gateway
+#   systemctl --user restart openclaw-gateway
+#   journalctl --user -u openclaw-gateway -f
+
+[Unit]
+Description=OpenClaw daemon — личный AI-агент
+Documentation=https://docs.openclaw.ai
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=%h/.npm-global/bin/openclaw gateway
+Restart=always
+RestartSec=10
+StartLimitInterval=300
+StartLimitBurst=5
+
+# Memory limits — защита от OOM на 4GB VPS (см. issue #41778)
+MemoryMax=2G
+MemoryHigh=1500M
+
+# CPU limits — не выжирать сервер
+CPUQuota=200%
+
+# Node.js heap — соответствует MemoryMax
+Environment="NODE_OPTIONS=--max-old-space-size=2048"
+
+# Системный путь — node 22 LTS через nodesource + локальный bin
+Environment="PATH=/home/clawd/.npm-global/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin"
+
+# Workspace
+WorkingDirectory=%h/.openclaw
+
+# Optional: trajectory recording для дебага (раскомментировать при необходимости)
+# Environment="OPENCLAW_TRAJECTORY=%h/.openclaw/traces"
+
+# Security hardening (см. PRO-04)
+# Закомментировано: systemd --user не поддерживает эти директивы (218/CAPABILITIES)
+# NoNewPrivileges=true
+# PrivateTmp=true
+# ProtectSystem=strict
+# ProtectHome=read-only
+# ReadWritePaths=%h/.openclaw
+# ProtectKernelTunables=true
+# ProtectKernelModules=true
+# ProtectControlGroups=true
+# RestrictNamespaces=true
+# LockPersonality=true
+# RestrictRealtime=true
+# RestrictSUIDSGID=true
+
+# Логи в journald
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=openclaw
+
+[Install]
+WantedBy=default.target

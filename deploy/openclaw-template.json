@@ -1,0 +1,214 @@
+{
+  "_comment": "Шаблон openclaw.json. configure.sh подставит реальные значения вместо ${PLACEHOLDER}. После генерации валидируется через `openclaw config validate`.",
+
+  "agents": {
+    "defaults": {
+      "workspace": "/home/clawd/.openclaw/workspace",
+      "models": {
+        "minimax/MiniMax-M2.7": { "alias": "Minimax" },
+        "deepseek/deepseek-v4-flash": {},
+        "deepseek/deepseek-v4-pro": { "alias": "premium" },
+        "deepseek/deepseek-v4-pro:thinking": { "alias": "think" },
+        "gonka/Qwen/Qwen3-235B-A22B-Instruct-2507-FP8": { "alias": "qwen235b" },
+        "gonka/moonshotai/Kimi-K2.6": { "alias": "kimi26" },
+        "openai/gpt-5.5": {}
+      },
+      "model": {
+        "primary": "minimax/MiniMax-M2.7",
+        "fallbacks": [
+          "deepseek/deepseek-v4-flash",
+          "openai/gpt-5.5",
+          "gonka/Qwen/Qwen3-235B-A22B-Instruct-2507-FP8"
+        ]
+      },
+      "timeoutSeconds": 180,
+      "imageGenerationModel": {
+        "primary": "openrouter/google/gemini-2.5-flash-image",
+        "fallbacks": ["openrouter/black-forest-labs/flux-schnell"]
+      },
+      "heartbeat": {
+        "model": "openrouter/google/gemini-2.5-flash-lite"
+      },
+      "contextInjection": "continuation-skip",
+      "compaction": {
+        "keepRecentTokens": 40000,
+        "maxHistoryShare": 0.5,
+        "memoryFlush": { "enabled": true, "model": "openrouter/moonshotai/kimi-k2.6" }
+      },
+      "contextPruning": { "mode": "cache-ttl" },
+      "sandbox": {
+        "mode": "all",
+        "backend": "docker",
+        "scope": "agent",
+        "workspaceAccess": "rw",
+        "docker": {
+          "image": "comandos-openclaw-sandbox:bookworm-slim",
+          "binds": [
+            "/home/clawd/emmbase:/emmbase:ro",
+            "/home/clawd/emmbase/inbox:/emmbase/inbox:rw"
+          ],
+          "dangerouslyAllowExternalBindSources": true
+        }
+      }
+    }
+  },
+
+  "gateway": {
+    "mode": "local",
+    "auth": { "mode": "token", "token": "${GATEWAY_TOKEN}" },
+    "port": 18789,
+    "bind": "loopback",
+    "tailscale": { "mode": "off", "resetOnExit": false },
+    "controlUi": { "allowInsecureAuth": true },
+    "nodes": {
+      "denyCommands": [
+        "camera.snap", "camera.clip", "screen.record",
+        "contacts.add", "calendar.add", "reminders.add",
+        "sms.send", "sms.search"
+      ]
+    }
+  },
+
+  "session": { "dmScope": "per-channel-peer" },
+
+  "env": {
+    "GROQ_API_KEY": "${GROQ_API_KEY}",
+    "OPENAI_SOCKS_PROXY": "socks5://127.0.0.1:9050",
+    "OPENROUTER_API_KEY": "${OPENROUTER_API_KEY}",
+    "BRAVE_API_KEY": "${BRAVE_API_KEY}",
+    "TAVILY_API_KEY": "${TAVILY_API_KEY}",
+    "GOOGLE_OAUTH_CLIENT_ID": "${GOOGLE_OAUTH_CLIENT_ID}",
+    "GOOGLE_OAUTH_CLIENT_SECRET": "${GOOGLE_OAUTH_CLIENT_SECRET}",
+    "GOOGLE_WORKSPACE_CLIENT_ID": "${GOOGLE_OAUTH_CLIENT_ID}",
+    "GOOGLE_WORKSPACE_CLIENT_SECRET": "${GOOGLE_OAUTH_CLIENT_SECRET}",
+    "GOOGLE_WORKSPACE_REFRESH_TOKEN": "${GOOGLE_WORKSPACE_REFRESH_TOKEN}"
+  },
+
+  "tools": {
+    "profile": "full",
+    "media": {
+      "audio": {
+        "models": [{ "provider": "groq" }]
+      }
+    },
+    "deny": [
+      "~/.openclaw/openclaw.json",
+      "~/.openclaw/credentials/",
+      "~/.openclaw/secrets/"
+    ],
+    "byProvider": {
+      "gonka/Qwen/Qwen3-235B-A22B-Instruct-2507-FP8": {
+        "deny": ["group:web", "browser"]
+      }
+    },
+    "sandbox": {
+      "tools": {
+        "alsoAllow": ["telegram", "google-workspace", "browser-use"]
+      }
+    },
+    "elevated": {
+      "enabled": true,
+      "allowFrom": {
+        "telegram": ["${TELEGRAM_USER_ID}"]
+      }
+    }
+  },
+
+  "plugins": {
+    "entries": {
+      "minimax": { "enabled": true },
+      "telegram": { "enabled": true },
+      "deepseek": { "enabled": true },
+      "openrouter": { "enabled": true },
+      "groq": { "enabled": true },
+      "openai": { "enabled": true },
+      "device-pair": { "enabled": true },
+      "memory-core": { "enabled": true },
+      "codex": { "enabled": true },
+      "openclaw-mem0": {
+        "enabled": true,
+        "config": {
+          "anonymousTelemetryId": "openclaw-anon-${ANONYMOUS_ID}",
+          "oss": {
+            "llm": {
+              "provider": "openai",
+              "config": {
+                "model": "openrouter/moonshotai/kimi-k2.6",
+                "apiKey": "${OPENROUTER_API_KEY}"
+              }
+            },
+            "embedder": {
+              "provider": "ollama",
+              "config": {
+                "model": "nomic-embed-text",
+                "ollamaUrl": "http://localhost:11434",
+                "embeddingDims": 768
+              }
+            },
+            "vectorStore": {
+              "provider": "qdrant",
+              "config": {
+                "url": "http://localhost:6333",
+                "onDisk": true,
+                "dimension": 768,
+                "embeddingModelDims": 768,
+                "collectionName": "mem0_768d"
+              }
+            }
+          },
+          "apiKey": "",
+          "userId": "clawd",
+          "mode": "open-source",
+          "skills": {
+            "triage": { "enabled": true },
+            "recall": {
+              "enabled": true,
+              "tokenBudget": 1000,
+              "rerank": true,
+              "keywordSearch": true,
+              "identityAlwaysInclude": true
+            },
+            "dream": { "enabled": true },
+            "domain": "companion"
+          }
+        }
+      }
+    }
+  },
+
+  "channels": {
+    "telegram": {
+      "enabled": true,
+      "groups": { "*": { "requireMention": true } },
+      "botToken": "${TELEGRAM_BOT_TOKEN}",
+      "allowFrom": ["${TELEGRAM_USER_ID}"],
+      "ackReaction": "👍",
+      "groupAllowFrom": ["${TELEGRAM_USER_ID}"]
+    }
+  },
+
+  "mcp": {
+    "servers": {
+      "google-workspace": {
+        "command": "/home/clawd/browser-env/bin/google-workspace-worker",
+        "env": {
+          "GOOGLE_WORKSPACE_CLIENT_ID": "${GOOGLE_OAUTH_CLIENT_ID}",
+          "GOOGLE_WORKSPACE_CLIENT_SECRET": "${GOOGLE_OAUTH_CLIENT_SECRET}",
+          "GOOGLE_WORKSPACE_REFRESH_TOKEN": "${GOOGLE_WORKSPACE_REFRESH_TOKEN}"
+        }
+      },
+      "browser-use": {
+        "command": "/home/clawd/browser-env/bin/browser-use",
+        "args": ["--mcp"],
+        "env": {
+          "OPENROUTER_API_KEY": "${OPENROUTER_API_KEY}",
+          "OPENROUTER_BASE_URL": "https://openrouter.ai/api/v1",
+          "BROWSER_USE_LLM": "openrouter/google/gemini-2.5-flash-lite",
+          "DISPLAY": ":99",
+          "BROWSER_HEADLESS": "false",
+          "BROWSER_PROFILE_DIR": "/home/clawd/.browser-profiles/default"
+        }
+      }
+    }
+  }
+}
