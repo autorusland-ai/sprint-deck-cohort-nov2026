@@ -59,18 +59,65 @@ for f in "$INBOUND"/*.amr "$INBOUND"/*.3gp "$INBOUND"/*.AMR; do
     curl -sS --max-time 15 -X POST "https://api.telegram.org/bot$TG_TOKEN/sendMessage"         -d "chat_id=$CHAT_ID"         --data-urlencode "text=$msg"         -d 'disable_notification=true' > /dev/null 2>>"$LOG"
 
     # Дополнительно — кладём в /emmbase/inbox/ как файл типа "голосовое"
-    # (бот может читать через mount /emmbase/, Claude разберёт в своей сессии)
-    inbox_date=$(date -u '+%Y-%m-%d_%H%M')
-    inbox_slug=$(echo "$name" | sed -E 's/[^A-Za-z0-9._-]/-/g; s/-+/-/g' | cut -c1-60)
-    inbox_file="$INBOX/${inbox_date}_voice-${inbox_slug}.md"
+    # Формат по системному промту v3 (06.06.2026):
+    # - имя: ГГГГ-ММ-ДД_ЧЧММ_voice-<источник>.md, ДАТА = дата ЗВОНКА из PBX-имени
+    # - YAML: # Дата события (когда звонок), # Телефон, # Связать с
+    #
+    # PBX-формат имени файла: <phone>_YYYYMMDDHHMMSS---<uuid>.amr
+    # либо: <name>_<phone>_YYYYMMDDHHMMSS---<uuid>.amr (с ФИО префиксом)
+
+    # Извлекаем timestamp звонка
+    event_ts=$(echo "$name" | grep -oE '[0-9]{14}' | head -1)
+    if [ -n "$event_ts" ]; then
+        event_date="${event_ts:0:4}-${event_ts:4:2}-${event_ts:6:2}"
+        event_hhmm="${event_ts:8:2}${event_ts:10:2}"
+        event_full="${event_date} ${event_ts:8:2}:${event_ts:10:2}"
+    else
+        event_date=$(date '+%Y-%m-%d')
+        event_hhmm=$(date '+%H%M')
+        event_full=$(date '+%Y-%m-%d %H:%M')
+    fi
+
+    # Извлекаем номер телефона из PBX-имени (формат: 7_NNN_NNN[-_]NN[-_]NN, разделители _ или -)
+    phone_raw=$(echo "$name" | grep -oE '[78]_[0-9]{3}_[0-9]{3}[-_][0-9]{2}[-_][0-9]{2}' | head -1)
+    if [ -n "$phone_raw" ]; then
+        # Нормализуем: подчёркивания → пробелы, дефисы оставляем как разделители блоков
+        phone_fmt="+$(echo "$phone_raw" | sed -E 's/_/ /g; s/^([78]) ([0-9]{3}) ([0-9]{3}) ([0-9]{2}) ([0-9]{2})$/\1 \2 \3-\4-\5/')"
+    else
+        phone_fmt="не определён"
+    fi
+
+    # Извлекаем имя клиента (префикс перед телефоном, если есть)
+    client_prefix=$(echo "$name" | sed -E 's/_[78]_[0-9]{3}_.*$//; s/_/ /g')
+    if [ -n "$client_prefix" ] && [ "$client_prefix" != "$name" ]; then
+        relates="клиент: $client_prefix"
+        link_entity="$client_prefix"
+    else
+        relates="новый-клиент?"
+        link_entity="неизвестный-номер ($phone_fmt)"
+    fi
+
+    # Slug для имени файла (короткая тема)
+    if [ -n "$client_prefix" ] && [ "$client_prefix" != "$name" ]; then
+        slug=$(echo "$client_prefix" | sed -E 's/[^A-Za-zА-Яа-я0-9]/-/g; s/-+/-/g; s/^-|-$//g' | cut -c1-40)
+        slug="voice-$slug"
+    else
+        slug="voice-$(echo "$phone_raw" | tr -d '_-' | cut -c1-12)"
+    fi
+
+    inbox_file="$INBOX/${event_date}_${event_hhmm}_${slug}.md"
+
     {
         printf '# Тип: голосовое\n'
-        printf '# Относится к: бизнес\n'
-        printf '# Дата: %s\n' "$(date '+%Y-%m-%d %H:%M')"
+        printf '# Дата события: %s\n' "$event_full"
+        printf '# Относится к: %s\n' "$relates"
+        printf '# Телефон: %s\n' "$phone_fmt"
+        printf '# Связать с: [[%s]]\n' "$link_entity"
         printf '# Источник: бот\n'
         printf '# Срочность: 🟡 обычно\n\n'
-        printf '**Источник звонка:** %s\n\n' "$meta"
-        printf '**Транскрипт (Whisper Large v3 через Groq, ffmpeg pre-process):**\n\n%s\n' "$text"
+        printf '**Источник звонка:** %s\n' "$meta"
+        printf '**Оригинал AMR:** `~/.openclaw/media/transcribed/%s`\n\n' "$name"
+        printf '**Транскрипт (Whisper Large v3 через Groq, ffmpeg → opus):**\n\n%s\n' "$text"
     } > "$inbox_file"
 
     echo "$(ts) [ok] $name chars=${#text} inbox=$(basename "$inbox_file")" >> "$LOG"
