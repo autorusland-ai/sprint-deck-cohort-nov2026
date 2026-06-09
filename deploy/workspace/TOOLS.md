@@ -95,15 +95,35 @@ Workspace бота (правила, state, sessions) монтируется от
 ⚠️ ПУБЛИКУЙ ТОЛЬКО ПО ЯВНОЙ КОМАНДЕ РУСЛАНА (например «опубликуй», «постни», «выложи», «/publish»). Никогда не публикуй на всякий случай, по контексту, потому что мне показалось. Сомневаешься — спроси.
 
 ---
-## Voice (Whisper транскрипция + TTS)
 
-- **Транскрипция (вход):** Whisper Large v3 Turbo через Groq (бесплатно).
-  - Язык: `ru` по умолчанию.
-  - Initial prompt: `OpenClaw, OpenRouter, MiniMax, DeepSeek, Telegram` — улучшает распознавание имён.
-- **TTS (выход):** OpenAI `tts-1` (НЕ `tts-1-hd` — в 2x дороже).
-  - Голос: `alloy` (нейтральный, поддерживает русский).
-  - ElevenLabs не настроен.
-- **Voice replies:** включены автоматически (`voiceReplies: "auto"`) — если входящее голосовое, ответ тоже голосом, но только короткий (< 200 символов). Длинные ответы — текстом.
+## Voice pipeline (.ogg / .amr / .3gp)
+
+### Как это устроено
+
+1. **`.ogg`** (стандартное Telegram voice от смартфона) — openclaw runtime **сам** транскрибирует через Groq Whisper API. Текст автоматически вставляется в диалог как inbound message. **Тебе ничего делать не надо** — просто отвечай на текст.
+2. **`.amr` / `.3gp`** (записи с офисных PBX, Asterisk, IP-телефонии, старые телефоны) — Groq Whisper НЕ принимает этот формат, runtime отдаёт `HTTP 400`. Но на VPS работает **host-side cron** `transcribe-audio-watcher.sh` (запуск каждую минуту):
+   - ffmpeg конвертирует `.amr` → opus 16k
+   - curl к Groq Whisper Large v3
+   - Результат **(а) отправляется отдельным сообщением в Telegram** с префиксом `📝 Транскрипт (.amr через ffmpeg)`
+   - И **(б) кладётся в `/emmbase/inbox/ГГГГ-ММ-ДД_ЧЧММ_voice-имя.md`** с типом `голосовое` — ты можешь его читать.
+
+### Что делать тебе как боту
+
+- Увидел в логе/диалоге `[media-understanding] audio: failed reason=Audio transcription failed (HTTP 400)` на `audio/amr` — **не паникуй**. Watcher уже обрабатывает. Подожди 60-120 сек (длина файла + ffmpeg + Groq).
+- На запрос «расшифруй то голосовое» — **сначала проверь `/emmbase/inbox/`** на свежие `*_voice-*.md` (за последние 5 минут). Если файл там — читай и используй текст.
+- **НЕ запускай faster-whisper / pip install whisper / прочую локальную транскрипцию.** Это CPU-heavy и медленно, watcher работает быстрее.
+- **НЕ говори «Groq API key не работает»** только потому что в твоём sandbox env переменная `GROQ_API_KEY=***`. Это **намеренное маскирование** openclaw'ом — runtime использует реальный ключ. Запусти `~/.openclaw/scripts/transcribe-audio-watcher.sh` (или подожди cron) — он читает реальный ключ из `~/.openclaw/openclaw.json` напрямую.
+
+### Где живёт реальный ключ Groq (для справки, не для копирования)
+
+- `~/.openclaw/openclaw.json` → `env.GROQ_API_KEY`
+- `~/.openclaw/agents/main/agent/auth-profiles.json` → `profiles.groq:global.key`
+
+Оба должны быть синхронизированы — формат `gsk_...`. Если sandbox видит у себя `***` — это OK, всё рабочее.
+
+### Где живёт реальный путь openclaw config
+
+`~/.openclaw/openclaw.json` (БЕЗ `/config/` префикса). Если видишь упоминание `~/.openclaw/config/openclaw.json` где-то в своих рассуждениях — это **галлюцинация**, такого пути не существует.
 
 ---
 

@@ -13,8 +13,9 @@ flock -n 9 || exit 0  # уже бежит другой инстанс — вых
 INBOUND=/home/clawd/.openclaw/media/inbound
 PROCESSED=/home/clawd/.openclaw/media/transcribed
 FAILED=/home/clawd/.openclaw/media/transcribe-failed
+INBOX=/home/clawd/emmbase/inbox
 LOG=/home/clawd/.openclaw/scripts/transcribe-audio.log
-mkdir -p "$PROCESSED" "$FAILED"
+mkdir -p "$PROCESSED" "$FAILED" "$INBOX"
 
 GROQ_KEY=$(python3 -c 'import json; print(json.load(open("/home/clawd/.openclaw/openclaw.json"))["env"]["GROQ_API_KEY"])')
 TG_TOKEN=$(cat /home/clawd/.openclaw/secrets/telegram.token)
@@ -57,7 +58,22 @@ for f in "$INBOUND"/*.amr "$INBOUND"/*.3gp "$INBOUND"/*.AMR; do
 
     curl -sS --max-time 15 -X POST "https://api.telegram.org/bot$TG_TOKEN/sendMessage"         -d "chat_id=$CHAT_ID"         --data-urlencode "text=$msg"         -d 'disable_notification=true' > /dev/null 2>>"$LOG"
 
-    echo "$(ts) [ok] $name chars=${#text}" >> "$LOG"
+    # Дополнительно — кладём в /emmbase/inbox/ как файл типа "голосовое"
+    # (бот может читать через mount /emmbase/, Claude разберёт в своей сессии)
+    inbox_date=$(date -u '+%Y-%m-%d_%H%M')
+    inbox_slug=$(echo "$name" | sed -E 's/[^A-Za-z0-9._-]/-/g; s/-+/-/g' | cut -c1-60)
+    inbox_file="$INBOX/${inbox_date}_voice-${inbox_slug}.md"
+    {
+        printf '# Тип: голосовое\n'
+        printf '# Относится к: бизнес\n'
+        printf '# Дата: %s\n' "$(date '+%Y-%m-%d %H:%M')"
+        printf '# Источник: бот\n'
+        printf '# Срочность: 🟡 обычно\n\n'
+        printf '**Источник звонка:** %s\n\n' "$meta"
+        printf '**Транскрипт (Whisper Large v3 через Groq, ffmpeg pre-process):**\n\n%s\n' "$text"
+    } > "$inbox_file"
+
+    echo "$(ts) [ok] $name chars=${#text} inbox=$(basename "$inbox_file")" >> "$LOG"
     mv "$f" "$PROCESSED/"
     rm -f "$tmp"
 done
