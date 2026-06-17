@@ -27,23 +27,29 @@ sudo -u clawd bash configure.sh
 | [scripts/](scripts/) | 13 helper-скриптов — host-side API wrappers и cron-задачи. См. таблицу ниже. |
 | [workspace/](workspace/) | Правила бота: SOUL, IDENTITY, TOOLS, USER, AGENTS, 8 skills, шаблоны постов. |
 
-### `scripts/` — что какой делает
+### `scripts/` — что какой делает (17 файлов)
 
-| Скрипт | Что | Запуск |
+Все cron-выражения в **UTC** (системная таймзона VPS = `Etc/UTC`).
+
+| Скрипт | Cron (UTC → МСК) | Назначение |
 |---|---|---|
-| **`gws-cli.py`** | Google API wrapper (Gmail / Calendar / Drive). Бот вызывает через `exec`. | По требованию из бота |
-| **`yacal-cli.py`** | Yandex Calendar CalDAV wrapper (7 календарей). Read+write. | По требованию из бота |
-| **`transcribe-audio-watcher.sh`** | Конверсия `.amr`/`.3gp` → ogg → Groq Whisper → транскрипт в Telegram. | Cron, каждую минуту |
-| **`media-cleanup.sh`** | Чистит `media/inbound`, `transcribed`, `outbound`, image-generation, `/tmp/openclaw`. | Cron, 04:00 UTC |
-| **`reminder-operacionka.sh`** | «🔔 Чат Операционка» в Telegram. | Cron, будни 09:30 МСК |
-| **`reminder-weekly-digest.sh`** | «📋 Итоги недели». | Cron, пятница 18:00 МСК |
-| **`weekly-digest.sh`** | Дайджест по `workspace/memory/` через kimi. | Cron, понедельник 10:00 МСК |
-| **`daily-digest.sh`** | Ежедневный дайджест базы EMMBASE. | Cron |
-| **`archive-memory.sh`** | Архивация memory в .tgz. | Cron, воскресенье 03:00 |
-| **`openclaw-autocommit.sh`** | Автокоммит `~/.openclaw/` в git. | Cron, каждый час |
-| **`permission-watchdog.sh`** | Сторож прав на secrets. | Cron, каждые 15 мин |
-| **`pre-update-backup.sh`** | Снэпшот перед `openclaw update`. | Вручную |
-| **`watchdog.sh`** | Бюджетный watchdog (fail-closed, без spend source). | Вручную |
+| **`gws-cli.py`** | по требованию | Google API wrapper (Gmail / Calendar / Drive). Бот вызывает через `exec`. |
+| **`yacal-cli.py`** | по требованию | Yandex Calendar CalDAV wrapper (7 календарей). Read+write. |
+| **`transcribe-audio-watcher.sh`** | `* * * * *` (каждую мин) | `.amr`/`.3gp` → **DeepGram nova-2** (primary) / Groq Whisper / faster-whisper local — fallback цепочка. Результат → inbox + Telegram. |
+| **`inbox-relocator.sh`** | `* * * * *` (каждую мин) | Страховка: переносит файлы из `~/.openclaw/workspace/inbox/` в `~/emmbase/inbox/` + алерт в Telegram. |
+| **`inbox-snapshot.sh`** | `0 * * * *` (каждый час) | Hardlink-snapshot всего inbox в `~/.openclaw/backups/inbox-snapshot/`. 7 дней хранения. |
+| **`inbox-monitor.sh`** | `0 7 * * *` (10:00 МСК) | Telegram-дайджест inbox + детектор «тихих пропаж» (что было в snapshot вчера, нет сегодня). |
+| **`calendar-board-sync.sh`** | `0 4 * * *` + `0 17 * * *` (07:00+20:00 МСК) | Сверяет Google+Yandex calendar с Tasks Board. При расхождении → Telegram + инструкция Claude'у в inbox. |
+| **`media-cleanup.sh`** | `0 4 * * *` (07:00 МСК) | Чистит `media/inbound`, `transcribed`, `outbound`, image-generation, `/tmp/openclaw`. |
+| **`reminder-operacionka.sh`** | `30 6 * * 1-5` (09:30 МСК будни) | «🔔 Чат Операционка» в Telegram. |
+| **`reminder-weekly-digest.sh`** | `0 15 * * 5` (18:00 МСК пт) | «📋 Итоги недели». |
+| **`weekly-digest.sh`** | `0 10 * * 1` (13:00 МСК пн) | Дайджест по `workspace/memory/` через kimi. |
+| **`daily-digest.sh`** | `30 4 * * 1-5` (07:30 МСК будни) | Ежедневный дайджест EMMBASE (Gmail + Calendar Google/Yandex + Tasks Board). |
+| **`archive-memory.sh`** | `0 3 * * 0` (06:00 МСК вс) | Архивация memory в .tgz. |
+| **`openclaw-autocommit.sh`** | `0 * * * *` | Автокоммит `~/.openclaw/` в git. |
+| **`permission-watchdog.sh`** | `*/15 * * * *` | Сторож прав на secrets (0600 на token-файлы). |
+| **`pre-update-backup.sh`** | вручную | Снэпшот перед `openclaw update`. |
+| **`watchdog.sh`** | вручную | Бюджетный watchdog (fail-closed, без spend source). |
 
 ### `workspace/skills/` — 8 skills
 

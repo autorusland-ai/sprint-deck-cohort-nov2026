@@ -226,6 +226,7 @@ curl -X POST https://oauth2.googleapis.com/token \
 - `google-workspace-mcp` (pip) — Gmail/Calendar/Drive/Docs/Sheets/Slides API
 - `browser-use` (форк) — web automation через Playwright
 - `caldav` + `icalendar` (pip) — для Yandex Calendar через `yacal-cli.py` (CalDAV-based, не MCP)
+- `faster-whisper` (pip) — локальный CPU-fallback для транскрипции (3-й уровень в watcher)
 
 **В openclaw.json** прописаны в `mcp.servers.google-workspace` и `mcp.servers.browser-use` с env-vars (refresh_token + client_id+secret).
 

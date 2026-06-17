@@ -344,3 +344,129 @@ Calendar-keeper теперь обязан при ЛЮБОМ вопросе пр�
 - `openai-primary.token` / `openai-backup.token` — устаревшие
 - `google-rusfincoach.txt` — устаревший аккаунт (можно удалить)
 
+---
+
+## Цикл 09.06–17.06.2026 — DeepGram, sync-checker, monitoring, snapshots
+
+### Расширение 09.06 — Системный промт v3 + Бакланов-инцидент
+
+Пользователь обновил `/emmbase/agents/openclaw-bot-системный-промт.md` до v3 — новые поля YAML в файлах inbox:
+- `# Дата события:` (вместо `# Дата:`) — когда событие произошло, не дата записи
+- `# Телефон:` — для поиска карточки клиента по номеру
+- `# Связать с: [[obsidian-links]]` — граф связей
+
+Причина: инцидент 09.06 — Claude поместил сегодняшний транскрипт звонка с Александром Николаевичем Баклановым (Альфарма-М) в карточку клиента с **именем 2026-06-08** (вчерашняя дата), Руслан искал по 09.06 и не нашёл. Файл сам был на месте (`КЛИЕНТЫ/Альфарма-М (Баканов)/2026-06-08_транскрипт-звонок.md`), но из-за неправильного имени казался пропавшим.
+
+Обновлено:
+- `transcribe-audio-watcher.sh` — парсит PBX-формат имён `<имя_клиента>_<phone>_YYYYMMDDHHMMSS---uuid.amr`, извлекает timestamp звонка → `# Дата события`, телефон → `# Телефон`.
+- `inbox-saver/SKILL.md` — переписан под v3 с примерами.
+
+Параллельно отдельный документ `feedback-for-claude-2026-06-09.md` (в корне репо) — обратная связь для Claude по 6 правилам разбора inbox.
+
+### Расширение 09.06 (continued) — путаница workspace/inbox vs emmbase/inbox
+
+Бот регулярно писал в `~/.openclaw/workspace/inbox/` (своя рабочая папка) вместо `/emmbase/inbox/` (Obsidian vault). За период 01.06–03.06 накопилось 12 «потерянных» файлов (Florida Beach, Mikhail, Кир Воликов, Чемоданов, Топорков и т.д.) которые Claude никогда не видел.
+
+Применено:
+- 12 файлов перенесены в `/emmbase/inbox/` руками.
+- Создан **`inbox-relocator.sh`** (cron каждую минуту) — переносит файлы из workspace/inbox в emmbase/inbox + шлёт Telegram-алерт «бот опять промахнулся».
+- В `SOUL.md` и `inbox-saver/SKILL.md` добавлен жёсткий блок «❌ Запрещённые пути».
+
+### Расширение 09.06 (continued) — Google refresh_token истёк (опять)
+
+Через 9 дней после re-auth 31.05 Google снова отозвал refresh_token (Google policy: testing-mode apps теряют tokens через 7 дней). Симптом: утренний дайджест показал «Gmail: ошибка чтения, Google: нет событий».
+
+Решение: новый OAuth flow через **OOB** (`urn:ietf:wg:oauth:2.0:oob`) — Google показывает code прямо на странице крупным шрифтом, не надо копировать redirect URL из адресной строки (проще для пользователя — он раньше путал OAuth URL с redirect URL).
+
+Memory: [`google-refresh-token-7-day-expiry.md`](https://example.com/memory). Root fix — Google Cloud Console → OAuth consent screen → Publish App. Пользователь это сделал 09.06 (status «In production»), но для sensitive scopes (Gmail/Calendar) Google всё равно может отзывать токены для unverified apps. Полное решение — пройти verification (требует privacy policy URL, ~2-6 недель ожидания).
+
+### Расширение 17.06 — DeepGram primary + 3-уровневый fallback транскрипции
+
+Watcher транскрипции упирался в Groq Whisper Large v3 на длинных файлах (25+ мин записи ФИС / Музыченко). Groq имеет неявные ограничения по длине, ответ — пустой transcript.
+
+Применено:
+- Добавлен **DeepGram API ключ** в `env` + `~/.openclaw/secrets/deepgram.token`.
+- `transcribe-audio-watcher.sh` переписан с 3 уровнями fallback:
+  1. **DeepGram nova-2** (ru, smart_format, diarize, principle) — принимает AMR **напрямую без ffmpeg**, длинные файлы (25+ мин) OK.
+  2. **Groq Whisper Large v3** (fallback) — через ffmpeg → opus.
+  3. **faster-whisper local** (fallback fallback) — model `base` на CPU, offline. Установлен через `/home/clawd/browser-env/bin/pip install faster-whisper`.
+- Параметр `engine` теперь в логе `[ok:deepgram]` / `[ok:groq]` / `[ok:whisper-local]` — видно какой движок отработал.
+- Защита от collision: если файл с тем же именем уже есть в inbox, добавляется суффикс `_2.md`, `_3.md` (раньше был silent overwrite).
+
+Re-транскрибированы оба AMR ФИС (по 25 минут каждый) → 19 823 chars transcript в `/emmbase/inbox/2026-06-17_0653_voice-fis-muzychenko.md`.
+
+### Расширение 17.06 — inbox monitoring + hourly snapshot
+
+Триггер: 16.06 три файла исчезли из inbox без следа (предположительно Syncthing засинкал удаление с компа). Раньше для recovery не было снапшота.
+
+Применено:
+- **`inbox-snapshot.sh`** — каждый час rsync с hardlink-копированием из `~/emmbase/inbox/` в `~/.openclaw/backups/inbox-snapshot/snapshot-ГГГГ-ММ-ДД_ЧЧ/`. Hardlinks → дисковое место не растёт. Хранится 7 дней. `LATEST` симлинк всегда указывает на последний.
+- **`inbox-monitor.sh`** — раз в день в 10:00 МСК Telegram-дайджест:
+  - сколько файлов в inbox корне сейчас
+  - сколько Claude разобрал за 24ч (новые файлы в КЛИЕНТЫ, life, projects)
+  - **⚠️ алерт «пропали без следа»**: файлы которые были в snapshot вчера, но сегодня нет нигде в emmbase
+
+Recovery файла из snapshot: `cp ~/.openclaw/backups/inbox-snapshot/snapshot-ГГГГ-ММ-ДД_ЧЧ/файл.md ~/emmbase/inbox/`.
+
+### Расширение 17.06 — calendar-board-sync (двунаправленная сверка)
+
+Раньше сверка с Tasks Board была только **реактивная** (calendar-keeper skill, при запросе пользователя). Добавлена **пассивная** сверка:
+
+- **`calendar-board-sync.sh`** (cron 04:00 + 17:00 UTC = 07:00 + 20:00 МСК):
+  - Читает Google + Yandex (все 6 events-календарей) на сегодня + 7 дней.
+  - Парсит секцию «📅 Календарь» из `Tasks Board.md`.
+  - При расхождении:
+    1. Telegram-сообщение Руслану с конкретикой («🆕 В календарях, нет в Tasks Board: ...», «⚠️ В Tasks Board, нет в календарях: ...»).
+    2. Файл-инструкция Claude'у в `/emmbase/inbox/ГГГГ-ММ-ДД_ЧЧММ_sync-calendar-tasks-board.md`.
+
+Этот двунаправленный sync покрывает сценарий: Руслан добавляет событие напрямую в Google Calendar (через мобильный/web), минуя бота — бот это автоматически обнаруживает и просит Claude обновить Tasks Board.
+
+### Расширение 17.06 — Inbox подпапки в правилах
+
+В `/emmbase/inbox/` есть 3 функциональных подпапки:
+- `claude-инструкции/` — бот может класть **мета-инструкции** Claude'у по обслуживанию базы (обновить индексы, чистка ссылок, и т.п.).
+- `ruslan-actions/` — бот документирует **ручные действия Руслана** для будущей автоматизации.
+- `_archive/` — Claude складывает разобранные файлы (бот не пишет сам).
+
+Добавлены явные правила в `inbox-saver/SKILL.md` (раздел «Подпапки inbox/ — когда использовать»). Структура НЕ плоская — у каждой подпапки своя роль.
+
+### Финальная инвентаризация на 17.06.2026
+
+**Скрипты на VPS (17 шт., все в `deploy/scripts/`):**
+
+| Скрипт | Cron | Назначение |
+|---|---|---|
+| `transcribe-audio-watcher.sh` | `* * * * *` (каждую мин) | DeepGram→Groq→whisper-local, .amr→inbox |
+| `inbox-relocator.sh` | `* * * * *` | страховка от workspace/inbox-промахов |
+| `permission-watchdog.sh` | `*/15 * * * *` | права на secrets |
+| `openclaw-autocommit.sh` | `0 * * * *` | git автокоммит ~/.openclaw |
+| `inbox-snapshot.sh` | `0 * * * *` | hardlink-snapshot inbox каждый час |
+| `daily-digest.sh` | `30 4 * * 1-5` (07:30 МСК будни) | дайджест emmbase по календарю/почте |
+| `calendar-board-sync.sh` | `0 4 * * *` + `0 17 * * *` (07:00+20:00 МСК) | сверка календарей ↔ Tasks Board |
+| `inbox-monitor.sh` | `0 7 * * *` (10:00 МСК) | Telegram-дайджест inbox + детектор пропаж |
+| `reminder-operacionka.sh` | `30 6 * * 1-5` (09:30 МСК будни) | 🔔 «Чат Операционка» |
+| `reminder-weekly-digest.sh` | `0 15 * * 5` (18:00 МСК пятн.) | 📋 «Итоги недели» |
+| `media-cleanup.sh` | `0 4 * * *` (07:00 МСК) | чистка media/* старше N дней |
+| `archive-memory.sh` | `0 3 * * 0` (06:00 МСК вс) | архив workspace/memory |
+| `weekly-digest.sh` | `0 10 * * 1` (13:00 МСК пн) | weekly-дайджест workspace/memory |
+| `watchdog.sh` | вручную | бюджетный fail-closed |
+| `pre-update-backup.sh` | вручную | снэпшот перед `openclaw update` |
+| `gws-cli.py` | по требованию из бота | Google API wrapper (Gmail/Calendar/Drive) |
+| `yacal-cli.py` | по требованию из бота | Yandex CalDAV wrapper (7 календарей) |
+
+**Дополнительно (не из моего bundle, оставлено как есть):**
+- `/tmp/watcher.sh` cron `*/30 * * * *` — отдельный watcher md-изменений emmbase, создан 11.06 (вероятно Claude'ом). ⚠️ В `/tmp/` — пропадёт при reboot VPS.
+
+**Workspace skills (8 шт.):** calendar-keeper, mail-handler, inbox-saver, browser-agent, deep-research, page-reader, web-quick, self-improving-agent.
+
+**Env-ключи в `~/.openclaw/openclaw.json`:** GROQ_API_KEY, OPENROUTER_API_KEY, BRAVE_API_KEY, TAVILY_API_KEY, GOOGLE_OAUTH_CLIENT_ID/SECRET, GOOGLE_WORKSPACE_CLIENT_ID/SECRET/REFRESH_TOKEN, **DEEPGRAM_API_KEY** (новое), OPENAI_SOCKS_PROXY, HTTPS_PROXY/HTTP_PROXY/NO_PROXY.
+
+**Secrets (`~/.openclaw/secrets/`, все 0600):** telegram.token, yandex-caldav.json, **deepgram.token** (новое), google-* (5 файлов), openai-* (2 файла).
+
+**Cron-таймзона:** `Etc/UTC` (проверено через `timedatectl`). Все cron-выражения в UTC.
+
+### Memory-записи (добавлено в этот цикл)
+
+- `google-refresh-token-7-day-expiry.md` — 7-day цикл expiry для Testing apps + OOB flow.
+- `deploy-bash-hardening-patterns.md` — `scp && ssh` цепочка, `set -e` в ssh-блоке, cron-дедуп по имени скрипта (не точной строке).
+
