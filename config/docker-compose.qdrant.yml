@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 services:
   qdrant:
     image: qdrant/qdrant:v1.12.4
@@ -7,10 +7,35 @@ services:
       - "127.0.0.1:6333:6333"
       - "127.0.0.1:6334:6334"
     volumes:
-      - ~/.openclaw/qdrant-data:/qdrant/storage:z
+      # ВАЖНО: абсолютный путь, НЕ "~".
+      # Контейнер изначально создан от root, поэтому "~" развернулся в /root.
+      # Если оставить "~", запуск от clawd подмонтирует пустой
+      # /home/clawd/.openclaw/qdrant-data и векторная память бота "исчезнет".
+      - /root/.openclaw/qdrant-data:/qdrant/storage:z
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:6333/ || exit 1"]
-      interval: 10s
+      # В образе qdrant/qdrant НЕТ curl — прежний healthcheck
+      # ("curl -f http://localhost:6333/") падал всегда, FailingStreak дорос до 143k.
+      # Проверяем порт средствами bash, который в образе есть.
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/localhost/6333"]
+      interval: 30s
       timeout: 5s
       retries: 5
+# ---------------------------------------------------------------------------
+# ВНИМАНИЕ (26.07.2026): на VPS стоит docker-compose v1.29.2, несовместимый
+# с текущим Docker Engine — "docker-compose up -d" падает с
+# KeyError: 'ContainerConfig', предварительно УДАЛИВ контейнер.
+# Плагин "docker compose" (v2) не установлен.
+# Пока это не исправлено, контейнер поднимать напрямую:
+#
+#   docker run -d --name qdrant \
+#     -p 127.0.0.1:6333:6333 -p 127.0.0.1:6334:6334 \
+#     -v /root/.openclaw/qdrant-data:/qdrant/storage:z \
+#     --restart unless-stopped \
+#     --health-cmd 'bash -c "exec 3<>/dev/tcp/localhost/6333"' \
+#     --health-interval 30s --health-timeout 5s --health-retries 5 \
+#     qdrant/qdrant:v1.12.4
+#
+# Данные лежат в /root/.openclaw/qdrant-data (bind-mount, не volume),
+# поэтому переживают пересоздание контейнера.
+# ---------------------------------------------------------------------------

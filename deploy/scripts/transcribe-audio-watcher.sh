@@ -49,7 +49,11 @@ transcribe_audio() {
     if [ -n "$DEEPGRAM_KEY" ]; then
         local resp send_file="$amr_file" ctype='audio/amr' anchor_sec=0 tmp_mix=''
         if [ -n "$ANCHOR" ] && [ -f "$ANCHOR" ]; then
-            anchor_sec=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$ANCHOR" 2>/dev/null | cut -d. -f1)
+            # Клеим встык, без паузы: вставка тишины между эталоном и звонком
+            # ослабляет связку — Deepgram начинает считать разговор новым куском
+            # и присваивает голосу Руслана другой speaker id (проверено на звонках).
+            # Точная длительность (не округлённая): эталон отрезается пословно.
+            anchor_sec=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$ANCHOR" 2>/dev/null)
             tmp_mix=$(mktemp --suffix=.wav)
             if [ -n "${anchor_sec:-}" ] && ffmpeg -y -nostdin -loglevel error -i "$ANCHOR" -i "$amr_file" \
                     -filter_complex '[0:a][1:a]concat=n=2:v=0:a=1[a]' -map '[a]' -ar 16000 -ac 1 "$tmp_mix" 2>>"$LOG"; then
@@ -81,19 +85,38 @@ if not utts:
     print(flat)
     sys.exit(0)
 
-# Реплики внутри эталона — это голос Руслана, по ним опознаём его speaker id.
+# Эталон отрезаем ПОСЛОВНО, а не по репликам: Deepgram склеивает конец эталона
+# с первой фразой звонка в одну реплику, и отбрасывание её целиком съедало
+# начало разговора («Алло, Ирина?»).
+def cut_anchor(u):
+    """(speaker, начало, текст) без слов из эталона; None если ничего не осталось."""
+    if anchor <= 0:
+        t = (u.get("transcript") or "").strip()
+        return (u.get("speaker"), float(u.get("start", 0)), t) if t else None
+    ws = [w for w in (u.get("words") or []) if float(w.get("start", 0)) >= anchor]
+    if not ws:
+        return None
+    t = " ".join((w.get("punctuated_word") or w.get("word") or "") for w in ws).strip()
+    return (u.get("speaker"), float(ws[0].get("start", 0)) - anchor, t) if t else None
+
+# Голос Руслана опознаём по большинству слов внутри эталона — устойчивее,
+# чем по одной первой реплике.
 me = None
 if anchor > 0:
+    counts = {}
     for u in utts:
-        if u.get("end", 0) <= anchor + 0.5:
-            me = u.get("speaker")
-            break
+        for w in u.get("words") or []:
+            if float(w.get("start", 0)) < anchor:
+                s = w.get("speaker", u.get("speaker"))
+                counts[s] = counts.get(s, 0) + 1
+    if counts:
+        me = max(counts, key=counts.get)
 
-body = [u for u in utts if not (anchor > 0 and u.get("end", 0) <= anchor + 0.5)]
-speakers = {u.get("speaker") for u in body}
+body = [p for p in (cut_anchor(u) for u in utts) if p]
+speakers = {spk for spk, _, _ in body}
 # Монолог (диктофонная заметка, а не звонок) — метки только зашумят текст.
 if len(speakers) < 2:
-    print(" ".join((u.get("transcript") or "").strip() for u in body).strip() or flat)
+    print(" ".join(t for _, _, t in body).strip() or flat)
     sys.exit(0)
 
 def label(s):
@@ -104,16 +127,11 @@ def label(s):
 # Deepgram дробит речь на короткие куски — склеиваем подряд идущие реплики одного
 # говорящего, иначе на 20-минутном звонке получается 500 обрывков по два слова.
 blocks = []
-for u in body:
-    txt = (u.get("transcript") or "").strip()
-    if not txt:
-        continue
-    spk = u.get("speaker")
-    start = max(0.0, float(u.get("start", 0)) - anchor)
+for spk, start, txt in body:
     if blocks and blocks[-1][0] == spk:
         blocks[-1][2] += " " + txt
     else:
-        blocks.append([spk, start, txt])
+        blocks.append([spk, max(0.0, start), txt])
 
 print("\n\n".join("[%02d:%02d] %s: %s" % (int(s)//60, int(s)%60, label(k), t)
                   for k, s, t in blocks))
@@ -225,7 +243,14 @@ for f in "$INBOUND"/*.amr "$INBOUND"/*.3gp "$INBOUND"/*.AMR; do
     fi
 
     if [ -n "$client_prefix" ] && [ "$client_prefix" != "${name%.amr}" ]; then
-        slug="voice-$(echo "$client_prefix" | sed -E 's/[^A-Za-zА-Яа-я0-9]/-/g; s/-+/-/g; s/^-|-$//g' | cut -c1-40)"
+        # Через python, а не sed: диапазон [А-Яа-я] в локали C.UTF-8 невалиден
+        # ("Invalid collation character"), из-за чего slug схлопывался в пустоту
+        # и все звонки с кириллическим именем клиента становились "voice-.md".
+        slug="voice-$(printf '%s' "$client_prefix" | python3 -c '
+import sys, re
+s = re.sub(r"[^0-9A-Za-zА-Яа-яЁё]+", "-", sys.stdin.read()).strip("-")
+print(s[:40])
+')"
     else
         slug="voice-$(echo "$phone_raw" | tr -d '_-' | cut -c1-12)"
     fi

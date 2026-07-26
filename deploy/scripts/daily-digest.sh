@@ -15,13 +15,16 @@ ts() { date -u '+%Y-%m-%dT%H:%M:%SZ'; }
 echo "$(ts) digest start" >> "$LOG"
 
 # ===== Gmail =====
-GMAIL_RAW=$("$GWS" gmail search "is:unread is:important" --limit 5 2>>"$LOG" || echo '[]')
-GMAIL_BLOCK=$(echo "$GMAIL_RAW" | python3 -c '
-import json, sys
+# NB: без `|| echo '[]'` — gws-cli при ошибке печатает JSON с {"error":...} и выходит с кодом 1,
+# из-за чего фолбэк дописывал второй JSON-документ и ломал разбор ("Extra data").
+GMAIL_RAW=$("$GWS" gmail search "is:unread is:important" --limit 5 2>>"$LOG")
+[ -z "$GMAIL_RAW" ] && GMAIL_RAW='[]'
+GMAIL_BLOCK=$(GMAIL_RAW="$GMAIL_RAW" python3 - <<'PYEOF' 2>>"$LOG"
+import json, os, sys
 try:
-    d = json.loads(sys.stdin.read() or "[]")
+    d = json.loads(os.environ.get("GMAIL_RAW", "") or "[]")
     if isinstance(d, dict) and d.get("error"):
-        print(f"📬 Gmail: {d.get(\"exception\",\"ошибка\")[:80]}")
+        print(f"📬 Gmail: {d.get('exception', 'ошибка')[:80]}")
         sys.exit()
     msgs = d if isinstance(d, list) else d.get("messages", [])
     if not msgs:
@@ -35,12 +38,14 @@ try:
         print("\n".join(lines))
 except Exception as e:
     print(f"📬 Gmail: парсинг fail: {e}")
-' 2>>"$LOG")
+PYEOF
+)
 
 # ===== Google Calendar today =====
-GCAL_RAW=$("$GWS" calendar today 2>>"$LOG" || echo '[]')
-GCAL_BLOCK=$(echo "$GCAL_RAW" | python3 -c '
-import json, sys
+GCAL_RAW=$("$GWS" calendar today 2>>"$LOG")
+[ -z "$GCAL_RAW" ] && GCAL_RAW='[]'
+GCAL_BLOCK=$(GCAL_RAW="$GCAL_RAW" python3 - <<'PYEOF' 2>>"$LOG"
+import json, os, sys
 from datetime import datetime, timezone, timedelta
 MSK = timezone(timedelta(hours=3))
 
@@ -57,9 +62,9 @@ def parse_time(s):
         return s[11:16] if len(s) > 16 else ""
 
 try:
-    d = json.loads(sys.stdin.read() or "[]")
+    d = json.loads(os.environ.get("GCAL_RAW", "") or "[]")
     if isinstance(d, dict) and d.get("error"):
-        print(f"📅 Google: {d.get(\"exception\",\"ошибка\")[:80]}")
+        print(f"📅 Google: {d.get('exception', 'ошибка')[:80]}")
         sys.exit()
     events = d if isinstance(d, list) else d.get("events", [])
     if not events:
@@ -73,11 +78,12 @@ try:
             else:
                 start_str = start_raw or ""
             t = parse_time(start_str)
-            lines.append(f"  {t} — {e.get(\"summary\",\"(без названия)\")[:55]}")
+            lines.append(f"  {t} — {e.get('summary', '(без названия)')[:55]}")
         print("\n".join(lines))
 except Exception as e:
     print(f"📅 Google: парсинг fail: {e}")
-' 2>>"$LOG")
+PYEOF
+)
 
 # ===== Yandex Calendar today (все 6 events-календарей) =====
 YCAL_BLOCK=$(python3 - <<'PYEOF' 2>>"$LOG"
@@ -176,14 +182,17 @@ PYEOF
 )
 
 # ===== Weather =====
-WEATHER=$(curl -s --max-time 8 "https://wttr.in/Moscow?format=j1" 2>/dev/null | python3 -c '
-import json, sys
+WEATHER_RAW=$(curl -s --max-time 8 "https://wttr.in/Moscow?format=j1" 2>/dev/null || echo "")
+WEATHER=$(WEATHER_RAW="$WEATHER_RAW" python3 - <<'PYEOF' 2>/dev/null
+import json, os
 try:
-    d = json.load(sys.stdin)
+    d = json.loads(os.environ.get("WEATHER_RAW", "") or "{}")
     c = d["current_condition"][0]
-    print(f"🌤 Москва: {c[\"temp_C\"]}°C, {c[\"weatherDesc\"][0][\"value\"]}, ветер {c[\"windspeedKmph\"]} км/ч")
+    print(f"🌤 Москва: {c['temp_C']}°C, {c['weatherDesc'][0]['value']}, ветер {c['windspeedKmph']} км/ч")
 except: print("🌤 Погода: недоступна")
-' 2>/dev/null || echo "🌤 Погода: недоступна")
+PYEOF
+)
+[ -z "$WEATHER" ] && WEATHER="🌤 Погода: недоступна"
 
 # ===== Compose & Send =====
 TODAY=$(date '+%d.%m.%Y, %A')
