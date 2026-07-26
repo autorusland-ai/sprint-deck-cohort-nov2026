@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 # Транскрибирует аудио-форматы, не поддерживаемые Groq Whisper напрямую (.amr, .3gp):
 #
-#  1. DeepGram nova-2 (ru, smart_format, diarize) — принимает AMR напрямую, длинные файлы OK.
+#  1. DeepGram nova-2 (ru, smart_format, diarize_model=latest + utterances) — принимает AMR
+#     напрямую, длинные файлы OK. Разделяет говорящих: транскрипт приходит репликами
+#     «[MM:SS] Руслан: …» / «[MM:SS] Собеседник: …», а не одним слитным полотном.
+#     ВАЖНО: diarize_model нельзя передавать вместе с diarize — API вернёт 400.
+#     Со старым diarize=true на телефонном моно Deepgram видел только одного спикера.
 #  2. Groq Whisper Large v3 (fallback) — нужен ffmpeg → opus/ogg.
 #  3. faster-whisper local CPU (fallback fallback) — если облачные API лежат.
 #
@@ -27,6 +31,11 @@ TG_TOKEN=$(cat /home/clawd/.openclaw/secrets/telegram.token)
 CHAT_ID=215087477
 WHISPER_PY=/home/clawd/browser-env/bin/python3.12
 
+# Эталон голоса Руслана (~30 сек чистой речи). Если файл есть — клеится в начало
+# записи перед отправкой в Deepgram: модель получает опорную точку и мы понимаем,
+# какой из говорящих Руслан. Нет файла — реплики просто помечаются «Спикер 1/2».
+ANCHOR=$(ls /home/clawd/.openclaw/media/voice-anchor-ruslan.* 2>/dev/null | head -1 || true)
+
 ts() { date -u '+%Y-%m-%dT%H:%M:%SZ'; }
 
 # Транскрибация с цепочкой fallback.
@@ -38,19 +47,76 @@ transcribe_audio() {
 
     # 1. DeepGram прямо на AMR
     if [ -n "$DEEPGRAM_KEY" ]; then
-        local resp
-        resp=$(curl -sS --max-time 300 -X POST \
-            'https://api.deepgram.com/v1/listen?model=nova-2&language=ru&smart_format=true&punctuate=true&diarize=true' \
+        local resp send_file="$amr_file" ctype='audio/amr' anchor_sec=0 tmp_mix=''
+        if [ -n "$ANCHOR" ] && [ -f "$ANCHOR" ]; then
+            anchor_sec=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$ANCHOR" 2>/dev/null | cut -d. -f1)
+            tmp_mix=$(mktemp --suffix=.wav)
+            if [ -n "${anchor_sec:-}" ] && ffmpeg -y -nostdin -loglevel error -i "$ANCHOR" -i "$amr_file" \
+                    -filter_complex '[0:a][1:a]concat=n=2:v=0:a=1[a]' -map '[a]' -ar 16000 -ac 1 "$tmp_mix" 2>>"$LOG"; then
+                send_file="$tmp_mix"; ctype='audio/wav'
+            else
+                anchor_sec=0; rm -f "$tmp_mix"; tmp_mix=''
+                echo "$(ts) [anchor-concat-failed]" >> "$LOG"
+            fi
+        fi
+
+        resp=$(curl -sS --max-time 600 -X POST \
+            'https://api.deepgram.com/v1/listen?model=nova-2&language=ru&smart_format=true&punctuate=true&diarize_model=latest&utterances=true' \
             -H "Authorization: Token $DEEPGRAM_KEY" \
-            -H 'Content-Type: audio/amr' \
-            --data-binary @"$amr_file" 2>>"$LOG")
-        out=$(echo "$resp" | python3 -c '
-import sys, json
+            -H "Content-Type: $ctype" \
+            --data-binary @"$send_file" 2>>"$LOG")
+        [ -n "$tmp_mix" ] && rm -f "$tmp_mix"
+
+        out=$(echo "$resp" | ANCHOR_SEC="${anchor_sec:-0}" python3 -c '
+import sys, json, os
+anchor = float(os.environ.get("ANCHOR_SEC") or 0)
 try:
     d = json.load(sys.stdin)
-    print(d.get("results",{}).get("channels",[{}])[0].get("alternatives",[{}])[0].get("transcript","").strip())
 except Exception:
-    pass
+    sys.exit(0)
+res = d.get("results", {})
+utts = res.get("utterances") or []
+flat = res.get("channels",[{}])[0].get("alternatives",[{}])[0].get("transcript","").strip()
+if not utts:
+    print(flat)
+    sys.exit(0)
+
+# Реплики внутри эталона — это голос Руслана, по ним опознаём его speaker id.
+me = None
+if anchor > 0:
+    for u in utts:
+        if u.get("end", 0) <= anchor + 0.5:
+            me = u.get("speaker")
+            break
+
+body = [u for u in utts if not (anchor > 0 and u.get("end", 0) <= anchor + 0.5)]
+speakers = {u.get("speaker") for u in body}
+# Монолог (диктофонная заметка, а не звонок) — метки только зашумят текст.
+if len(speakers) < 2:
+    print(" ".join((u.get("transcript") or "").strip() for u in body).strip() or flat)
+    sys.exit(0)
+
+def label(s):
+    if me is not None:
+        return "Руслан" if s == me else "Собеседник"
+    return "Спикер %d" % (int(s) + 1)
+
+# Deepgram дробит речь на короткие куски — склеиваем подряд идущие реплики одного
+# говорящего, иначе на 20-минутном звонке получается 500 обрывков по два слова.
+blocks = []
+for u in body:
+    txt = (u.get("transcript") or "").strip()
+    if not txt:
+        continue
+    spk = u.get("speaker")
+    start = max(0.0, float(u.get("start", 0)) - anchor)
+    if blocks and blocks[-1][0] == spk:
+        blocks[-1][2] += " " + txt
+    else:
+        blocks.append([spk, start, txt])
+
+print("\n\n".join("[%02d:%02d] %s: %s" % (int(s)//60, int(s)%60, label(k), t)
+                  for k, s, t in blocks))
 ' 2>>"$LOG")
         if [ -n "$out" ] && [ ${#out} -gt 20 ]; then
             printf 'deepgram:%s' "$out"
