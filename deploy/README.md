@@ -27,7 +27,7 @@ sudo -u clawd bash configure.sh
 | [scripts/](scripts/) | 13 helper-скриптов — host-side API wrappers и cron-задачи. См. таблицу ниже. |
 | [workspace/](workspace/) | Правила бота: SOUL, IDENTITY, TOOLS, USER, AGENTS, 8 skills, шаблоны постов. |
 
-### `scripts/` — что какой делает (17 файлов)
+### `scripts/` — что какой делает (19 файлов)
 
 Все cron-выражения в **UTC** (системная таймзона VPS = `Etc/UTC`).
 
@@ -35,9 +35,9 @@ sudo -u clawd bash configure.sh
 |---|---|---|
 | **`gws-cli.py`** | по требованию | Google API wrapper (Gmail / Calendar / Drive). Бот вызывает через `exec`. |
 | **`yacal-cli.py`** | по требованию | Yandex Calendar CalDAV wrapper (7 календарей). Read+write. |
-| **`transcribe-audio-watcher.sh`** | `* * * * *` (каждую мин) | `.amr`/`.3gp` → **DeepGram nova-2** (primary) / Groq Whisper / faster-whisper local — fallback цепочка. Результат → inbox + Telegram. |
+| **`transcribe-audio-watcher.sh`** | `* * * * *` (каждую мин) | `.amr`/`.3gp` → **DeepGram nova-2** (primary) / Groq Whisper / faster-whisper local — fallback цепочка. **Разделяет говорящих** (`diarize_model=latest` + `utterances`, склейка реплик, голосовой якорь `media/voice-anchor-ruslan.ogg` → «Руслан/Собеседник»). Результат → inbox + Telegram. |
 | **`inbox-relocator.sh`** | `* * * * *` (каждую мин) | Страховка: переносит файлы из `~/.openclaw/workspace/inbox/` в `~/emmbase/inbox/` + алерт в Telegram. |
-| **`inbox-snapshot.sh`** | `0 * * * *` (каждый час) | Hardlink-snapshot всего inbox в `~/.openclaw/backups/inbox-snapshot/`. 7 дней хранения. |
+| **`inbox-snapshot.sh`** | `0 * * * *` (каждый час) | Hardlink-snapshot всего inbox в `~/.openclaw/backups/inbox-snapshot/`. 7 дней хранения. Снимок делается **только при реальных изменениях** (sha256-отпечаток содержимого), rsync с `--checksum` и `--delete`. |
 | **`inbox-monitor.sh`** | `0 7 * * *` (10:00 МСК) | Telegram-дайджест inbox + детектор «тихих пропаж» (что было в snapshot вчера, нет сегодня). |
 | **`calendar-board-sync.sh`** | `0 4 * * *` + `0 17 * * *` (07:00+20:00 МСК) | Сверяет Google+Yandex calendar с Tasks Board. При расхождении → Telegram + инструкция Claude'у в inbox. |
 | **`media-cleanup.sh`** | `0 4 * * *` (07:00 МСК) | Чистит `media/inbound`, `transcribed`, `outbound`, image-generation, `/tmp/openclaw`. |
@@ -46,9 +46,11 @@ sudo -u clawd bash configure.sh
 | **`weekly-digest.sh`** | `0 10 * * 1` (13:00 МСК пн) | Дайджест по `workspace/memory/` через kimi. |
 | **`daily-digest.sh`** | `30 4 * * 1-5` (07:30 МСК будни) | Ежедневный дайджест EMMBASE (Gmail + Calendar Google/Yandex + Tasks Board). |
 | **`archive-memory.sh`** | `0 3 * * 0` (06:00 МСК вс) | Архивация memory в .tgz. |
-| **`openclaw-autocommit.sh`** | `0 * * * *` | Автокоммит `~/.openclaw/` в git. |
+| **`openclaw-autocommit.sh`** | `0 * * * *` | Автокоммит **двух** репозиториев: `~/.openclaw/` (ветка `main`, конфиг шифруется git-crypt) и вложенного `workspace/` с правилами бота (ветка `bot-rules`). Push в приватный `autorusland-ai/openclaw-backup`. Лог: `logs/autocommit.log`. |
 | **`permission-watchdog.sh`** | `*/15 * * * *` | Сторож прав на secrets (0600 на token-файлы). |
-| **`pre-update-backup.sh`** | вручную | Снэпшот перед `openclaw update`. |
+| **`telegram-watchdog.sh`** | `*/5 * * * *` | Сторож Telegram-канала: рестарт gateway при неактивной службе, зависших >15 мин входящих в ingress-spool, серии `getMe`-таймаутов или холостых рестартах health-monitor. Проактивные уведомления владельцу. |
+| **`google-token-check.sh`** | `0 6 * * *` (09:00 МСК) | Проверяет, обновляется ли Google OAuth-токен; при отказе — алерт в Telegram с кодом ошибки, при восстановлении — отбой. |
+| **`pre-update-backup.sh`** | `0 5 * * 0` (08:00 МСК вс) + вручную | Шифрованный снимок состояния, ротация 8 шт. Из архива исключены зависимости, кэши, медиа и codex-home. |
 | **`watchdog.sh`** | вручную | Бюджетный watchdog (fail-closed, без spend source). |
 
 ### `workspace/skills/` — 8 skills

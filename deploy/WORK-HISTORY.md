@@ -455,7 +455,8 @@ Recovery файла из snapshot: `cp ~/.openclaw/backups/inbox-snapshot/snapsh
 | `yacal-cli.py` | по требованию из бота | Yandex CalDAV wrapper (7 календарей) |
 
 **Дополнительно (не из моего bundle, оставлено как есть):**
-- `/tmp/watcher.sh` cron `*/30 * * * *` — отдельный watcher md-изменений emmbase, создан 11.06 (вероятно Claude'ом). ⚠️ В `/tmp/` — пропадёт при reboot VPS.
+- ~~`/tmp/watcher.sh` cron `*/30 * * * *` — отдельный watcher md-изменений emmbase, создан 11.06 (вероятно Claude'ом). ⚠️ В `/tmp/` — пропадёт при reboot VPS.~~
+  **Так и вышло:** файл вычищен из `/tmp` 09.07.2026, после чего cron полмесяца писал в лог `not found` (891 КБ мусора), а `emmbase-changes.log` замёрз. Потребителей его вывода не нашлось, состояние было сломано (полный дамп вместо дельты) → строка удалена из crontab 26.07.2026. Мораль: скриптам не место в `/tmp`.
 
 **Workspace skills (8 шт.):** calendar-keeper, mail-handler, inbox-saver, browser-agent, deep-research, page-reader, web-quick, self-improving-agent.
 
@@ -470,3 +471,33 @@ Recovery файла из snapshot: `cp ~/.openclaw/backups/inbox-snapshot/snapsh
 - `google-refresh-token-7-day-expiry.md` — 7-day цикл expiry для Testing apps + OOB flow.
 - `deploy-bash-hardening-patterns.md` — `scp && ssh` цепочка, `set -e` в ssh-блоке, cron-дедуп по имени скрипта (не точной строке).
 
+
+---
+
+# Цикл 26.07.2026 — восстановление, аудит, обновление платформы
+
+Полный разбор: **[../WORK-SUMMARY-2026-07-26.md](../WORK-SUMMARY-2026-07-26.md)**.
+Коммиты: `945f0e8`, `6a77ee1`, `2567390`, `a6c8091`.
+
+**Кратко, что изменилось в инфраструктуре:**
+
+| Область | Изменение |
+|---|---|
+| Транскрипция | разделение говорящих (`diarize_model=latest` + `utterances`), голосовой якорь, склейка реплик |
+| Мониторинг | `telegram-watchdog.sh` ловит зависший ingress-spool; новый `google-token-check.sh` |
+| Бэкапы | автокоммит чинит вложенный `workspace/`, push на GitHub восстановлен (ветки `main` + `bot-rules`), снимки еженедельно |
+| Платформа | openclaw `2026.5.19` → `2026.7.1-2` |
+| Гигиена | освобождено ~2.3 ГБ (journal, sessions, бэкапы конфига) |
+
+**Что важно помнить при следующих работах:**
+
+1. Провайдеры моделей в `2026.7.x` — **отдельные плагины**; ключи хранятся не в
+   `auth-profiles.json`, а в `agents/main/agent/openclaw-agent.sqlite`.
+2. При старте новая версия **ждёт подтверждения с клавиатуры** на предупреждениях
+   конфига — под systemd это выглядит как вечное зависание без логов.
+3. `npm` на VPS по умолчанию целится в `/usr` — всегда указывать
+   `--prefix /home/clawd/.npm-global`.
+4. `workspace/` содержит `media/` с записями звонков клиентов и
+   `openclaw-config.json` с ключами открытым текстом — **не пушить целиком**,
+   в репо есть `.gitignore` с исключениями.
+5. `git-crypt status` без аргумента виснет на untracked-папках — проверять точечно.
