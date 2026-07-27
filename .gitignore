@@ -38,7 +38,11 @@ desktop.ini
 # Antigravity локальные файлы
 .antigravity/
 .antigravity.local.json
+# Локальные настройки Claude Code не версионируем — там пути и права машины,
+# а вот навыки это командное знание, их храним.
 .claude/
+!.claude/skills/
+!.claude/skills/**
 
 # Node / Python (если что-то ставится локально)
 node_modules/
