@@ -40,9 +40,9 @@ desktop.ini
 .antigravity.local.json
 # Локальные настройки Claude Code не версионируем — там пути и права машины,
 # а вот навыки это командное знание, их храним.
-.claude/
+# Именно .claude/* — при скрытии всей папки (.claude/) исключения не работают.
+.claude/*
 !.claude/skills/
-!.claude/skills/**
 
 # Node / Python (если что-то ставится локально)
 node_modules/
