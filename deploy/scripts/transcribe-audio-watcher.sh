@@ -1,13 +1,11 @@
 #!/usr/bin/env bash
 # Транскрибирует аудио-форматы, не поддерживаемые Groq Whisper напрямую (.amr, .3gp):
 #
-#  1. DeepGram nova-2 (ru, smart_format, diarize_model=latest + utterances) — принимает AMR
-#     напрямую, длинные файлы OK. Разделяет говорящих: транскрипт приходит репликами
-#     «[MM:SS] Руслан: …» / «[MM:SS] Собеседник: …», а не одним слитным полотном.
-#     ВАЖНО: diarize_model нельзя передавать вместе с diarize — API вернёт 400.
-#     Со старым diarize=true на телефонном моно Deepgram видел только одного спикера.
-#  2. Groq Whisper Large v3 (fallback) — нужен ffmpeg → opus/ogg.
-#  3. faster-whisper local CPU (fallback fallback) — если облачные API лежат.
+#  1. DeepGram nova-2 (ru, smart_format, diarize_model=latest + utterances) — OGG/opus
+#     от ffmpeg. Разделяет говорящих, длинные файлы OK.
+#     ВАЖНО: diarize_model нельзя вместе с diarize — API вернёт 400.
+#  2. Groq Whisper Large v3 — ОТКЛЮЧЁН (ключ мёртв, 403).
+#  3. faster-whisper local CPU — fallback.
 #
 # Результат: файл в /emmbase/inbox/ с YAML v3 + Telegram-уведомление.
 # Триггер: cron каждую минуту. flock защищает от наложения.
@@ -26,36 +24,41 @@ LOG=/home/clawd/.openclaw/scripts/transcribe-audio.log
 mkdir -p "$PROCESSED" "$FAILED" "$INBOX"
 
 GROQ_KEY=$(python3 -c 'import json; print(json.load(open("/home/clawd/.openclaw/openclaw.json"))["env"].get("GROQ_API_KEY",""))')
-DEEPGRAM_KEY=$(cat /home/clawd/.openclaw/secrets/deepgram.token 2>/dev/null || python3 -c 'import json; print(json.load(open("/home/clawd/.openclaw/openclaw.json"))["env"].get("DEEPGRAM_API_KEY",""))')
-TG_TOKEN=$(cat /home/clawd/.openclaw/secrets/telegram.token)
+DEEPGRAM_KEY=$(python3 -c 'import json; print(json.load(open("/home/clawd/.openclaw/openclaw.json"))["env"].get("DEEPGRAM_API_KEY",""))')
+TG_TOKEN=$(cat /home/clawd/.openclaw/secrets/telegram.token 2>/dev/null || echo "")
 CHAT_ID=215087477
 WHISPER_PY=/home/clawd/browser-env/bin/python3.12
 
-# Эталон голоса Руслана (~30 сек чистой речи). Если файл есть — клеится в начало
-# записи перед отправкой в Deepgram: модель получает опорную точку и мы понимаем,
-# какой из говорящих Руслан. Нет файла — реплики просто помечаются «Спикер 1/2».
 ANCHOR=$(ls /home/clawd/.openclaw/media/voice-anchor-ruslan.* 2>/dev/null | head -1 || true)
 
 ts() { date -u '+%Y-%m-%dT%H:%M:%SZ'; }
 
-# Транскрибация с цепочкой fallback.
-# Принимает: путь к AMR-оригиналу
-# Возвращает в stdout: "engine:text" (engine = deepgram/groq/whisper-local)
 transcribe_audio() {
     local amr_file="$1"
     local out=""
+    local tmp_opus=""
 
-    # 1. DeepGram прямо на AMR
+    # 0. Конвертируем AMR → OGG/opus (Deepgram принимает ogg напрямую)
+    tmp_opus=$(mktemp --suffix=.ogg)
+    if ! ffmpeg -y -nostdin -loglevel error -i "$amr_file" -ar 16000 -c:a libopus -application voip "$tmp_opus" 2>>"$LOG"; then
+        echo "$(ts) [ffmpeg-amr-to-ogg-fail] $amr_file" >> "$LOG"
+        rm -f "$tmp_opus"
+        return 1
+    fi
+
+    # 1. DeepGram на OGG (быстрее и надёжнее чем Groq)
     if [ -n "$DEEPGRAM_KEY" ]; then
-        local resp send_file="$amr_file" ctype='audio/amr' anchor_sec=0 tmp_mix=''
+        local resp send_file="$tmp_opus" ctype='audio/ogg' anchor_sec=0 tmp_mix=''
+        # Голосовой якорь (~30 сек речи Руслана) клеится в НАЧАЛО записи ВСТЫК,
+        # без паузы: вставка тишины ослабляет связку — Deepgram считает разговор
+        # новым куском и даёт голосу Руслана другой speaker id (проверено).
+        # Длительность берём точную, не округлённую: эталон режется ПОСЛОВНО,
+        # иначе теряется начало разговора («Алло, Ирина?»), которое Deepgram
+        # склеивает с хвостом эталона в одну реплику.
         if [ -n "$ANCHOR" ] && [ -f "$ANCHOR" ]; then
-            # Клеим встык, без паузы: вставка тишины между эталоном и звонком
-            # ослабляет связку — Deepgram начинает считать разговор новым куском
-            # и присваивает голосу Руслана другой speaker id (проверено на звонках).
-            # Точная длительность (не округлённая): эталон отрезается пословно.
             anchor_sec=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$ANCHOR" 2>/dev/null)
             tmp_mix=$(mktemp --suffix=.wav)
-            if [ -n "${anchor_sec:-}" ] && ffmpeg -y -nostdin -loglevel error -i "$ANCHOR" -i "$amr_file" \
+            if [ -n "${anchor_sec:-}" ] && ffmpeg -y -nostdin -loglevel error -i "$ANCHOR" -i "$tmp_opus" \
                     -filter_complex '[0:a][1:a]concat=n=2:v=0:a=1[a]' -map '[a]' -ar 16000 -ac 1 "$tmp_mix" 2>>"$LOG"; then
                 send_file="$tmp_mix"; ctype='audio/wav'
             else
@@ -85,11 +88,7 @@ if not utts:
     print(flat)
     sys.exit(0)
 
-# Эталон отрезаем ПОСЛОВНО, а не по репликам: Deepgram склеивает конец эталона
-# с первой фразой звонка в одну реплику, и отбрасывание её целиком съедало
-# начало разговора («Алло, Ирина?»).
 def cut_anchor(u):
-    """(speaker, начало, текст) без слов из эталона; None если ничего не осталось."""
     if anchor <= 0:
         t = (u.get("transcript") or "").strip()
         return (u.get("speaker"), float(u.get("start", 0)), t) if t else None
@@ -99,8 +98,6 @@ def cut_anchor(u):
     t = " ".join((w.get("punctuated_word") or w.get("word") or "") for w in ws).strip()
     return (u.get("speaker"), float(ws[0].get("start", 0)) - anchor, t) if t else None
 
-# Голос Руслана опознаём по большинству слов внутри эталона — устойчивее,
-# чем по одной первой реплике.
 me = None
 if anchor > 0:
     counts = {}
@@ -114,7 +111,6 @@ if anchor > 0:
 
 body = [p for p in (cut_anchor(u) for u in utts) if p]
 speakers = {spk for spk, _, _ in body}
-# Монолог (диктофонная заметка, а не звонок) — метки только зашумят текст.
 if len(speakers) < 2:
     print(" ".join(t for _, _, t in body).strip() or flat)
     sys.exit(0)
@@ -124,8 +120,6 @@ def label(s):
         return "Руслан" if s == me else "Собеседник"
     return "Спикер %d" % (int(s) + 1)
 
-# Deepgram дробит речь на короткие куски — склеиваем подряд идущие реплики одного
-# говорящего, иначе на 20-минутном звонке получается 500 обрывков по два слова.
 blocks = []
 for spk, start, txt in body:
     if blocks and blocks[-1][0] == spk:
@@ -137,51 +131,21 @@ print("\n\n".join("[%02d:%02d] %s: %s" % (int(s)//60, int(s)%60, label(k), t)
                   for k, s, t in blocks))
 ' 2>>"$LOG")
         if [ -n "$out" ] && [ ${#out} -gt 20 ]; then
+            rm -f "$tmp_opus"
             printf 'deepgram:%s' "$out"
             return 0
         fi
         echo "$(ts) [deepgram-empty-or-fail]" >> "$LOG"
     fi
 
-    # 2. ffmpeg → opus → Groq Whisper
-    local tmp_opus
-    tmp_opus=$(mktemp --suffix=.ogg)
-    if ffmpeg -y -nostdin -loglevel error -i "$amr_file" -ar 16000 -c:a libopus -application voip "$tmp_opus" 2>>"$LOG"; then
-        local resp
-        resp=$(curl -sS --max-time 120 -X POST 'https://api.groq.com/openai/v1/audio/transcriptions' \
-            -H "Authorization: Bearer $GROQ_KEY" \
-            -F "file=@$tmp_opus" \
-            -F "model=whisper-large-v3" \
-            -F "language=ru" \
-            -F "response_format=json" 2>>"$LOG")
-        out=$(echo "$resp" | python3 -c '
-import sys, json
-try:
-    d = json.load(sys.stdin)
-    print(d.get("text","").strip())
-except Exception:
-    pass
-' 2>>"$LOG")
-        if [ -n "$out" ] && [ ${#out} -gt 20 ]; then
-            rm -f "$tmp_opus"
-            printf 'groq:%s' "$out"
-            return 0
-        fi
-        echo "$(ts) [groq-empty-or-fail]" >> "$LOG"
-    else
-        echo "$(ts) [ffmpeg-fail-for-groq]" >> "$LOG"
-    fi
+    # 2. Groq Whisper — ОТКЛЮЧЁН (403 Forbidden, ключ мёртв)
 
-    # 3. faster-whisper local (CPU, медленно но работает offline)
+    # 3. faster-whisper local CPU
     if [ -x "$WHISPER_PY" ] && $WHISPER_PY -c 'import faster_whisper' 2>/dev/null; then
-        # Используем converted opus если есть, иначе сам файл
-        local audio_for_whisper="$tmp_opus"
-        [ -s "$audio_for_whisper" ] || audio_for_whisper="$amr_file"
-
-        out=$($WHISPER_PY <<PYEOF 2>>"$LOG"
+        out=$($WHISPER_PY 2>>"$LOG" <<PYEOF
 from faster_whisper import WhisperModel
 m = WhisperModel('base', device='cpu', compute_type='int8')
-segments, _ = m.transcribe('$audio_for_whisper', language='ru', vad_filter=True)
+segments, _ = m.transcribe('$tmp_opus', language='ru', vad_filter=True)
 parts = [s.text.strip() for s in segments if s.text.strip()]
 print(' '.join(parts))
 PYEOF
@@ -191,7 +155,7 @@ PYEOF
             printf 'whisper-local:%s' "$out"
             return 0
         fi
-        echo "$(ts) [whisper-local-empty-or-fail]" >> "$LOG"
+        echo "$(ts) [whisper-local-empty]" >> "$LOG"
     fi
 
     rm -f "$tmp_opus"
@@ -213,14 +177,12 @@ for f in "$INBOUND"/*.amr "$INBOUND"/*.3gp "$INBOUND"/*.AMR; do
     engine="${result%%:*}"
     text="${result#*:}"
 
-    # PBX-формат имени: <prefix>_<phone>_YYYYMMDDHHMMSS---uuid.amr
     event_ts=$(echo "$name" | grep -oE '[0-9]{14}' | head -1)
     if [ -n "$event_ts" ]; then
         event_date="${event_ts:0:4}-${event_ts:4:2}-${event_ts:6:2}"
         event_hhmm="${event_ts:8:2}${event_ts:10:2}"
         event_full="${event_date} ${event_ts:8:2}:${event_ts:10:2}"
     else
-        # Если в имени нет 14-значного timestamp — берём mtime файла
         event_full=$(date -d "@$(stat -c%Y "$f")" '+%Y-%m-%d %H:%M')
         event_date=$(date -d "@$(stat -c%Y "$f")" '+%Y-%m-%d')
         event_hhmm=$(date -d "@$(stat -c%Y "$f")" '+%H%M')
@@ -242,20 +204,12 @@ for f in "$INBOUND"/*.amr "$INBOUND"/*.3gp "$INBOUND"/*.AMR; do
         link_entity="неизвестный-номер ($phone_fmt)"
     fi
 
-    if [ -n "$client_prefix" ] && [ "$client_prefix" != "${name%.amr}" ]; then
-        # Через python, а не sed: диапазон [А-Яа-я] в локали C.UTF-8 невалиден
-        # ("Invalid collation character"), из-за чего slug схлопывался в пустоту
-        # и все звонки с кириллическим именем клиента становились "voice-.md".
-        slug="voice-$(printf '%s' "$client_prefix" | python3 -c '
+    slug="voice-$(printf '%s' "$client_prefix" | python3 -c '
 import sys, re
 s = re.sub(r"[^0-9A-Za-zА-Яа-яЁё]+", "-", sys.stdin.read()).strip("-")
 print(s[:40])
 ')"
-    else
-        slug="voice-$(echo "$phone_raw" | tr -d '_-' | cut -c1-12)"
-    fi
 
-    # Collision-safe имя: если файл существует — добавить суффикс _2, _3 ...
     inbox_file="$INBOX/${event_date}_${event_hhmm}_${slug}.md"
     n=2
     while [ -e "$inbox_file" ]; do
@@ -278,10 +232,10 @@ print(s[:40])
 
     msg=$(printf '📝 Транскрипт (%s, %d chars)\n%s\n%s\n→ %s' \
         "$engine" "${#text}" "$client_prefix" "$event_full" "$(basename "$inbox_file")")
-    curl -sS --max-time 30 -X POST "https://api.telegram.org/bot$TG_TOKEN/sendMessage" \
+    [ -n "$TG_TOKEN" ] && curl -sS --max-time 30 -X POST "https://api.telegram.org/bot$TG_TOKEN/sendMessage" \
         -d "chat_id=$CHAT_ID" \
         --data-urlencode "text=$msg" \
-        -d 'disable_notification=true' > /dev/null 2>>"$LOG" || true
+        -d 'disable_notification=true' > /dev/null 2>&1 || true
 
     echo "$(ts) [ok:$engine] $name chars=${#text} inbox=$(basename "$inbox_file")" >> "$LOG"
     mv "$f" "$PROCESSED/"
