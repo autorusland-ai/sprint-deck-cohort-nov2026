@@ -140,11 +140,15 @@ print("\n\n".join("[%02d:%02d] %s: %s" % (int(s)//60, int(s)%60, label(k), t)
 
     # 2. Groq Whisper — ОТКЛЮЧЁН (403 Forbidden, ключ мёртв)
 
-    # 3. faster-whisper local CPU
+    # 3. faster-whisper local CPU — единственный резерв после отключения Groq.
+    # Модель 'small': на русском заметно точнее 'base', а точность здесь важнее
+    # скорости — это записи разговоров с клиентами, ошибки уезжают в базу.
+    # Модель скачана заранее в ~/.cache/huggingface, чтобы отказ Deepgram не
+    # упирался ещё и в загрузку полугигабайта.
     if [ -x "$WHISPER_PY" ] && $WHISPER_PY -c 'import faster_whisper' 2>/dev/null; then
         out=$($WHISPER_PY 2>>"$LOG" <<PYEOF
 from faster_whisper import WhisperModel
-m = WhisperModel('base', device='cpu', compute_type='int8')
+m = WhisperModel('small', device='cpu', compute_type='int8')
 segments, _ = m.transcribe('$tmp_opus', language='ru', vad_filter=True)
 parts = [s.text.strip() for s in segments if s.text.strip()]
 print(' '.join(parts))
