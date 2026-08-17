@@ -108,26 +108,83 @@ echo "$(ts) [collected] $EVENTS_COUNT events from calendars" >> "$LOG"
 # Парсим Tasks Board, секция «📅 Календарь»
 python3 - > /tmp/cal-board-sync-board.json 2>>"$LOG" <<'PYEOF'
 import re, json
+from datetime import date, timedelta
+
 src = open("/home/clawd/emmbase/Tasks Board.md").read()
 # Достаём секцию между "## 📅 Календарь" и следующим "## "
 m = re.search(r"## 📅 Календарь\s*\n(.*?)(?=\n## |\Z)", src, re.DOTALL)
+
+# Свёрнутые блоки «▸ Прошедшее» — обычный markdown внутри html-тегов. Убираем
+# сами теги, чтобы строки внутри разбирались наравне с остальными: раньше
+# события из свёртки считались отсутствующими и попадали в отчёт.
+def strip_html(t):
+    t = re.sub(r"</?details[^>]*>", "", t)
+    return re.sub(r"<summary[^>]*>.*?</summary>", "", t, flags=re.DOTALL)
+
+
+def dates_in(line):
+    """Все даты ДД.ММ, которые покрывает строка карточки.
+
+    Календарь ведётся не только точечными датами, но и диапазонами:
+    «14–16.08», «30.08–02.09». Прежняя регулярка вытаскивала из «14–16.08»
+    только «16.08», поэтому события 14 и 15 числа считались отсутствующими —
+    отсюда 21 одинаковый пустой отчёт с 31.07.2026.
+    """
+    seg = re.search(r"\*\*([^*]+)\*\*", line)
+    if not seg:
+        return []
+    s = seg.group(1)
+    out = []
+
+    # Диапазон через границу месяца: 30.08–02.09
+    r2 = re.search(r"(\d{1,2})\.(\d{1,2})\s*[–—-]\s*(\d{1,2})\.(\d{1,2})", s)
+    if r2:
+        d1, m1, d2, m2 = (int(g) for g in r2.groups())
+        y = date.today().year
+        try:
+            cur, end = date(y, m1, d1), date(y, m2, d2)
+            if end < cur:
+                end = date(y + 1, m2, d2)
+            while cur <= end and len(out) < 62:
+                out.append(cur.strftime("%d.%m"))
+                cur += timedelta(days=1)
+            return out
+        except ValueError:
+            pass
+
+    # Диапазон внутри месяца: 14–16.08
+    r1 = re.search(r"(\d{1,2})\s*[–—-]\s*(\d{1,2})\.(\d{1,2})", s)
+    if r1:
+        d1, d2, mo = (int(g) for g in r1.groups())
+        if d1 <= d2:
+            return ["%02d.%02d" % (d, mo) for d in range(d1, d2 + 1)]
+
+    # Одиночная дата
+    for d, mo in re.findall(r"(\d{1,2})\.(\d{1,2})", s):
+        out.append("%02d.%02d" % (int(d), int(mo)))
+    return out
+
+
 entries = []
 if m:
-    for line in m.group(1).split("\n"):
-        # Ищем даты формата DD.MM или DD.MM, HH:MM
-        date_match = re.search(r"\*\*[^*]*?(\d{1,2})\.(\d{1,2})(?:[\s,]*(\d{1,2}):(\d{2}))?\*\*", line)
-        if date_match:
-            d, mo = int(date_match.group(1)), int(date_match.group(2))
-            hh, mi = (date_match.group(3) or "??"), (date_match.group(4) or "??")
-            # Извлекаем тему — всё после первого "|" второй колонки
-            cols = [c.strip() for c in line.strip().strip("|").split("|")]
-            summary = (cols[-1] if cols else line)[:80]
-            entries.append({
-                "date_md": f"{d:02d}.{mo:02d}",
-                "time": f"{hh}:{mi}" if hh != "??" else "",
-                "summary": summary,
-                "raw_line": line.strip()[:120],
-            })
+    for line in strip_html(m.group(1)).split("\n"):
+        # Цитаты и служебные пометки («> ⚠️ Формат сменён на карточки 06.08»)
+        # событиями не являются — иначе попадают в отчёт как расхождение.
+        if line.lstrip().startswith(">"):
+            continue
+        dates = dates_in(line)
+        if not dates:
+            continue
+        tm = re.search(r"(\d{1,2}):(\d{2})", line)
+        cols = [c.strip() for c in line.strip().strip("|").split("|")]
+        summary = (cols[-1] if cols else line)[:80]
+        entries.append({
+            "dates_md": dates,
+            "date_md": dates[0],          # для обратной совместимости отчёта
+            "time": tm.group(0) if tm else "",
+            "summary": summary,
+            "raw_line": line.strip()[:120],
+        })
 print(json.dumps(entries, ensure_ascii=False, indent=2))
 PYEOF
 
@@ -140,6 +197,41 @@ board = json.load(open("/tmp/cal-board-sync-board.json"))
 def norm(s):
     return re.sub(r"[^\wа-яА-Я]+", "", s.lower())[:30]
 
+STOP = {"календарь", "google", "yandex", "период", "благоприятный", "конфликт"}
+
+
+def words(s):
+    """Значимые слова строки — для сравнения формулировок, а не подстрок."""
+    return {w for w in re.findall(r"[\wа-яА-Я]{4,}", s.lower()) if w not in STOP}
+
+
+def same_event(a, b):
+    """Одно ли это событие. Формулировки в календаре и в карточке различаются:
+    «Завершение сделок/показы недвижимости» против «АН: благоприятный период —
+    завершение сделок / показы». Сравнение по вхождению подстроки такие пары
+    не ловило, поэтому событие считалось отсутствующим при каждой сверке."""
+    if norm(a) in norm(b) or norm(b) in norm(a):
+        return True
+    wa, wb = words(a), words(b)
+    return bool(wa and wb and len(wa & wb) >= 2)
+
+# Одна встреча, заведённая и в Google, и в Яндексе, приходит двумя событиями.
+# Раньше это считалось за два расхождения. Схлопываем до сравнения, источники
+# перечисляем через запятую — чтобы в отчёте было видно, где событие лежит.
+deduped = {}
+for e in events:
+    key = (e["date"], e["time"], norm(e["summary"]))
+    if key in deduped:
+        src = deduped[key]["source"]
+        if e["source"] not in src:
+            deduped[key]["source"] = f"{src}+{e['source']}"
+    else:
+        deduped[key] = dict(e)
+events = list(deduped.values())
+
+def board_covers(b, cal_md):
+    return cal_md in b.get("dates_md", [b.get("date_md")])
+
 # События в календаре → проверяем что есть в Tasks Board
 missing_in_board = []
 for e in events:
@@ -147,9 +239,9 @@ for e in events:
     cal_md = f"{d}.{m}"
     matched = False
     for b in board:
-        if b["date_md"] == cal_md:
+        if board_covers(b, cal_md):
             # И summary похож
-            if norm(e["summary"]) in norm(b["summary"]) or norm(b["summary"]) in norm(e["summary"]):
+            if same_event(e["summary"], b["summary"]):
                 matched = True
                 break
             # Или просто событие в этот день
@@ -160,15 +252,35 @@ for e in events:
         missing_in_board.append(e)
 
 # Записи в Tasks Board → проверяем что есть в календарях
+# Обратная сверка — только по карточкам с конкретным временем: это реальные
+# встречи, которые опасно потерять. Карточки без времени — заметки и периоды
+# (бизнес-завтраки, «благоприятный период»), их в календарь никто не заводит,
+# и раньше они шумели в каждом отчёте.
+# Окно сверки — то же, что запрашивалось у календарей (сегодня + 7 дней).
+# Карточки вне окна проверить нечем: событий за эти даты просто не запрашивали,
+# поэтому раньше они попадали в отчёт как «отсутствующие» — навсегда.
+from datetime import date, timedelta
+today = date.today()
+window = {(today + timedelta(days=i)).strftime("%d.%m") for i in range(0, 8)}
+
 missing_in_calendar = []
 for b in board:
+    if not b.get("time"):
+        continue
+    if not (set(b.get("dates_md", [])) & window):
+        continue
+    raw = b.get("raw_line", "")
+    # Выполненные и отменённые карточки сверять не нужно.
+    if raw.lstrip().startswith("- [x]") or "ОТМЕН" in raw.upper():
+        continue
+    # Обрывки перенесённых строк («ТЗ]]») — не события.
+    if len(re.sub(r"[^\wа-яА-Я]+", "", b.get("summary", ""))) < 8:
+        continue
     matched = False
     for e in events:
         d, m = e["date"].split("-")[2], e["date"].split("-")[1]
         cal_md = f"{d}.{m}"
-        if b["date_md"] == cal_md and (
-            norm(e["summary"]) in norm(b["summary"]) or norm(b["summary"]) in norm(e["summary"])
-        ):
+        if board_covers(b, cal_md) and same_event(e["summary"], b["summary"]):
             matched = True
             break
     if not matched:
@@ -214,14 +326,19 @@ TS_DATE=$(date '+%Y-%m-%d')
 TS_HHMM=$(date '+%H%M')
 INBOX_FILE="$INBOX/${TS_DATE}_${TS_HHMM}_sync-calendar-tasks-board.md"
 {
-    echo '# Тип: инструкция'
+    # Тип «инструкция» отменён системным промтом v5 (31.07.2026) и в белый
+    # список не входит — файлы с ним не исполняются НИ ОДНОЙ сессией. Отчёты
+    # копились в inbox мёртвым грузом: 21 штука с 31.07 по 11.08. Сверка требует
+    # решения человека (событие отменено? дата сдвинулась?), поэтому «вопрос».
+    echo '# Тип: вопрос'
     echo "# Дата события: $(date '+%Y-%m-%d %H:%M')"
     echo '# Относится к: бизнес'
     echo '# Связать с: [[Tasks Board]], [[Google Calendar]], [[Yandex Calendar]]'
     echo '# Источник: бот'
     echo '# Срочность: 🟡 обычно'
     echo
-    echo 'ИНСТРУКЦИЯ для Claude: cверка календарей и Tasks Board выявила расхождения.'
+    echo 'Сверка календарей и Tasks Board выявила расхождения. Нужно решение Руслана —'
+    echo 'автоматически ничего не применять.'
     echo
     echo 'Действия:'
     echo '1. Для событий из «🆕 В календарях, нет в Tasks Board» — добавь строки в `Tasks Board.md` → раздел «📅 Календарь».'
