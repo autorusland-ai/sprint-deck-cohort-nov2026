@@ -19,6 +19,12 @@ exec 9>"$LOCKFILE"
 flock -n 9 || exit 0
 
 LOG=/home/clawd/.openclaw/scripts/calendar-board-sync.log
+# Подпись прошлого набора расхождений — состояние скрипта, не факт базы,
+# поэтому живёт вне emmbase.
+SIG_STATE=/home/clawd/.openclaw/state/cal-board-sync.hash
+mkdir -p "$(dirname "$SIG_STATE")"
+DRY_RUN=0
+[ "${1:-}" = "--dry-run" ] && DRY_RUN=1
 TG_TOKEN=$(cat /home/clawd/.openclaw/secrets/telegram.token)
 CHAT_ID=215087477
 TASKS_BOARD="/home/clawd/emmbase/Tasks Board.md"
@@ -107,7 +113,7 @@ echo "$(ts) [collected] $EVENTS_COUNT events from calendars" >> "$LOG"
 
 # Парсим Tasks Board, секция «📅 Календарь»
 python3 - > /tmp/cal-board-sync-board.json 2>>"$LOG" <<'PYEOF'
-import re, json
+import re, json, sys
 from datetime import date, timedelta
 
 src = open("/home/clawd/emmbase/Tasks Board.md").read()
@@ -165,26 +171,75 @@ def dates_in(line):
     return out
 
 
+# Слотом считается ТОЛЬКО каноническое время протокола календаря: «ДД.ММ (дн), ЧЧ:ММ»
+# или «ДД.ММ, ЧЧ:ММ» — время идёт сразу за датой, через запятую. Раньше бралось
+# любое сочетание ЧЧ:ММ в строке, из-за чего заметка «04.09 (пт), после 10:00»
+# принималась за согласованный слот и пять прогонов подряд требовала найти
+# несуществующее событие в календарях.
+SLOT = re.compile(r"(\d{1,2})\.(\d{1,2})(?:\s*\([^)]*\))?\s*,\s*(\d{1,2}):(\d{2})")
+
+# Ограничители названия: дальше идёт ссылка, стрелка или пометка — не название.
+# Пометки в этой базе всегда начинаются с эмодзи, поэтому список закрытый.
+STOP = ("→", "[[", "~~", "⚠️", "⛔", "📌", "✅", "❌", "❗", "❓", "🔔", "📅",
+        "💬", "🟢", "🟡", "🔴", "⛳", "📎")
+
+
+def clean_summary(line, after):
+    """Название события — текст между временем и первым ограничителем.
+
+    Раньше брался последний столбец строки или её первые 80 символов, и в отчёт
+    уезжали куски соседнего текста вместе с остатком ссылки и разметкой:
+    «карточка]] ⚠️ **Автосверка календарей флагует…».
+    """
+    s = line[after:]
+    cut = len(s)
+    for stop in STOP:
+        i = s.find(stop)
+        if i != -1:
+            cut = min(cut, i)
+    s = s[:cut]
+    # Слот может быть диапазоном «09:00 — 10:00»: конец диапазона в название
+    # не входит, иначе получалось «10:00 — КАДУЦЕЙ: РАБОЧИЙ СОЗВОН».
+    s = re.sub(r"^\s*[—–-]?\s*\d{1,2}:\d{2}", "", s)
+    s = re.sub(r"^\s*[—–-]\s*", "", s)          # тире после времени
+    s = s.replace("**", "").replace("~~", "")
+    s = re.sub(r"^\s*-\s*\[[ xX]\]\s*", "", s)  # маркер задачи
+    s = re.sub(r"^[^\w\dА-Яа-яЁё«\"]+", "", s)  # эмодзи-префикс
+    s = re.sub(r"\]\]", "", s)                  # хвост оборванной ссылки
+    return " ".join(s.split()).strip(" .,;:·|")[:80]
+
+
 entries = []
+skipped_lines = []
 if m:
-    for line in strip_html(m.group(1)).split("\n"):
+    for lineno, line in enumerate(strip_html(m.group(1)).split("\n"), 1):
         # Цитаты и служебные пометки («> ⚠️ Формат сменён на карточки 06.08»)
         # событиями не являются — иначе попадают в отчёт как расхождение.
         if line.lstrip().startswith(">"):
             continue
+        # Механизм отказа: база отвечает скрипту «эту строку не синхронизировать».
+        # Ответ живёт в самой карточке и потому сохраняется между прогонами.
+        if "#nosync" in line:
+            continue
         dates = dates_in(line)
         if not dates:
             continue
-        tm = re.search(r"(\d{1,2}):(\d{2})", line)
-        cols = [c.strip() for c in line.strip().strip("|").split("|")]
-        summary = (cols[-1] if cols else line)[:80]
+        slot = SLOT.search(line)
+        summary = clean_summary(line, slot.end() if slot else 0)
+        if not summary:
+            # Молча подставлять кусок соседнего текста нельзя — именно так
+            # 03.09 в отчёт попало «карточка]] ⚠️ **Автосверка…».
+            skipped_lines.append(lineno)
+            continue
         entries.append({
             "dates_md": dates,
             "date_md": dates[0],          # для обратной совместимости отчёта
-            "time": tm.group(0) if tm else "",
+            "time": "%s:%s" % (slot.group(3).zfill(2), slot.group(4)) if slot else "",
             "summary": summary,
             "raw_line": line.strip()[:120],
         })
+if skipped_lines:
+    print("строки не разобраны: %s" % ", ".join(map(str, skipped_lines)), file=sys.stderr)
 print(json.dumps(entries, ensure_ascii=False, indent=2))
 PYEOF
 
@@ -302,6 +357,16 @@ if missing_in_calendar:
 if not report:
     report.append("✅ Календари ↔ Tasks Board: расхождений нет")
 
+# Подпись набора расхождений — для дедупликации между прогонами. Только пары
+# «дата + название», отсортированные: без времени прогона, без путей к временным
+# файлам и без порядка строк, иначе одинаковый по смыслу набор давал бы разный хэш.
+sig = sorted(
+    ["N|%s|%s" % (e["date"], e["summary"]) for e in missing_in_board] +
+    ["B|%s|%s" % (b["date_md"], b["summary"]) for b in missing_in_calendar]
+)
+with open("/tmp/cal-board-sync-sig.txt", "w", encoding="utf-8") as f:
+    f.write("\n".join(sig))
+
 print("\n".join(report))
 PYEOF
 
@@ -309,7 +374,32 @@ REPORT=$(cat /tmp/cal-board-sync-diff.txt)
 HAS_DIFF=$(echo "$REPORT" | grep -cE "^(🆕|⚠️)" || true)
 
 if [ "$HAS_DIFF" -eq 0 ]; then
+    # Расхождений нет — файл не создаётся: отчитываться о том, что всё сошлось,
+    # нечем. Подпись обнуляем, чтобы следующее появление расхождения приехало.
     echo "$(ts) [no-diff] calendars and Tasks Board are in sync" >> "$LOG"
+    : > "$SIG_STATE" 2>/dev/null || true
+    rm -f /tmp/cal-board-sync-*.json /tmp/cal-board-sync-*.txt
+    exit 0
+fi
+
+# Холостой прогон: печатаем результат и ничего не трогаем — для приёмки правок.
+if [ "$DRY_RUN" -eq 1 ]; then
+    echo "=== ХОЛОСТОЙ ПРОГОН, ничего не пишется ==="
+    echo "$REPORT"
+    echo "--- подпись набора ---"
+    cat /tmp/cal-board-sync-sig.txt 2>/dev/null
+    rm -f /tmp/cal-board-sync-*.json /tmp/cal-board-sync-*.txt
+    exit 0
+fi
+
+# Дедупликация между прогонами: набор расхождений не изменился — в inbox ничего
+# не кладём. Скрипт запускается дважды в сутки, и раньше каждый прогон создавал
+# новый файл даже при неизменном наборе: с 31.07 по 05.08 так набралось 11
+# одинаковых файлов подряд, а в сентябре то же повторилось на строке Махаона.
+SIG_NOW=$(sha256sum /tmp/cal-board-sync-sig.txt 2>/dev/null | cut -d" " -f1)
+SIG_WAS=$(cat "$SIG_STATE" 2>/dev/null || echo "")
+if [ -n "$SIG_NOW" ] && [ "$SIG_NOW" = "$SIG_WAS" ]; then
+    echo "$(ts) [unchanged] набор расхождений тот же — файл не создаётся" >> "$LOG"
     rm -f /tmp/cal-board-sync-*.json /tmp/cal-board-sync-*.txt
     exit 0
 fi
@@ -333,7 +423,9 @@ INBOX_FILE="$INBOX/${TS_DATE}_${TS_HHMM}_sync-calendar-tasks-board.md"
     echo '# Тип: вопрос'
     echo "# Дата события: $(date '+%Y-%m-%d %H:%M')"
     echo '# Относится к: бизнес'
-    echo '# Связать с: [[Tasks Board]], [[Google Calendar]], [[Yandex Calendar]]'
+        # Google/Yandex Calendar — сервисы, файлов с такими именами в базе нет.
+    # Скобки на них давали 252 битые ссылки из 567 и возвращались каждым прогоном.
+    echo '# Связать с: [[Tasks Board]], Google Calendar, Yandex Calendar'
     echo '# Источник: бот'
     echo '# Срочность: 🟡 обычно'
     echo
@@ -356,6 +448,8 @@ INBOX_FILE="$INBOX/${TS_DATE}_${TS_HHMM}_sync-calendar-tasks-board.md"
     echo "- Записи Tasks Board: \`/tmp/cal-board-sync-board.json\`"
 } > "$INBOX_FILE"
 
+cp -f /tmp/cal-board-sync-sig.txt "$SIG_STATE.raw" 2>/dev/null || true
+sha256sum /tmp/cal-board-sync-sig.txt 2>/dev/null | cut -d" " -f1 > "$SIG_STATE"
 echo "$(ts) [diff-found] events_new=$(echo "$REPORT" | grep -c '^  •  *' || true) inbox=$(basename "$INBOX_FILE")" >> "$LOG"
 
 # Чистка временных
