@@ -27,7 +27,7 @@ sudo -u clawd bash configure.sh
 | [scripts/](scripts/) | 13 helper-скриптов — host-side API wrappers и cron-задачи. См. таблицу ниже. |
 | [workspace/](workspace/) | Правила бота: SOUL, IDENTITY, TOOLS, USER, AGENTS, 8 skills, шаблоны постов. |
 
-### `scripts/` — что какой делает (19 файлов)
+### `scripts/` — что какой делает (26 файлов)
 
 Все cron-выражения в **UTC** (системная таймзона VPS = `Etc/UTC`).
 
@@ -39,7 +39,13 @@ sudo -u clawd bash configure.sh
 | **`inbox-relocator.sh`** | `* * * * *` (каждую мин) | Страховка: переносит файлы из `~/.openclaw/workspace/inbox/` в `~/emmbase/inbox/` + алерт в Telegram. |
 | **`inbox-snapshot.sh`** | `0 * * * *` (каждый час) | Hardlink-snapshot всего inbox в `~/.openclaw/backups/inbox-snapshot/`. 7 дней хранения. Снимок делается **только при реальных изменениях** (sha256-отпечаток содержимого), rsync с `--checksum` и `--delete`. |
 | **`inbox-monitor.sh`** | `0 7 * * *` (10:00 МСК) | Telegram-дайджест inbox + детектор «тихих пропаж» (что было в snapshot вчера, нет сегодня). |
-| **`calendar-board-sync.sh`** | `0 4 * * *` + `0 17 * * *` (07:00+20:00 МСК) | Сверяет Google+Yandex calendar с Tasks Board. При расхождении → Telegram + инструкция Claude'у в inbox. |
+| **`calendar-board-sync.sh`** | `0 4 * * *` + `0 17 * * *` (07:00+20:00 МСК) | Сверяет Google+Yandex calendar с Tasks Board. Слотом признаётся только каноническое `ДД.ММ (дн), ЧЧ:ММ` — «после 10:00» не слот. Строка с тегом `#nosync` исключается из сверки в обе стороны. Файл в inbox создаётся **только если набор расхождений изменился** (подпись в `state/cal-board-sync.hash`). Флаг `--dry-run` — печать без записи. |
+| **`проверка-связности.sh`** | `40 3 * * *` (06:40 МСК) | Три метрики связности EMMBASE: файлы вне `ПОЛНЫЙ_ИНДЕКС`, битые `[[ссылки]]`, неоднозначные имена. Отчёт с дельтой к прошлому прогону → `inbox/`, тип `вопрос`. **Ничего не чинит.** Флаг `--dry-run`. |
+| **`checkin-buffer-cleanup.sh`** | `*/20 * * * *` | Удаляет буфер `life/чекины/_чекин-в-процессе.md`, но **только когда есть** готовый `life/чекины/<дата>.md` — иначе незавершённый опрос потерялся бы. |
+| **`astro-daily.sh`** + **`astro-cli.py`** | `50 1 * * *` (04:50 МСК) | Локальный расчёт эфемерид (транзиты swisseph + столпы Бацзы) → `life/прогнозы/_астро-данные-сегодня.md`. Заменил внешние сайты, недоступные с RU-адреса. |
+| **`codex-tor-route.sh`** | при загрузке | Заворачивает трафик к `chatgpt.com` в Tor через iptables REDIRECT + REJECT по IPv6-диапазону провайдера. Без него Codex отдаёт 403 по региону. |
+| **`setup-telegram-redsocks.sh`** | разово | Установка прозрачного SOCKS-прокси (redsocks + iptables) для `api.telegram.org` — блокировка TimeWeb/РКН с 27.06. |
+| **`undici-telegram-proxy.mjs`** | загружается gateway | Патч undici: axios внутри openclaw игнорирует `HTTPS_PROXY`, дозвон до Telegram шёл мимо прокси. |
 | **`media-cleanup.sh`** | `0 4 * * *` (07:00 МСК) | Чистит `media/inbound`, `transcribed`, `outbound`, image-generation, `/tmp/openclaw`. |
 | **`reminder-operacionka.sh`** | `30 6 * * 1-5` (09:30 МСК будни) | «🔔 Чат Операционка» в Telegram. |
 | **`reminder-weekly-digest.sh`** | `0 15 * * 5` (18:00 МСК пт) | «📋 Итоги недели». |
