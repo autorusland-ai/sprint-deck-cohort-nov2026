@@ -170,8 +170,9 @@ MiniMax, gonka и Telegram ходят напрямую (проверено ко�
 - MiniMax Coding Plan (`sk-cp-`) работает через `api.minimax.io/anthropic`.
 - «Empty response» от MiniMax лечится сбросом раздутой сессии (`/new`), не тарифом.
 
-Рабочая цепочка (сверено запросами 06–07.09.2026): primary
-`minimax/MiniMax-M2.7` → `gonka/MiniMaxAI/MiniMax-M2.7` → `gonka/moonshotai/Kimi-K2.6`.
+Рабочая цепочка (сверено запросами 07.09.2026): primary `minimax/MiniMax-M2.7` →
+`gonka/MiniMaxAI/MiniMax-M2.7` → `gonka/moonshotai/Kimi-K2.6` →
+`openrouter/google/gemini-2.5-flash`.
 
 Состояние провайдеров на 07.09.2026, каждый проверен прямым запросом:
 
@@ -179,7 +180,7 @@ MiniMax, gonka и Telegram ходят напрямую (проверено ко�
 |---|---|---|
 | gonka (`router.mingles.ai`) | ✅ жив, бесплатный, отвечает | вернул валидный ответ на `chat/completions` |
 | minimax | ✅ жив, подписка, но страдает от приступов DNS | 131k выдачи, `timeoutSeconds` срезан 150 → **30** |
-| openrouter | ❌ `403 Key limit exceeded` | `limit: 10`, `usage: 10.007` — упёрся **лимит на самом ключе**, не баланс аккаунта. Снимается в кабинете OpenRouter |
+| openrouter | ✅ жив с 07.09.2026 | был `403 Key limit exceeded` при `limit: 10`, `usage: 10.007` и **`limit_reset: null`** — потолок на самом ключе без периода сброса, деньги на аккаунте ни при чём. Владелец включил ежемесячный сброс, ключ ожил. При повторе смотри `limit_reset`, а не баланс |
 | openai `gpt-5.5` | ❌ `You have no credits remaining` | платёжный `sk-proj-` не оплачен, из цепочки убран |
 | zai (`api.z.ai`) | ❌ `Insufficient balance` | ключ в конфиге живой, денег нет. `doctor --fix` включает его сам — не путай с рабочим |
 
