@@ -297,6 +297,19 @@ media-understanding.
 с ключами открытым текстом — исключены через `.gitignore`. Перед пушем прогоняй
 поиск по префиксам `sk-proj-`, `sk-or-v1`, `gsk_`, `AIzaSy`, `GOCSPX`, `github_pat_`.
 
+⚠️ **`openclaw.json` не попадает в автоматические бэкапы.** В
+`openclaw-autocommit.sh` он занесён в `BLOCK_RE` с обоснованием «не покрыт
+фильтрами git-crypt» — **обоснование устарело**: в `.gitattributes` есть строка
+`openclaw.json filter=git-crypt`, и в истории файл лежит зашифрованным (блоб
+начинается с `\0GITCRYPT\0`, проверено 07.09.2026). Пока фильтр не поправлен,
+после каждой правки конфига коммить его руками:
+
+```bash
+git -C ~/.openclaw add openclaw.json && git -C ~/.openclaw commit -m "..."
+```
+
+Хук `gitleaks` на коммите отработает и подтвердит, что открытых ключей нет.
+
 `git-crypt status` без аргумента виснет на untracked-папках — проверяй точечно.
 Локальные снимки: `pre-update-backup.sh` (cron вс, ротация 8).
 
