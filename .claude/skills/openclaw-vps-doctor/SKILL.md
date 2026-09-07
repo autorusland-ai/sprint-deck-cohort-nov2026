@@ -105,7 +105,8 @@ curl -s --max-time 40 -x http://127.0.0.1:8118 -o /dev/null -w "через Tor: 
 |---|---|---|---|
 | api.deepgram.com, api.minimax.io | ✅ | ✅ | напрямую, в `NO_PROXY` |
 | api.search.brave.com | ✅ | ✅ | напрямую |
-| openrouter.ai, api.openai.com | ❌ 403 | ✅ | через privoxy `127.0.0.1:8118` |
+| openrouter.ai | ✅ 200 | ✅ | **напрямую, гео-блока больше нет** (сверено 07.09.2026) |
+| api.openai.com | ❌ 403 | ✅ 401 | через privoxy `127.0.0.1:8118` |
 | api.tavily.com | ❌ 403 | ✅ | **плагин игнорирует прокси** → выключен |
 | api.telegram.org | ❌ | — | transparent SOCKS: iptables + redsocks |
 
