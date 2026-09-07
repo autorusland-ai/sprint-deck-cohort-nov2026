@@ -297,6 +297,25 @@ grep -ohE 'SILENT_REPLY_TOKEN ?= ?"[^"]*"' ~/.npm-global/lib/node_modules/opencl
 Модели в `models.providers` объявлены как `input: ["text"]` — minimax, gonka и zai
 картинок не видят в принципе, зрячая модель нужна отдельная.
 
+⛔ **Не выноси разделы из `AGENTS.md` в отдельный `TOOLS.md`.** Соблазн велик: файл
+разросся до 41 КБ, в ядре есть `DEFAULT_TOOLS_FILENAME`, а `CLAW_BOOTSTRAP_FILE_NAMES`
+перечисляет `TOOLS.md`. **Но в контекст сессии он не попадает.** Рантайм собирает
+правила из другого списка:
+
+```bash
+grep -rhoE "WORKSPACE_BOOTSTRAP_FILENAMES ?= ?\[[^]]{0,220}\]" ~/.npm-global/lib/node_modules/openclaw/dist
+# → [AGENTS.md, SOUL.md, IDENTITY.md, USER.md, BOOTSTRAP, MEMORY] — TOOLS.md отсутствует
+```
+
+`workspace.bootstrapFiles` в схеме — про заготовки из пакетов (`packageRelativePath`),
+а не про подключение своего файла. Проверено 07.09.2026: разделение молча вынесло
+24 КБ инфраструктурных правил из головы бота и было откачено.
+
+⚠️ **Консольная сессия не годится для проверки правил.** `openclaw agent --agent main`
+не знает даже содержимого `AGENTS.md` — на вопрос о собственном маркере молчания
+отвечает «ничего, просто не писать». Проверять загрузку правил **только реальным
+сообщением в Telegram**, как и права инструментов (п.2).
+
 ---
 
 ## 6. Голос и транскрипция
