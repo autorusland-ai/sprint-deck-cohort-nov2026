@@ -267,6 +267,20 @@ sudo bash -c 'npm install -g --prefix /home/clawd/.npm-global openclaw@ВЕРС�
 Проверка после: `config validate`, `channels status`, живой вызов агента, пустой
 `ingress-spool`. Старт занимает ~20–25 секунд; «служба active» ничего не доказывает.
 
+⚠️ **После обновления проверь маркер молчания.** В 2026.9.2
+`SILENT_REPLY_TOKEN = "NO_REPLY"`. Если правила бота велят отвечать другим словом,
+служебные ответы heartbeat перестают глушиться и **сыплются владельцу в чат**
+(«Disk 58%, inbox empty, no alerts. SILENT» каждые полчаса). Найдено 07.09.2026:
+`AGENTS.md` требовал `SILENT`, `BOOT.md` — `NO_REPLY`, правила противоречили друг другу.
+
+```bash
+grep -rn "NO_REPLY\|SILENT" ~/.openclaw/workspace/*.md      # в правилах
+grep -ohE 'SILENT_REPLY_TOKEN ?= ?"[^"]*"' ~/.npm-global/lib/node_modules/openclaw/dist/tokens-*   # в ядре
+```
+
+Токен должен быть **всем** содержимым ответа. Приписанный в конец фразы
+(`Disk 58%. NO_REPLY`) не распознаётся — сообщение уходит целиком.
+
 ---
 
 ## 6. Голос и транскрипция
