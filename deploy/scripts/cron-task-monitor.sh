@@ -1,15 +1,17 @@
 #!/usr/bin/env bash
-# cron-task-monitor.sh — замечает задачи планировщика openclaw, застрявшие в ошибке.
+# cron-task-monitor.sh — страховка на случай, когда openclaw не смог сам
+# сообщить о сбое задачи планировщика.
 #
 # Зачем: 07.09.2026 аудит нашёл "Недельный прогноз" в статусе error семь недель
-# подряд — никто не заметил. У openclaw есть своё уведомление о сбое, но у всех
-# упавших задач lastFailureNotificationDeliveryStatus=not-delivered: когда модели
-# лежат, доставить сообщение тем же каналом не получается.
+# подряд — владелец не знал. У openclaw есть своё уведомление, но когда модели
+# лежат, доставить его тем же каналом не получается:
+# lastFailureNotificationDeliveryStatus=not-delivered.
 #
-# Логика: раз в час читаем cron list --json. Задача попадает в отчёт, если
-# status=error. Уведомляем только при ИЗМЕНЕНИИ (новая упавшая задача или выросло
-# число подряд идущих ошибок) — иначе молчим, чтобы не спамить.
-# Отправка идёт прямым вызовом Bot API с хоста, как в telegram-watchdog.sh.
+# Чтобы не дублировать openclaw (08.09.2026 владелец получил два сообщения об
+# одной задаче), берём ТОЛЬКО задачи, о которых openclaw сообщить НЕ смог.
+# Если его отчёт доставлен — молчим, владелец уже в курсе.
+#
+# Уведомляем при изменении: новая задача или выросло число ошибок подряд.
 set -u
 export XDG_RUNTIME_DIR="/run/user/$(id -u)"
 
@@ -45,13 +47,18 @@ try: jobs = json.load(sys.stdin).get(\"jobs\", [])
 except Exception: sys.exit(0)
 for j in jobs:
     if j.get(\"status\") != \"error\": continue
+    # openclaw смог сообщить сам — не дублируем
+    if j.get(\"lastFailureNotificationDeliveryStatus\") == \"delivered\": continue
     st = j.get(\"state\") or {}
     name = (j.get(\"displayName\") or j.get(\"name\") or j.get(\"id\"))
     print(f\"{j.get(\"id\")}\t{st.get(\"consecutiveErrors\", 1)}\t{name}\")
 " 2>/dev/null)
 
 if [ -z "$CUR" ]; then
-  [ -s "$STATE" ] && { log "[ok] все задачи вышли из ошибки"; notify "✅ Задачи планировщика: все восстановились."; }
+  if [ -s "$STATE" ]; then
+    log "[ok] недоставленных отчётов о сбоях не осталось"
+    notify "✅ Задачи планировщика: сбоев без уведомления больше нет."
+  fi
   : > "$STATE"
   exit 0
 fi
@@ -69,9 +76,9 @@ printf "%s" "$CUR" | cut -f1,2 > "$STATE"
 
 if [ -n "$CHANGED" ]; then
   log "изменения: $(echo "$CHANGED" | tr "\n" " ")"
-  notify "⚠️ Задачи планировщика в ошибке:
+  notify "⚠️ Задачи планировщика падают, и openclaw не смог сообщить об этом сам:
 ${CHANGED}
 Проверить: openclaw cron list"
 else
-  log "[тихо] состав упавших задач не изменился"
+  log "[тихо] состав не изменился"
 fi
