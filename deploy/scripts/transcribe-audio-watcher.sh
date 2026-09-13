@@ -67,11 +67,16 @@ transcribe_audio() {
             fi
         fi
 
-        resp=$(curl -sS --max-time 600 -X POST \
+        # Код ответа — последней строкой, чтобы при сбое знать ПРИЧИНУ: до 13.09.2026
+        # отказ Deepgram уходил в резерв молча ([deepgram-empty-or-fail] без кода и текста).
+        resp=$(curl -sS --max-time 600 -X POST -w '\n%{http_code}' \
             'https://api.deepgram.com/v1/listen?model=nova-2&language=ru&smart_format=true&punctuate=true&diarize_model=latest&utterances=true' \
             -H "Authorization: Token $DEEPGRAM_KEY" \
             -H "Content-Type: $ctype" \
             --data-binary @"$send_file" 2>>"$LOG")
+        dg_rc=$?
+        dg_http=$(printf '%s' "$resp" | tail -n1)
+        resp=$(printf '%s' "$resp" | sed '$d')
         [ -n "$tmp_mix" ] && rm -f "$tmp_mix"
 
         out=$(echo "$resp" | ANCHOR_SEC="${anchor_sec:-0}" python3 -c '
@@ -135,7 +140,7 @@ print("\n\n".join("[%02d:%02d] %s: %s" % (int(s)//60, int(s)%60, label(k), t)
             printf 'deepgram:%s' "$out"
             return 0
         fi
-        echo "$(ts) [deepgram-empty-or-fail]" >> "$LOG"
+        echo "$(ts) [deepgram-fail] curl=$dg_rc http=${dg_http:-?} body=$(printf '%s' "$resp" | tr '\n' ' ' | cut -c1-240)" >> "$LOG"
     fi
 
     # 2. Groq Whisper — ОТКЛЮЧЁН (403 Forbidden, ключ мёртв)
