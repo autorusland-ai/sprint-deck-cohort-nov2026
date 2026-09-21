@@ -24,6 +24,8 @@ TOKEN_CACHE = '/tmp/gws-access-token.json'
 def get_creds():
     d = json.load(open(CFG))
     env = d['env']
+    # 2026.9.x: ключи переехали в env.vars; читаем оба расклада (поломка 06–21.09.2026)
+    env = env.get('vars', env)
     return env['GOOGLE_OAUTH_CLIENT_ID' if 'GOOGLE_OAUTH_CLIENT_ID' in env else 'GOOGLE_WORKSPACE_CLIENT_ID'],            env['GOOGLE_OAUTH_CLIENT_SECRET' if 'GOOGLE_OAUTH_CLIENT_SECRET' in env else 'GOOGLE_WORKSPACE_CLIENT_SECRET'],            env['GOOGLE_WORKSPACE_REFRESH_TOKEN']
 
 def get_access_token():

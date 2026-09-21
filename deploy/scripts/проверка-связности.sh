@@ -46,6 +46,9 @@ def is_skipped(rel):
     if SKIP_RE.search(rel):
         return True
     base = parts[-1]
+    # Собственные отчёты детектора не считаем: иначе отчёт порождает отчёт (21.09.2026).
+    if base.endswith("_проверка-связности.md"):
+        return True
     return ".bak-" in base or base.startswith("_backup")
 
 
@@ -194,11 +197,43 @@ if broken_samples:
     for src, target in broken_samples[:10]:
         body.append("- `[[%s]]` — в `%s`" % (target, src))
 
+# Чинить индексом можно только файлы ВНЕ inbox: inbox — транзит, его разбирает
+# свой конвейер, и «каскад индексации» к нему неприменим.
+actionable_out = [r for r in out_of_index if not r.startswith("inbox/")]
+todo = []
+if actionable_out:
+    todo.append("- **Вне индекса** — провести каскад индексации для перечисленных файлов "
+                "(сессией, по регламенту массовых операций).")
+if n_broken:
+    todo.append("- **Битые ссылки** — исправить или перенацелить ссылки из списка ниже.")
+if todo:
+    body.append("")
+    body.append("**Что с этим делать:**")
+    body.extend(todo)
+    body.append("- После правки файл отчёта можно удалить: завтра скрипт пересчитает всё заново.")
+    body.append("- «Неоднозначных» — справочное число (одно имя → несколько файлов), "
+                "отдельного действия не требует.")
+    if len(actionable_out) != n_out:
+        body.append("- Файлы из `inbox/` в списке «вне индекса» — не в счёт: они ждут обычного разбора inbox.")
+
 report = "\n".join(body)
 now = datetime.now(MSK)
 
 if DRY:
     print(report)
+    sys.exit(0)
+
+# Тихий день: чинить нечего — в inbox не пишем (три числа без движения — шум),
+# но состояние и лог обновляем, чтобы дельты завтра считались верно.
+if not (actionable_out or n_broken):
+    json.dump({"out_of_index": n_out, "broken": n_broken, "ambiguous": n_amb,
+               "at": now.isoformat()}, open(STATE, "w", encoding="utf-8"), ensure_ascii=False)
+    with open(LOG, "a", encoding="utf-8") as f:
+        f.write("%s вне_индекса=%d битых=%d неоднозначных=%d живых=%d -> тихо, отчёт не нужен\n"
+                % (time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                   n_out, n_broken, n_amb, total_live))
+    print("тихо: вне inbox вне индекса 0, битых 0 — отчёт не пишу "
+          "(в inbox ждут разбора: %d)" % (n_out - len(actionable_out)))
     sys.exit(0)
 
 fname = "%s_проверка-связности.md" % now.strftime("%Y-%m-%d_%H%M")

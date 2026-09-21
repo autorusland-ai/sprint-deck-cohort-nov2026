@@ -24,7 +24,7 @@ import json, os, sys
 try:
     d = json.loads(os.environ.get("GMAIL_RAW", "") or "[]")
     if isinstance(d, dict) and d.get("error"):
-        print(f"📬 Gmail: {d.get('exception', 'ошибка')[:80]}")
+        print(f"⚠️ Gmail НЕ РАБОТАЕТ — сбой скрипта gws-cli ({d.get('exception', 'ошибка')[:80]}). Это поломка, а не пустой ящик: перешли Клоду.")
         sys.exit()
     msgs = d if isinstance(d, list) else d.get("messages", [])
     if not msgs:
@@ -64,7 +64,7 @@ def parse_time(s):
 try:
     d = json.loads(os.environ.get("GCAL_RAW", "") or "[]")
     if isinstance(d, dict) and d.get("error"):
-        print(f"📅 Google: {d.get('exception', 'ошибка')[:80]}")
+        print(f"⚠️ Google Calendar НЕ РАБОТАЕТ — сбой скрипта gws-cli ({d.get('exception', 'ошибка')[:80]}). Это поломка, а не пустой день: перешли Клоду.")
         sys.exit()
     events = d if isinstance(d, list) else d.get("events", [])
     if not events:

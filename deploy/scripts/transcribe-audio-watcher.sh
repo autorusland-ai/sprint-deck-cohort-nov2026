@@ -23,8 +23,10 @@ INBOX=/home/clawd/emmbase/inbox
 LOG=/home/clawd/.openclaw/scripts/transcribe-audio.log
 mkdir -p "$PROCESSED" "$FAILED" "$INBOX"
 
-GROQ_KEY=$(python3 -c 'import json; print(json.load(open("/home/clawd/.openclaw/openclaw.json"))["env"].get("GROQ_API_KEY",""))')
-DEEPGRAM_KEY=$(python3 -c 'import json; print(json.load(open("/home/clawd/.openclaw/openclaw.json"))["env"].get("DEEPGRAM_API_KEY",""))')
+# 2026.9.x: ключи переехали в env.vars — читаем оба расклада. С 06.09 по 21.09.2026
+# ключ Deepgram читался пустым, и ВСЕ звонки молча шли через локальный whisper.
+GROQ_KEY=$(python3 -c 'import json; e=json.load(open("/home/clawd/.openclaw/openclaw.json"))["env"]; e=e.get("vars",e); print(e.get("GROQ_API_KEY",""))')
+DEEPGRAM_KEY=$(python3 -c 'import json; e=json.load(open("/home/clawd/.openclaw/openclaw.json"))["env"]; e=e.get("vars",e); print(e.get("DEEPGRAM_API_KEY",""))')
 TG_TOKEN=$(cat /home/clawd/.openclaw/secrets/telegram.token 2>/dev/null || echo "")
 CHAT_ID=215087477
 WHISPER_PY=/home/clawd/browser-env/bin/python3.12

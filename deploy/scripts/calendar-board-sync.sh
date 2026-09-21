@@ -59,7 +59,11 @@ try:
     r = subprocess.run([
         "/home/clawd/.openclaw/scripts/gws-cli.py", "calendar", "range", start, end
     ], capture_output=True, text=True, timeout=30)
+    if r.returncode != 0:
+        print(f"google-fail: rc={r.returncode} {(r.stderr or '').strip()[-200:]}", file=sys.stderr)
     raw = json.loads(r.stdout) if r.stdout.strip() else []
+    if not isinstance(raw, list):
+        print(f"google-fail: неожиданный ответ {str(raw)[:200]}", file=sys.stderr)
     if isinstance(raw, list):
         for e in raw:
             s = e.get("start", {})
@@ -85,6 +89,8 @@ for cal in YANDEX_CALENDARS:
         r = subprocess.run([
             "/home/clawd/.openclaw/scripts/yacal-cli.py", "range", start, end, "--calendar", cal
         ], capture_output=True, text=True, timeout=20)
+        if r.returncode != 0:
+            print(f"yandex-{cal}-fail: rc={r.returncode} {(r.stderr or '').strip()[-200:]}", file=sys.stderr)
         raw = json.loads(r.stdout) if r.stdout.strip() else []
         if isinstance(raw, list):
             for e in raw:
