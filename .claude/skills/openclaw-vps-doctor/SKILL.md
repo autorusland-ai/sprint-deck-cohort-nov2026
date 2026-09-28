@@ -28,6 +28,7 @@ ssh clawd-vps-tail          # Tailscale, пользователь clawd; свя�
 | Конфиг | `~/.openclaw/openclaw.json` |
 | CLI | `~/.npm-global/bin/openclaw` (в PATH может не быть) |
 | Правила бота | `~/.openclaw/workspace/` — **вложенный git-репо**, ветка `bot-rules` |
+| Системный промт (правила inbox) | навык `workspace/skills/inbox-saver/SKILL.md` — канон `~/emmbase/agents/openclaw-bot-системный-промт.md`, переносится руками |
 | База знаний | `~/emmbase/`, бот пишет **только** в `inbox/` |
 | Скрипты и cron | `~/.openclaw/scripts/`, копии в репо `deploy/scripts/` |
 | Ключи моделей | SQLite `~/.openclaw/agents/main/agent/openclaw-agent.sqlite`, таблица `auth_profile_store` |
@@ -357,6 +358,30 @@ sudo bash -c 'npm install -g --prefix /home/clawd/.npm-global openclaw@ВЕРС�
    владельца, не агента.
 5. Порядок: снять сторожа → установить ядро → `doctor --fix` → `config validate`
    → плагины → старт с ожиданием порта → вернуть сторожа.
+
+⚠️ **Перед установкой сверь требование к Node** (28.09.2026: 2026.9.6 хочет
+`>=24.16.0 <25 || >=26.1.0`, на сервере был 24.15.0 из nodesource → `EBADENGINE`,
+npm ничего не ставит, старая версия цела). Проверка за секунду:
+`npm view openclaw@ВЕРСИЯ engines --json` против `node --version`.
+
+**Обновление 2026.9.2 → 2026.9.6 (пройдено 28.09.2026), новые грабли:**
+- Node поднят `apt-get install --only-upgrade nodejs` (24.15 → 24.21, из root-шелла).
+  С ним пришёл новый npm, который **молча не запускает install-скрипты** — в т.ч.
+  `postinstall-bundled-plugins` самого openclaw. Ставить с
+  `--allow-scripts=@google/genai,koffi,protobufjs,openclaw` (список печатает npm).
+- Конфиг валиден без миграции → `doctor --fix` не запускался (он включает лишнее).
+- `mem0` при `plugins update --all` не обновляется без `--accept-capabilities` —
+  остаётся на старой версии и работает.
+- **Старт теперь ~4 минуты** (отложенные миграции, 66 старых транскриптов с
+  «Primary transcript header does not match» — безвредно). `channels status` в
+  это окно пишет «Gateway not reachable» — смотри `[gateway] ready` в журнале.
+- **Память выросла вдвое** (RSS ~1,6 ГБ против ~840 МБ). Со старым `MemoryHigh=2500M`
+  горячая перезагрузка конфига повесила шлюз на 10 минут: процесс в D-state,
+  непрерывная подкачка. Лимиты подняты на лету:
+  `systemctl --user set-property openclaw-gateway MemoryHigh=4G MemoryMax=5G`
+  (drop-in `50-Memory*.conf` перекрывает значения в юните).
+- Правка `openclaw.json` на живом шлюзе запускает hot reload → для смены моделей
+  он всё равно требует рестарт и ждёт активные запросы. Правь конфиг пачкой.
 
 Проверка после: `config validate`, `channels status`, живой вызов агента, пустой
 `ingress-spool`. Старт занимает ~20–25 секунд; «служба active» ничего не доказывает.

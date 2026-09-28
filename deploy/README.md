@@ -40,7 +40,7 @@ sudo -u clawd bash configure.sh
 | **`inbox-snapshot.sh`** | `0 * * * *` (каждый час) | Hardlink-snapshot всего inbox в `~/.openclaw/backups/inbox-snapshot/`. 7 дней хранения. Снимок делается **только при реальных изменениях** (sha256-отпечаток содержимого), rsync с `--checksum` и `--delete`. |
 | **`inbox-monitor.sh`** | `0 7 * * *` (10:00 МСК) | Telegram-дайджест inbox + детектор «тихих пропаж» (что было в snapshot вчера, нет сегодня). |
 | **`calendar-board-sync.sh`** | `0 4 * * *` + `0 17 * * *` (07:00+20:00 МСК) | Сверяет Google+Yandex calendar с Tasks Board. Слотом признаётся только каноническое `ДД.ММ (дн), ЧЧ:ММ` — «после 10:00» не слот. Строка с тегом `#nosync` исключается из сверки в обе стороны. Файл в inbox создаётся **только если набор расхождений изменился** (подпись в `state/cal-board-sync.hash`). Флаг `--dry-run` — печать без записи. |
-| **`проверка-связности.sh`** | `40 3 * * *` (06:40 МСК) | Три метрики связности EMMBASE: файлы вне `ПОЛНЫЙ_ИНДЕКС`, битые `[[ссылки]]`, неоднозначные имена. Отчёт с дельтой к прошлому прогону → `inbox/`, тип `вопрос`. **Ничего не чинит.** Флаг `--dry-run`. |
+| **`~/emmbase/agents/скрипты/контроль-сессии.py --report ~/.openclaw/state/connectivity-v2.json`** | `40 3 * * *` (06:40 МСК) | С 28.09.2026 единственный счётчик связности EMMBASE (ТЗ связности v2): вне индекса, битые `[[ссылки]]`, неоднозначные имена → `inbox/`, тип `вопрос`. Тот же код, что в контроле сессии. Лог `logs/контроль-сессии-report.log`. **Ничего не чинит.** Флаг `--dry-run`. Прежний `проверка-связности.sh` отключён → `.sh.off` (точка отката). |
 | **`checkin-buffer-cleanup.sh`** | `*/20 * * * *` | Удаляет буфер `life/чекины/_чекин-в-процессе.md`, но **только когда есть** готовый `life/чекины/<дата>.md` — иначе незавершённый опрос потерялся бы. |
 | **`astro-daily.sh`** + **`astro-cli.py`** | `50 1 * * *` (04:50 МСК) | Локальный расчёт эфемерид (транзиты swisseph + столпы Бацзы) → `life/прогнозы/_астро-данные-сегодня.md`. Заменил внешние сайты, недоступные с RU-адреса. |
 | **`codex-tor-route.sh`** | при загрузке | Заворачивает трафик к `chatgpt.com` в Tor через iptables REDIRECT + REJECT по IPv6-диапазону провайдера. Без него Codex отдаёт 403 по региону. |
@@ -49,7 +49,7 @@ sudo -u clawd bash configure.sh
 | **`media-cleanup.sh`** | `0 4 * * *` (07:00 МСК) | Чистит `media/inbound`, `transcribed`, `outbound`, image-generation, `/tmp/openclaw`. |
 | **`reminder-operacionka.sh`** | `30 6 * * 1-5` (09:30 МСК будни) | «🔔 Чат Операционка» в Telegram. |
 | **`reminder-weekly-digest.sh`** | `0 15 * * 5` (18:00 МСК пт) | «📋 Итоги недели». |
-| **`weekly-digest.sh`** | `0 10 * * 1` (13:00 МСК пн) | Дайджест по `workspace/memory/` через kimi. |
+| **`weekly-digest.sh`** | `0 10 * * 1` (13:00 МСК пн) | Дайджест по `workspace/memory/` через `gonka/moonshotai/Kimi-K2.6` (с 28.09.2026, бесплатно; раньше OpenRouter). Единственный host-скрипт, вызывающий LLM. |
 | **`daily-digest.sh`** | `30 4 * * 1-5` (07:30 МСК будни) | Ежедневный дайджест EMMBASE (Gmail + Calendar Google/Yandex + Tasks Board). |
 | **`archive-memory.sh`** | `0 3 * * 0` (06:00 МСК вс) | Архивация memory в .tgz. |
 | **`openclaw-autocommit.sh`** | `0 * * * *` | Автокоммит **двух** репозиториев: `~/.openclaw/` (ветка `main`, конфиг шифруется git-crypt) и вложенного `workspace/` с правилами бота (ветка `bot-rules`). Push в приватный `autorusland-ai/openclaw-backup`. Лог: `logs/autocommit.log`. |

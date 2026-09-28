@@ -240,7 +240,6 @@ log "Регистрирую crontab"
 0 * * * * ~/.openclaw/scripts/openclaw-autocommit.sh
 0 10 * * 1 ~/.openclaw/scripts/weekly-digest.sh
 0 15 * * 5 ~/.openclaw/scripts/reminder-weekly-digest.sh
-0 23 * * * cd ~/.openclaw && git checkout main && git merge auto/cron --squash && git commit -m "Daily Squash"
 0 3 * * 0 ~/.openclaw/scripts/archive-memory.sh
 0 4 * * * ~/.openclaw/scripts/media-cleanup.sh
 30 6 * * 1-5 ~/.openclaw/scripts/reminder-operacionka.sh

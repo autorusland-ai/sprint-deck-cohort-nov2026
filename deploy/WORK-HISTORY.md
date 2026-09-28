@@ -526,3 +526,25 @@ Recovery файла из snapshot: `cp ~/.openclaw/backups/inbox-snapshot/snapsh
 
 Операционный справочник вынесен в навык
 [.claude/skills/openclaw-vps-doctor](../.claude/skills/openclaw-vps-doctor/SKILL.md).
+
+---
+
+# Цикл 28.09.2026 — промт v8, связность v2, openclaw 2026.9.6, уход с OpenRouter
+
+Полный разбор: **[../WORK-SUMMARY-2026-09-28.md](../WORK-SUMMARY-2026-09-28.md)**.
+
+| Область | Изменение |
+|---|---|
+| Правила бота | промт v8 → навык `inbox-saver`: эталонное имя ЭММ `etalonnaya-model-marketinga` (`bot-rules` `877d1fc`) |
+| Связность | крон 06:40 МСК → `контроль-сессии.py --report` (ТЗ v2), `проверка-связности.sh` → `.sh.off` |
+| Планировщик | `месячная-очистка-мусора` доставляет в `telegram:215087477`; `Daily Squash` ждёт ручного удаления |
+| Платформа | Node 24.15 → 24.21, openclaw 2026.9.2 → 2026.9.6, плагины 2026.9.6 (mem0 остался 1.0.11) |
+| Память службы | `MemoryHigh=4G`, `MemoryMax=5G` через `set-property` |
+| Модели | heartbeat, чек-ин, недельный прогноз, memoryFlush, weekly-digest → gonka; OR убран из резервов; генерация картинок удалена |
+
+**Ключевые факты, которые дорого выяснять заново:**
+
+1. Перед обновлением сверять `npm view openclaw@X engines` с `node --version` — иначе `EBADENGINE`.
+2. Новый npm не выполняет install-скрипты без `--allow-scripts=…` — openclaw встаёт без bundled-плагинов.
+3. 2026.9.6 стартует ~4 минуты и держит ~1,6 ГБ RSS; при старом `MemoryHigh=2500M` hot reload вешал шлюз.
+4. Промт бота живёт в `workspace/skills/inbox-saver/SKILL.md`, а не в конфиге и не в `AGENTS.md`.

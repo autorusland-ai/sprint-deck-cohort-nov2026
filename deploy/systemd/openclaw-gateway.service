@@ -27,9 +27,11 @@ RestartSec=10
 StartLimitInterval=300
 StartLimitBurst=5
 
-# Memory limits — защита от OOM на 4GB VPS (см. issue #41778)
-MemoryMax=2G
-MemoryHigh=1500M
+# Memory limits — хост 8 ГБ. С 2026.9.6 RSS ~1,6 ГБ + файловый кэш SQLite ~1 ГБ;
+# при MemoryHigh=2500M шлюз зависал на hot reload (28.09.2026). На VPS значения
+# заданы через `systemctl --user set-property` (drop-in 50-Memory*.conf).
+MemoryMax=5G
+MemoryHigh=4G
 
 # CPU limits — не выжирать сервер
 CPUQuota=200%

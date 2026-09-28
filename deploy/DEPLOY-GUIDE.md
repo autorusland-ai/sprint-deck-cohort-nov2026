@@ -329,7 +329,6 @@ docker build -t comandos-openclaw-sandbox:bookworm-slim .
 0 * * * * ~/.openclaw/scripts/openclaw-autocommit.sh
 0 10 * * 1 ~/.openclaw/scripts/weekly-digest.sh
 0 15 * * 5 /home/clawd/.openclaw/scripts/reminder-weekly-digest.sh
-0 23 * * * cd ~/.openclaw && git checkout main && git merge auto/cron --squash && git commit -m "Daily Squash"
 0 3 * * 0 ~/.openclaw/scripts/archive-memory.sh
 0 4 * * * ~/.openclaw/scripts/media-cleanup.sh
 30 6 * * 1-5 /home/clawd/.openclaw/scripts/reminder-operacionka.sh
@@ -341,10 +340,10 @@ docker build -t comandos-openclaw-sandbox:bookworm-slim .
 - **media-cleanup.sh** (1д, 04:00 UTC): чистит `media/inbound` >3д, `media/transcribed` >1д, `media/transcribe-failed` >14д, `media/outbound` >3д, `media/tool-image-generation` >7д, `/tmp/openclaw` >7д. Ротирует свои же логи >5MB.
 - **reminder-operacionka.sh** (Пн-Пт 09:30 МСК): «🔔 Каждый день — чат Операционка» в Telegram.
 - **reminder-weekly-digest.sh** (Пт 18:00 МСК): «📋 Пятница — время подвести итоги недели».
-- **weekly-digest.sh** (Пн 13:00 МСК): собирает memory за неделю, дайджест от Kimi через openrouter, дописывает в `workspace/MEMORY.md`.
+- **weekly-digest.sh** (Пн 13:00 МСК): собирает memory за неделю, дайджест от Kimi через gonka (бесплатно, с 28.09.2026), дописывает в `workspace/MEMORY.md`.
 - **archive-memory.sh** (Вс 06:00 МСК): архивирует старые memory.
 - **openclaw-autocommit.sh** (ежечасно): автокоммит `workspace/` в git auto/cron бранч.
-- **Daily Squash** (23:00 МСК): merge auto/cron → main с squash.
+- ~~Daily Squash~~ — убран 28.09.2026: ветки `auto/cron` в схеме бэкапа нет, а запуск в 23:00 совпадал с автокоммитом и давал `index.lock: File exists`.
 - **permission-watchdog.sh** (15м): проверяет права на ключевые файлы.
 
 ### 4.9. OpenClaw cron-задачи (внутри openclaw, не системный cron)
