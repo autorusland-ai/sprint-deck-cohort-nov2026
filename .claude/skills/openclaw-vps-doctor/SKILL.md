@@ -463,6 +463,14 @@ grep -ohE 'SILENT_REPLY_TOKEN ?= ?"[^"]*"' ~/.npm-global/lib/node_modules/opencl
 Модели в `models.providers` объявлены как `input: ["text"]` — minimax, gonka и zai
 картинок не видят в принципе, зрячая модель нужна отдельная.
 
+**С 28.09.2026 картинки читает `codex/gpt-5.5` (подписка Plus) → резерв
+`minimax/MiniMax-VL-01` (Coding Plan)**, OpenRouter qwen-vl убран (давал «Model does not
+support images»). Проверка без Telegram и без чужих фото:
+`ffmpeg -f lavfi -i testsrc=size=480x320:rate=1 -frames:v 1 /tmp/t.png &&
+openclaw infer image describe --agent main --file /tmp/t.png --model codex/gpt-5.5 --json`.
+`openai/gpt-5.5` здесь не годится: секция `models.providers.openai` (ради прокси)
+переводит openai на платный API-ключ. Адресуй через плагин: `codex/…`.
+
 ⛔ **Не выноси разделы из `AGENTS.md` в отдельный `TOOLS.md`.** Соблазн велик: файл
 разросся до 41 КБ, в ядре есть `DEFAULT_TOOLS_FILENAME`, а `CLAW_BOOTSTRAP_FILE_NAMES`
 перечисляет `TOOLS.md`. **Но в контекст сессии он не попадает.** Рантайм собирает

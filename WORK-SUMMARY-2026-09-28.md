@@ -96,18 +96,29 @@ md5 конфига до правок совпал; `gws-cli.py gmail unread-coun
 | резерв основного чата | …→ OR deepseek | убран |
 | генерация картинок `mediaModels.image` | OR flux / gemini-image | удалена — владелец ею не пользуется |
 
-Осталось на OpenRouter: распознавание картинок `tools.media.models` →
-`qwen/qwen-2.5-vl-72b-instruct` — **и оно не работает** (7 отказов за неделю
-«Model does not support images», отказ локальный, денег не тратит). Кандидат —
-Codex по подписке Plus (`openai:manual`), нужна проверка реальной картинкой.
-Также `mcp.servers.browser-use` ходит в OR gemini-flash-lite — Google через OR закрыт по ToS.
+**Распознавание картинок** (`tools.media.models`, capability `image`) было на OR
+`qwen/qwen-2.5-vl-72b-instruct` и **не работало** (7 отказов за неделю «Model does not
+support images», отказ локальный). Переведено (`main` `eb85e52`):
+`codex/gpt-5.5` (подписка Plus через плагин codex) → резерв `minimax/MiniMax-VL-01`
+(подписка Coding Plan). Оба проверены `openclaw infer image describe` на синтетической
+тест-карте (ffmpeg testsrc) — описали верно. Применилось hot reload без рестарта.
+
+⚠️ `openai/gpt-5.5` для картинок **не работает**: в конфиге есть `models.providers.openai`
+(только `request.proxy`), а явная секция провайдера переключает openai на платный
+API-ключ (`No API key found for provider "openai"`). Работает адресация через плагин —
+`codex/<модель>`. `openai-codex/*` — «Unknown model».
+
+После этого на OpenRouter остался только `mcp.servers.browser-use`
+(OR gemini-flash-lite — Google через OR закрыт по ToS, скорее всего не работает).
 
 ## Открытые вопросы владельцу
 
 - [ ] Удалить `Daily Squash` из крона (команда выше).
-- [ ] Распознавание картинок: перевести на Codex/Plus?
-- [ ] Отключить `/update` и `/restart` в Telegram: самообновление из чата на этом сервере
-      требует Node, root и лимитов памяти — почти наверняка положит бота.
+- [x] Распознавание картинок → Codex/Plus (сделано, см. п.6). Проверить фото в Telegram.
+- [x] `/update` и `/restart` — владелец решил **не отключать**.
+- [ ] Память: hot reload оставляет старые экземпляры плагинов («forced retirement …
+      cleanup remains pending»), memory.current упирается в `MemoryHigh=4G` (anon ~2 ГБ +
+      файловый кэш ~1,5 ГБ, 4574 события `high`). Чистый рестарт в тихое время сбросит до ~0,5 ГБ.
 - [ ] mem0 1.0.11 → новая версия требует согласия на доступ к переписке.
 - [ ] 29.09 после 06:40 МСК — проверить первый боевой отчёт связности v2.
 
