@@ -12,6 +12,8 @@ sudo -n systemctl --user -M hermes@ show hermes-gateway -p ActiveState -p SubSta
 systemctl is-active tor@default redsocks tg-net-watchdog.timer
 printf '\n=== TELEGRAM NETWORK ===\n'
 curl -s -o /dev/null -w '%{http_code}\n' --max-time 20 https://api.telegram.org
+printf '\n=== ASTRO OWNERSHIP ===\n'
+ls -ld /home/clawd/.openclaw/scripts /home/clawd/.openclaw/scripts/astro-cli.py /home/clawd/.openclaw/workspace /home/clawd/.openclaw/workspace/skills /home/clawd/emmbase/life/прогнозы
 printf '\n=== ASTRO FILES ===\n'
 find /home/clawd/.openclaw/scripts -maxdepth 2 -iname '*astro*' -printf '%p\n'
 sudo -n find /home/hermes/.hermes/scripts -maxdepth 1 -iname '*astro*' -printf '%p\n'

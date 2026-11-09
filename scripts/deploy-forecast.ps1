@@ -58,8 +58,11 @@ done
 sudo -n cp -p /home/hermes/.hermes/skills/research/astro-bazi-forecast/SKILL.md "$BACKUP/hermes-SKILL.md"
 # Fail before writes if upload did not pass tests; install CLI atomically first.
 for name in astro-cli.py astro-daily.sh astro-weekly.sh; do
- install -m 755 "$STAGE/deploy/scripts/$name" "/home/clawd/.openclaw/scripts/$name.new"
- mv "/home/clawd/.openclaw/scripts/$name.new" "/home/clawd/.openclaw/scripts/$name"
+ owner=$(stat -c %u "/home/clawd/.openclaw/scripts/$name")
+ group=$(stat -c %g "/home/clawd/.openclaw/scripts/$name")
+ mode=$(stat -c %a "/home/clawd/.openclaw/scripts/$name")
+ sudo -n install -o "$owner" -g "$group" -m "$mode" "$STAGE/deploy/scripts/$name" "/home/clawd/.openclaw/scripts/$name.new"
+ sudo -n mv "/home/clawd/.openclaw/scripts/$name.new" "/home/clawd/.openclaw/scripts/$name"
 done
 mkdir -p /home/clawd/.openclaw/workspace/skills/astro-forecast
 install -m 644 "$STAGE/skills/openclaw-SKILL.md" /home/clawd/.openclaw/workspace/skills/astro-forecast/SKILL.md

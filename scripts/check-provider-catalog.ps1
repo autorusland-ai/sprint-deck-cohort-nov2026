@@ -1,7 +1,7 @@
 $remote = @'
 python3 - <<'PY'
 import urllib.request,json,pathlib,re,os
-url='https://gonka-gateway.mingles.ai/v1/models'
+url='https://router.mingles.ai/v1/models'
 cfg=json.loads(pathlib.Path('/home/clawd/.openclaw/openclaw.json').read_text())
 p=cfg.get('models',{}).get('providers',{}).get('gonka',{})
 from urllib.parse import urlsplit
