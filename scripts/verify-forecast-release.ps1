@@ -26,6 +26,12 @@ for name in ['_астро-данные-сегодня.md','_астро-данн�
  print('Published:',text.splitlines()[0],p.stat().st_size,'bytes')
  if 'неделя' in name: assert text.count('\n## ')==7
 PY
+printf '\n=== VAULT NOTE SYNC ===\n'
+python3 - <<'PY'
+from pathlib import Path
+text=Path('/home/clawd/emmbase/life/прогнозирование.md').read_text()
+print('Reviewed natal note synced:', 'Проверка 09.11.2026' in text and '+0.147844' in text)
+PY
 printf '\n=== BOT SERVICES / TELEGRAM ===\n'
 systemctl --user is-active openclaw-gateway
 sudo -n systemctl --user -M hermes@ is-active hermes-gateway
