@@ -51,3 +51,6 @@ __pycache__/
 venv/
 *.pyc
 .sync-stage/
+
+# Private runtime audit snapshots (personal forecasts and remote skill text)
+audit/forecast-*/

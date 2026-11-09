@@ -1,43 +1,47 @@
 #!/usr/bin/env bash
-# astro-weekly.sh — выкладывает расчёт транзитов и Бацзы на предстоящую неделю
-# для задачи «Недельный прогноз (ВС 10:00 МСК)».
-#
-# Зачем: задача выполняется в песочнице без сети и без доступа к host-скриптам.
-# Дневной файл (_астро-данные-сегодня.md, astro-daily.sh) покрывает один день,
-# а недельному прогнозу нужны семь. Без готовых данных задание 8 недель подряд
-# пыталось искать в интернете (заблокировано) и падало по таймауту — 13.09.2026
-# отчёт о сбое ушёл в публичный канал.
-#
-# Считает тот же astro-cli.py из эфемерид на каждый день пн–вс следующей недели.
-set -u
+# Семь дней от ближайшего понедельника; публикация только полного расчёта.
+set -euo pipefail
+export TZ=Europe/Moscow
 
 OUT=/home/clawd/emmbase/life/прогнозы/_астро-данные-неделя.md
 CLI=/home/clawd/.openclaw/scripts/astro-cli.py
 LOG=/home/clawd/.openclaw/logs/astro-weekly.log
 mkdir -p "$(dirname "$OUT")" "$(dirname "$LOG")"
+TMP=$(mktemp "${OUT}.tmp.XXXXXX")
+cleanup() {
+  rc=$?
+  rm -f -- "$TMP"
+  if (( rc != 0 )); then
+    printf '%s [fail] расчёт недели не опубликован\n' "$(date -u +%FT%TZ)" >> "$LOG"
+  fi
+  exit "$rc"
+}
+trap cleanup EXIT
 
-# Ближайший понедельник (если сегодня понедельник — он и есть)
-dow=$(date +%u)                       # 1=пн … 7=вс
-[ "$dow" = "1" ] && off=0 || off=$(( 8 - dow ))
-MON=$(date -d "+${off} day" +%Y-%m-%d)
-SUN=$(date -d "$MON +6 day" +%Y-%m-%d)
+dow=$(date +%u)
+if [ "$dow" = 1 ]; then off=0; else off=$((8 - dow)); fi
+MON=$(date -d "+${off} day" +%F)
+SUN=$(date -d "$MON +6 day" +%F)
 
+# Отдельный блок, без &&/||: ошибка любого CLI прерывает публикацию.
 {
-  echo "# Астро-данные на неделю $(date -d "$MON" +%d.%m) – $(date -d "$SUN" +%d.%m.%Y) — расчёт, не из интернета"
+  echo "# Астро-данные на неделю $MON – $SUN — локальный расчёт"
   echo
-  echo "> Считает \`astro-cli.py\` из эфемерид прямо на VPS: натальная карта от"
-  echo "> 05.05.1971 17:05 (Уссурийск, UTC+10), транзиты на 09:00 МСК каждого дня."
-  echo "> Обновляется по воскресеньям в 09:40 МСК, перед недельным прогнозом."
-  echo "> Для каждого дня: положения планет, аспекты к натальной карте, столпы Бацзы."
+  echo "> Сформировано: $(date --iso-8601=seconds). Часовой пояс: Europe/Moscow."
+  echo '> Транзиты и дневные столпы на 08:00 МСК каждого дня; натальные — на момент рождения.'
+  echo '> Swiss Ephemeris/Moshier; транзиты наложены на натальные дома Плацидуса.'
+  echo '> Узел mean выбран для аспектов, true справочно; Хирон только при доступных эфемеридах.'
+  echo '> Орб аспекта >3° — слабый сигнал; такт удачи справочный, не вычисленный.'
   for i in 0 1 2 3 4 5 6; do
-    D=$(date -d "$MON +$i day" +%Y-%m-%d)
+    D=$(date -d "$MON +$i day" +%F)
     echo
-    echo "## $(date -d "$D" +%A\ %d.%m.%Y | sed "s/^Monday/Понедельник/;s/^Tuesday/Вторник/;s/^Wednesday/Среда/;s/^Thursday/Четверг/;s/^Friday/Пятница/;s/^Saturday/Суббота/;s/^Sunday/Воскресенье/")"
+    echo "## $D"
     echo
     echo '```'
-    "$CLI" all "$D" 2>&1
+    "$CLI" all "$D"
     echo '```'
   done
-} > "$OUT.tmp" && mv "$OUT.tmp" "$OUT" \
-  && echo "$(date -u +%FT%TZ) [ok] неделя $MON..$SUN -> $OUT ($(wc -c < "$OUT") байт)" >> "$LOG" \
-  || echo "$(date -u +%FT%TZ) [fail] неделя $MON..$SUN" >> "$LOG"
+} > "$TMP"
+mv -- "$TMP" "$OUT"
+printf '%s [ok] неделя %s..%s -> %s (%s байт)\n' \
+  "$(date -u +%FT%TZ)" "$MON" "$SUN" "$OUT" "$(wc -c < "$OUT")" >> "$LOG"
